@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Coffee Log - Coffee Detail</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        coffee: {
+                            warmWhite: '#F7F3EC',
+                            cream: '#EFE7DA',
+                            latte: '#D7C4A8',
+                            brown: '#7A5638',
+                            espresso: '#2A1E17',
+                            charcoal: '#1E1E1E',
+                            softGray: '#A8A29A',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .paper-grain {
+            background-color: #F7F3EC;
+            background-image: radial-gradient(rgba(42, 30, 23, 0.03) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .double-border {
+            border: 4px double rgba(122, 86, 56, 0.25);
+        }
+        .editorial-border {
+            border: 1px solid rgba(122, 86, 56, 0.15);
+        }
+    </style>
+</head>
+<body class="paper-grain text-coffee-charcoal font-sans antialiased min-h-screen flex flex-col justify-between max-w-[430px] mx-auto border-x border-coffee-cream shadow-sm relative">
+
+    <!-- Top Overlay Buttons -->
+    <div class="absolute top-0 inset-x-0 h-16 flex justify-between items-center px-6 z-20 bg-gradient-to-b from-black/50 to-transparent">
+        <a href="./02_home_page.html" class="w-9 h-9 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center hover:bg-white/35 transition-colors">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        </a>
+        <a href="./05_share_card.html" class="w-9 h-9 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center hover:bg-white/35 transition-colors">
+            <i data-lucide="share-2" class="w-4 h-4"></i>
+        </a>
+    </div>
+
+    <!-- Scrollable Detail Body -->
+    <div class="flex-1 overflow-y-auto pb-12">
+        <!-- Top Hero Cover Image -->
+        <div class="w-full h-72 relative bg-coffee-espresso">
+            <img src="https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-coffee-warmWhite via-transparent to-transparent"></div>
+            <span class="absolute bottom-5 left-6 bg-coffee-brown text-coffee-warmWhite px-3 py-1 rounded-sm text-[10px] font-serif uppercase tracking-[0.25em] leading-none font-bold">Pour Over</span>
+        </div>
+
+        <!-- Editorial Info Blocks -->
+        <div class="px-6 space-y-6 -mt-2 relative z-10">
+            
+            <!-- Core Header Text -->
+            <div class="space-y-1.5 animate-fade-in">
+                <span class="text-[9px] uppercase tracking-[0.25em] font-semibold text-coffee-softGray">Thursday, May 21, 2026</span>
+                <h1 class="font-serif text-[38px] font-light italic text-coffee-espresso leading-none">Ethiopia Yirgacheffe</h1>
+                <div class="flex gap-2 items-center text-xs text-coffee-brown font-medium">
+                    <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+                    <span>Blue Bottle Coffee, Shanghai</span>
+                </div>
+            </div>
+
+            <!-- Divider Line -->
+            <div class="h-[1px] bg-coffee-cream"></div>
+
+            <!-- AI Sensory Description Card -->
+            <div class="p-5 bg-coffee-cream rounded-sm double-border space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-[9px] uppercase tracking-[0.25em] font-bold text-coffee-brown">AI Sensory Prose</span>
+                    <span class="text-[10px] text-coffee-espresso italic font-medium">😌 Calm</span>
+                </div>
+                <p class="font-serif italic text-[13.5px] text-coffee-espresso leading-relaxed">
+                    "A highly articulate cup. It opens with an explosive, sweet citrus acidity reminiscent of candied lemon peel, transitioning into delicate, tea-like floral jasmine notes. The finish is clean, with a lingering orange-blossom sweetness and a light, breathable body."
+                </p>
+            </div>
+
+            <!-- Sensory Radar Grid (Custom SVG Embedded) -->
+            <div class="space-y-3.5">
+                <h3 class="text-xs uppercase tracking-[0.2em] font-bold text-coffee-espresso">Sensory Signature / 风味指纹</h3>
+                
+                <div class="grid grid-cols-5 gap-4 items-center">
+                    <!-- SVG Radar Box -->
+                    <div class="col-span-2 aspect-square flex items-center justify-center p-1 bg-coffee-cream/40 rounded-full border border-coffee-latte/30">
+                        <svg id="detail-radar-svg" class="w-full h-full overflow-visible"></svg>
+                    </div>
+                    
+                    <!-- Scoring Lists -->
+                    <div class="col-span-3 text-[11px] text-coffee-brown space-y-1.5 font-medium pl-3 border-l border-coffee-cream">
+                        <div class="flex justify-between"><span>Acidity / 酸度</span><span class="font-mono text-coffee-espresso">4.0 / 5</span></div>
+                        <div class="flex justify-between"><span>Bitterness / 苦感</span><span class="font-mono text-coffee-espresso">1.0 / 5</span></div>
+                        <div class="flex justify-between"><span>Sweetness / 甜感</span><span class="font-mono text-coffee-espresso">3.0 / 5</span></div>
+                        <div class="flex justify-between"><span>Body / 醇厚度</span><span class="font-mono text-coffee-espresso">2.0 / 5</span></div>
+                        <div class="flex justify-between"><span>Aroma / 香气</span><span class="font-mono text-coffee-espresso">5.0 / 5</span></div>
+                        <div class="flex justify-between"><span>Aftertaste / 余韵</span><span class="font-mono text-coffee-espresso">4.0 / 5</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flavor Tags Section -->
+            <div class="space-y-2.5">
+                <h3 class="text-xs uppercase tracking-[0.2em] font-bold text-coffee-espresso">Associated Flavor Notes / 关联标签</h3>
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-3 py-1 text-xs bg-coffee-cream text-coffee-espresso border border-coffee-latte/45 rounded-full font-mono">★ citrus</span>
+                    <span class="px-3 py-1 text-xs bg-coffee-cream text-coffee-espresso border border-coffee-latte/45 rounded-full font-mono">★ floral</span>
+                    <span class="px-3 py-1 text-xs bg-coffee-cream text-coffee-espresso border border-coffee-latte/45 rounded-full font-mono">★ jasmine</span>
+                </div>
+            </div>
+
+            <!-- Diary notes -->
+            <div class="space-y-2">
+                <h3 class="text-xs uppercase tracking-[0.2em] font-bold text-coffee-espresso">Tasting Diary / 手账备忘</h3>
+                <p class="text-xs text-coffee-brown leading-relaxed font-light font-serif">
+                    "今天手冲非常成功。滤杯水流顺畅，茉莉茶香和佛手柑的甜美在咖啡温度下降后更加突出。极简、干净，是一杯适合放空沉静的高级咖啡。"
+                </p>
+            </div>
+
+            <!-- Share Button Call to Action -->
+            <div class="pt-4 pb-4">
+                <a href="./05_share_card.html" class="w-full py-4 bg-coffee-espresso text-coffee-warmWhite hover:bg-coffee-brown transition-colors rounded-sm text-xs font-semibold tracking-[0.25em] uppercase shadow-sm flex items-center justify-center gap-2">
+                    <i data-lucide="share-2" class="w-4 h-4"></i>
+                    <span>Generate Share Card</span>
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Script to draw SVG Radar Chart dynamically on load -->
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+
+            // Draw SVG Radar Chart
+            drawRadar('detail-radar-svg', 
+                ["Acid", "Bitter", "Sweet", "Body", "Aroma", "After"], 
+                [4, 1, 3, 2, 5, 4]
+            );
+        });
+
+        function drawRadar(svgId, dimensions, values, maxVal = 5) {
+            const svg = document.getElementById(svgId);
+            if (!svg) return;
+            
+            svg.innerHTML = '';
+            
+            // Width & Height bounds
+            const width = 110;
+            const height = 110;
+            svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+            
+            const cx = width / 2;
+            const cy = height / 2;
+            const r = (Math.min(width, height) / 2) * 0.72;
+            
+            const axesCount = dimensions.length;
+            const angleStep = (2 * Math.PI) / axesCount;
+            
+            // 1. Draw grid polygons
+            for (let i = 1; i <= maxVal; i++) {
+                const stepRadius = r * (i / maxVal);
+                let polyPoints = [];
+                for (let a = 0; a < axesCount; a++) {
+                    const angle = a * angleStep - Math.PI / 2;
+                    const px = cx + stepRadius * Math.cos(angle);
+                    const py = cy + stepRadius * Math.sin(angle);
+                    polyPoints.push(`${px},${py}`);
+                }
+                
+                const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                polygon.setAttribute("points", polyPoints.join(' '));
+                polygon.setAttribute("fill", "none");
+                polygon.setAttribute("stroke", "rgba(122, 86, 56, 0.12)");
+                polygon.setAttribute("stroke-width", "0.8");
+                svg.appendChild(polygon);
+            }
+            
+            // 2. Draw axes and text labels
+            for (let a = 0; a < axesCount; a++) {
+                const angle = a * angleStep - Math.PI / 2;
+                const ax = cx + r * Math.cos(angle);
+                const ay = cy + r * Math.sin(angle);
+                
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", cx);
+                line.setAttribute("y1", cy);
+                line.setAttribute("x2", ax);
+                line.setAttribute("y2", ay);
+                line.setAttribute("stroke", "rgba(122, 86, 56, 0.15)");
+                line.setAttribute("stroke-width", "0.8");
+                svg.appendChild(line);
+                
+                // Draw text labels with offset
+                const labelPadding = 11;
+                const lx = cx + (r + labelPadding) * Math.cos(angle);
+                const ly = cy + (r + labelPadding) * Math.sin(angle);
+                
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", lx);
+                text.setAttribute("y", ly);
+                text.setAttribute("font-family", "Plus Jakarta Sans");
+                text.setAttribute("font-size", "7.5px");
+                text.setAttribute("font-weight", "600");
+                text.setAttribute("fill", "#7A5638");
+                text.setAttribute("text-anchor", Math.cos(angle) > 0.05 ? "start" : (Math.cos(angle) < -0.05 ? "end" : "middle"));
+                text.setAttribute("dominant-baseline", "middle");
+                text.textContent = dimensions[a];
+                svg.appendChild(text);
+            }
+            
+            // 3. Draw flavor polygon (Latte fill and Coffee Brown line)
+            let dataPoints = [];
+            for (let a = 0; a < axesCount; a++) {
+                const val = values[a];
+                const scoreRadius = r * (val / maxVal);
+                const angle = a * angleStep - Math.PI / 2;
+                const dx = cx + scoreRadius * Math.cos(angle);
+                const dy = cy + scoreRadius * Math.sin(angle);
+                dataPoints.push(`${dx},${dy}`);
+            }
+            
+            const dataPolygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            dataPolygon.setAttribute("points", dataPoints.join(' '));
+            dataPolygon.setAttribute("fill", "rgba(215, 196, 168, 0.5)"); // warm latte fill
+            dataPolygon.setAttribute("stroke", "#7A5638"); // brown edge
+            dataPolygon.setAttribute("stroke-width", "1.2");
+            svg.appendChild(dataPolygon);
+            
+            // 4. Vertices circles
+            for (let a = 0; a < axesCount; a++) {
+                const val = values[a];
+                const scoreRadius = r * (val / maxVal);
+                const angle = a * angleStep - Math.PI / 2;
+                const dx = cx + scoreRadius * Math.cos(angle);
+                const dy = cy + scoreRadius * Math.sin(angle);
+                
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", dx);
+                circle.setAttribute("cy", dy);
+                circle.setAttribute("r", "2.2");
+                circle.setAttribute("fill", "#7A5638");
+                circle.setAttribute("stroke", "#F7F3EC");
+                circle.setAttribute("stroke-width", "0.5");
+                svg.appendChild(circle);
+            }
+        }
+    </script>
+</body>
+</html>

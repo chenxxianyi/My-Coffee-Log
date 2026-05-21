@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #F7F3EC;
+    color: #1E1E1E;
+    font-family: "Plus Jakarta Sans", sans-serif;
+  }
+}
+
+/* tactile paper grain texture overlay */
+.paper-grain {
+  background-color: #F7F3EC;
+  background-image: radial-gradient(rgba(42, 30, 23, 0.035) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* retro double margin line decoration */
+.double-border {
+  border: 4px double rgba(122, 86, 56, 0.25);
+}
+
+/* thin subtle hairline separator */
+.editorial-border {
+  border: 1px solid rgba(122, 86, 56, 0.15);
+}
+
+/* custom scrollbars */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #F7F3EC;
+}
+::-webkit-scrollbar-thumb {
+  background: #D7C4A8;
+  border-radius: 2px;
+}
+
+/* hide native scrollbars */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* page transition animations */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fade-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}

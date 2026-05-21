@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Coffee Log - Splash Screen</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        coffee: {
+                            warmWhite: '#F7F3EC',
+                            cream: '#EFE7DA',
+                            latte: '#D7C4A8',
+                            brown: '#7A5638',
+                            espresso: '#2A1E17',
+                            charcoal: '#1E1E1E',
+                            softGray: '#A8A29A',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .paper-grain {
+            background-color: #F7F3EC;
+            background-image: radial-gradient(rgba(42, 30, 23, 0.03) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+    </style>
+</head>
+<body class="paper-grain text-coffee-charcoal font-sans antialiased min-h-screen flex flex-col justify-between px-8 py-12 max-w-[430px] mx-auto relative border-x border-coffee-cream shadow-sm">
+
+    <!-- Top Branding / Date -->
+    <div class="flex justify-between items-center text-[10px] tracking-[0.25em] text-coffee-softGray font-bold mt-4">
+        <span>CHRONICLE OF TASTE</span>
+        <span>EST. 2026</span>
+    </div>
+
+    <!-- Center Typographic Core -->
+    <div class="flex flex-col items-center text-center my-auto py-12">
+        <div class="relative mb-8">
+            <!-- Overlapping decorative initial serif -->
+            <span class="font-serif text-[130px] leading-none font-light italic text-coffee-latte tracking-tighter select-none block">mcl</span>
+            <span class="absolute top-[75px] left-1/2 -translate-x-1/2 font-serif text-[44px] uppercase font-light text-coffee-espresso tracking-[0.12em] leading-none block whitespace-nowrap">Coffee Log</span>
+        </div>
+        
+        <!-- Elegant separator -->
+        <div class="w-12 h-[1px] bg-coffee-latte my-4"></div>
+        
+        <!-- Sensory motto text -->
+        <p class="font-serif italic text-base text-coffee-brown max-w-[260px] leading-relaxed">
+            "A daily sensory journal of aroma, mood, and quiet moments."
+        </p>
+    </div>
+
+    <!-- Bottom Action CTA -->
+    <div class="space-y-4 mb-4">
+        <a href="./02_home_page.html" class="w-full py-4 bg-coffee-espresso text-coffee-warmWhite hover:bg-coffee-brown transition-all duration-300 rounded-sm text-xs font-semibold tracking-[0.25em] uppercase shadow-sm flex items-center justify-center gap-2">
+            <span>Enter Journal</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+        <p class="text-[9px] text-coffee-softGray text-center tracking-wider font-light">
+            Tap to open your daily coffee lifestyle手账
+        </p>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

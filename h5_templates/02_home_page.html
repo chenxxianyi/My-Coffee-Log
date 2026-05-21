@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Coffee Log - Daily Chronicle</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        coffee: {
+                            warmWhite: '#F7F3EC',
+                            cream: '#EFE7DA',
+                            latte: '#D7C4A8',
+                            brown: '#7A5638',
+                            espresso: '#2A1E17',
+                            charcoal: '#1E1E1E',
+                            softGray: '#A8A29A',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .paper-grain {
+            background-color: #F7F3EC;
+            background-image: radial-gradient(rgba(42, 30, 23, 0.03) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .double-border {
+            border: 4px double rgba(122, 86, 56, 0.25);
+        }
+        .editorial-border {
+            border: 1px solid rgba(122, 86, 56, 0.15);
+        }
+        /* Hide scrollbar */
+        .scrollbar-none::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-none {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="paper-grain text-coffee-charcoal font-sans antialiased min-h-screen flex flex-col justify-between max-w-[430px] mx-auto border-x border-coffee-cream shadow-sm relative">
+
+    <!-- Sticky Header -->
+    <div class="px-6 py-5 flex justify-between items-end border-b border-coffee-cream/80 bg-coffee-warmWhite/80 backdrop-blur-md sticky top-0 z-20">
+        <div>
+            <span class="text-[9px] uppercase tracking-[0.25em] font-semibold text-coffee-softGray">May 21, 2026</span>
+            <h2 class="font-serif text-2xl font-light text-coffee-espresso leading-none mt-1">Today's Chronicle</h2>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="./04_timeline.html" class="text-coffee-espresso hover:text-coffee-brown transition-colors">
+                <i data-lucide="search" class="w-5 h-5"></i>
+            </a>
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" alt="Avatar" class="w-8 h-8 rounded-full object-cover border border-coffee-latte">
+        </div>
+    </div>
+
+    <!-- Scrollable Body Content -->
+    <div class="flex-1 overflow-y-auto px-6 py-5 space-y-6 pb-24">
+        
+        <!-- Hero: Today's Special Brew Entrance (Asymmetric Card Layout) -->
+        <a href="./03_coffee_detail.html" class="block group relative overflow-hidden h-[190px] bg-coffee-espresso flex flex-col justify-between p-5 rounded-sm shadow-sm hover:scale-[0.99] transition-transform duration-300">
+            <!-- Background Image with beautiful mix-blend -->
+            <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&q=80&w=600" class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-luminosity filter saturate-50 group-hover:scale-105 transition-all duration-700">
+            
+            <div class="z-10 flex justify-between items-start">
+                <span class="text-[9px] uppercase tracking-[0.2em] font-semibold text-coffee-latte">sensory record</span>
+                <span class="text-[9px] text-coffee-warmWhite border border-coffee-latte/40 px-2 py-0.5 rounded-full font-light font-serif italic">TAP TO DETAIL</span>
+            </div>
+            
+            <div class="z-10 space-y-1">
+                <h3 class="font-serif text-2xl text-coffee-warmWhite font-light">Ethiopia Yirgacheffe</h3>
+                <div class="flex items-center gap-1.5 text-[10px] text-coffee-latte tracking-wider">
+                    <span class="font-serif italic">Pour Over</span>
+                    <span>•</span>
+                    <span>Blue Bottle, Shanghai</span>
+                </div>
+            </div>
+        </a>
+
+        <!-- AI Tasting Summary Quote (Double border editorial style) -->
+        <div class="p-5 bg-coffee-cream rounded-sm double-border text-center space-y-2.5">
+            <span class="text-[9px] uppercase tracking-[0.25em] font-bold text-coffee-brown block">AI Sensory Summary / 今日风味摘要</span>
+            <p class="font-serif italic text-sm text-coffee-espresso leading-relaxed px-1">
+                "今天你享用的是一杯埃塞俄比亚手冲。明亮高亢的柑橘酸犹如晨曦，醇甜柔和的花香融化在微风中，最适合在这个慵懒惬味的午后阅读时光伴你左右。"
+            </p>
+            <div class="text-[9px] text-coffee-softGray font-semibold tracking-wider">A calm & cozy life rhythm • 😌 Calm</div>
+        </div>
+
+        <!-- Monthly Overview Grid -->
+        <div class="grid grid-cols-3 gap-3">
+            <div class="p-4 bg-coffee-cream/40 border border-coffee-cream/80 text-center rounded-sm">
+                <div class="text-2xl font-serif text-coffee-espresso font-light">18</div>
+                <div class="text-[9px] uppercase tracking-wider text-coffee-softGray mt-1 font-semibold">本月饮用</div>
+            </div>
+            <div class="p-4 bg-coffee-cream/40 border border-coffee-cream/80 text-center rounded-sm">
+                <div class="text-2xl font-serif text-coffee-espresso font-light truncate">手冲</div>
+                <div class="text-[9px] uppercase tracking-wider text-coffee-softGray mt-1 font-semibold">最常喝</div>
+            </div>
+            <div class="p-4 bg-coffee-cream/40 border border-coffee-cream/80 text-center rounded-sm">
+                <div class="text-2xl font-serif text-coffee-espresso font-light truncate">柑橘</div>
+                <div class="text-[9px] uppercase tracking-wider text-coffee-softGray mt-1 font-semibold">最爱风味</div>
+            </div>
+        </div>
+
+        <!-- Recent Logs Section -->
+        <div class="space-y-4">
+            <div class="flex justify-between items-end border-b border-coffee-cream pb-1.5">
+                <h3 class="font-serif text-lg font-light text-coffee-espresso">最近咖啡日记</h3>
+                <a href="./04_timeline.html" class="text-[9px] uppercase tracking-widest text-coffee-brown font-semibold hover:text-coffee-espresso transition-colors">View Timeline</a>
+            </div>
+            
+            <div class="space-y-3">
+                <!-- Recent Card 1 -->
+                <a href="./03_coffee_detail.html" class="block editorial-border p-3.5 bg-coffee-cream/20 flex gap-4 items-center rounded-sm hover:bg-coffee-cream/35 transition-colors">
+                    <img src="https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&q=80&w=150" class="w-16 h-16 object-cover rounded-sm border border-coffee-cream">
+                    <div class="flex-1 min-w-0 space-y-1">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[9px] uppercase tracking-widest font-semibold text-coffee-softGray">Pour Over</span>
+                            <span class="text-[8px] font-mono text-coffee-softGray">May 21</span>
+                        </div>
+                        <h4 class="font-serif text-base font-light text-coffee-espresso truncate italic leading-tight">Ethiopia Yirgacheffe</h4>
+                        <p class="text-[10px] text-coffee-brown font-light truncate leading-relaxed">柑橘与茉莉花茶的高昂香气，入口干净清爽...</p>
+                        <div class="flex gap-2 items-center text-[9px] text-coffee-softGray pt-0.5">
+                            <span class="px-1.5 py-0.5 bg-coffee-cream rounded-sm text-coffee-espresso">😌 Calm</span>
+                            <span>at Blue Bottle</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Recent Card 2 -->
+                <a href="./03_coffee_detail.html" class="block editorial-border p-3.5 bg-coffee-cream/20 flex gap-4 items-center rounded-sm hover:bg-coffee-cream/35 transition-colors">
+                    <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=150" class="w-16 h-16 object-cover rounded-sm border border-coffee-cream">
+                    <div class="flex-1 min-w-0 space-y-1">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[9px] uppercase tracking-widest font-semibold text-coffee-softGray">Latte</span>
+                            <span class="text-[8px] font-mono text-coffee-softGray">May 18</span>
+                        </div>
+                        <h4 class="font-serif text-base font-light text-coffee-espresso truncate italic leading-tight">Macadamia Nut Latte</h4>
+                        <p class="text-[10px] text-coffee-brown font-light truncate leading-relaxed">坚果奶泡非常绵厚顺滑，奶油和麦芽糖般的甜感明显...</p>
+                        <div class="flex gap-2 items-center text-[9px] text-coffee-softGray pt-0.5">
+                            <span class="px-1.5 py-0.5 bg-coffee-cream rounded-sm text-coffee-espresso">⚡ Joy</span>
+                            <span>at Manner Coffee</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Floating Navigation Bar -->
+    <div class="absolute bottom-0 inset-x-0 h-16 border-t border-coffee-cream bg-coffee-warmWhite flex items-center justify-around px-6 z-30">
+        <a href="./02_home_page.html" class="flex flex-col items-center gap-1 text-coffee-brown">
+            <i data-lucide="book-open" class="w-5 h-5"></i>
+            <span class="text-[9px] uppercase tracking-widest font-bold">Home</span>
+        </a>
+        <a href="./04_timeline.html" class="flex flex-col items-center gap-1 text-coffee-softGray hover:text-coffee-brown transition-colors">
+            <i data-lucide="calendar" class="w-5 h-5"></i>
+            <span class="text-[9px] uppercase tracking-widest font-bold">Timeline</span>
+        </a>
+        <a href="./05_share_card.html" class="flex flex-col items-center gap-1 text-coffee-softGray hover:text-coffee-brown transition-colors">
+            <i data-lucide="share-2" class="w-5 h-5"></i>
+            <span class="text-[9px] uppercase tracking-widest font-bold">Share Card</span>
+        </a>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

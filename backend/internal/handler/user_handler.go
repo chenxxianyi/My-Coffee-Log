@@ -1,0 +1,55 @@
+package handler
+
+import (
+	"my-coffee-log/internal/middleware"
+	"my-coffee-log/internal/response"
+	"my-coffee-log/internal/service"
+
+	"github.com/gin-gonic/gin"
+)
+
+type UserHandler struct {
+	userService *service.UserService
+}
+
+func NewUserHandler(userService *service.UserService) *UserHandler {
+	return &UserHandler{userService: userService}
+}
+
+func (h *UserHandler) GetCurrentUser(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserID)
+	if !exists {
+		response.ErrorUnauthorized(c, "user not found in context")
+		return
+	}
+
+	user, err := h.userService.GetCurrentUser(userID.(uint))
+	if err != nil {
+		response.ErrorNotFound(c, "user not found")
+		return
+	}
+
+	response.Success(c, user)
+}
+
+func (h *UserHandler) UpdateCurrentUser(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserID)
+	if !exists {
+		response.ErrorUnauthorized(c, "user not found in context")
+		return
+	}
+
+	var req service.UpdateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.ErrorBadRequest(c, err.Error())
+		return
+	}
+
+	user, err := h.userService.UpdateUser(userID.(uint), req)
+	if err != nil {
+		response.Error(c, 40001, err.Error())
+		return
+	}
+
+	response.Success(c, user)
+}
