@@ -57,7 +57,7 @@
         <div class="flex-1 flex flex-col justify-center space-y-3.5 my-3">
           <!-- Portrait photo inside card -->
           <div 
-            class="overflow-hidden rounded-sm relative border border-coffee-cream/40 bg-neutral-100 transition-all duration-300 flex-shrink-0 select-none"
+            class="overflow-hidden rounded-xl relative border border-coffee-cream/40 bg-neutral-100 transition-all duration-300 flex-shrink-0 select-none"
             :class="ratio === '1:1' ? 'h-16' : (ratio === '3:4' ? 'h-28' : 'h-40')"
           >
             <img :src="log.image_url" class="w-full h-full object-cover">
@@ -106,7 +106,7 @@
     <div class="space-y-4">
       <button 
         @click="exportCardImage" 
-        class="w-full py-4 bg-coffee-cream text-coffee-espresso hover:bg-coffee-latte transition-all duration-300 rounded-sm text-xs font-semibold tracking-[0.25em] uppercase shadow-md flex items-center justify-center gap-2"
+        class="w-full py-4 bg-coffee-cream text-coffee-espresso hover:bg-coffee-latte transition-all duration-300 rounded-xl text-xs font-semibold tracking-[0.25em] uppercase shadow-md flex items-center justify-center gap-2"
         :disabled="isExporting"
       >
         <template v-if="isExporting">
@@ -128,7 +128,7 @@
   <div v-else class="flex-1 flex flex-col justify-center items-center p-8 text-center text-coffee-softGray space-y-4">
     <Coffee class="w-12 h-12 stroke-[1px]" />
     <p class="font-serif text-sm uppercase tracking-widest">Entry Not Found</p>
-    <router-link to="/home" class="px-4 py-2 bg-coffee-espresso text-coffee-warmWhite text-xs tracking-wider rounded-sm font-semibold uppercase">Go Back</router-link>
+    <router-link to="/home" class="px-4 py-2 bg-coffee-espresso text-coffee-warmWhite text-xs tracking-wider rounded-xl font-semibold uppercase">Go Back</router-link>
   </div>
 </template>
 
@@ -175,7 +175,7 @@ const exportCardImage = async () => {
     const canvas = await html2canvas(cardElement, {
       scale: 3, // Upscale 3x to get high-definition retina rendering (for social media posts!)
       useCORS: true, // Handle images cross origin safely
-      backgroundColor: '#F7F3EC', // Ensure warm background is baked in
+      backgroundColor: '#FFF2DB', // Ensure warm background is baked in
       logging: false
     })
     
@@ -209,7 +209,7 @@ const formatFullDate = (dateStr: string) => {
 
 <style scoped>
 .card-paper {
-  background-color: #F7F3EC;
-  box-shadow: 0 25px 50px -12px rgba(42, 30, 23, 0.45);
+  background-color: #FFF2DB;
+  box-shadow: 0 25px 50px -12px rgba(44, 26, 14, 0.45);
 }
 </style>

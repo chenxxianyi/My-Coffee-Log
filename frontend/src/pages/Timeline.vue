@@ -50,7 +50,7 @@
               :to="'/coffee/' + log.id" 
               class="block group flex gap-5 items-stretch"
             >
-              <div class="w-2/5 aspect-[3/4] overflow-hidden rounded-sm bg-neutral-100 border border-coffee-cream flex-shrink-0 select-none">
+              <div class="w-2/5 aspect-[3/4] overflow-hidden rounded-xl bg-neutral-100 border border-coffee-cream flex-shrink-0 select-none">
                 <img :src="log.image_url" class="w-full h-full object-cover filter saturate-50 group-hover:scale-105 transition-transform duration-700">
               </div>
               <div class="flex-1 flex flex-col justify-between py-1">
@@ -75,7 +75,7 @@
             <router-link 
               v-else-if="isModOne(idx, 3)"
               :to="'/coffee/' + log.id" 
-              class="block group p-5 bg-coffee-cream/30 rounded-sm border border-coffee-cream/70 hover:bg-coffee-cream/45 transition-colors"
+              class="block group p-5 bg-coffee-cream/30 rounded-2xl border border-coffee-cream/70 hover:bg-coffee-cream/45 transition-colors"
             >
               <div class="space-y-2">
                 <div class="flex justify-between items-center text-[8px] font-mono text-coffee-softGray select-none">
@@ -99,7 +99,7 @@
               :to="'/coffee/' + log.id" 
               class="block group space-y-2"
             >
-              <div class="w-full h-40 overflow-hidden rounded-sm bg-neutral-100 border border-coffee-cream select-none">
+              <div class="w-full h-40 overflow-hidden rounded-xl bg-neutral-100 border border-coffee-cream select-none">
                 <img :src="log.image_url" class="w-full h-full object-cover filter saturate-50 group-hover:scale-[1.02] transition-transform duration-700">
               </div>
               <div class="space-y-1">
@@ -130,23 +130,31 @@
 
     </div>
 
-    <!-- Floating Navigation Bar -->
-    <div class="h-16 border-t border-coffee-cream bg-coffee-warmWhite flex items-center justify-around px-6 z-30 select-none">
-      <router-link to="/home" class="flex flex-col items-center gap-1 text-coffee-softGray hover:text-coffee-brown transition-colors">
+    <!-- Sticky Bottom Navigation Bar -->
+    <div class="relative h-16 border-t border-coffee-cream/60 bg-coffee-warmWhite flex items-center z-30 select-none">
+      <router-link to="/home" class="flex-1 flex flex-col items-center gap-0.5 text-coffee-softGray hover:text-coffee-brown transition-colors">
         <BookOpen class="w-5 h-5" />
-        <span class="text-[10.5px] tracking-widest font-medium">咖啡日志</span>
+        <span class="text-[9.5px] tracking-widest font-medium">咖啡日志</span>
       </router-link>
-      <router-link to="/timeline" class="flex flex-col items-center gap-1 text-coffee-brown">
+      <router-link to="/timeline" class="flex-1 flex flex-col items-center gap-0.5 text-coffee-brown">
         <Calendar class="w-5 h-5" />
-        <span class="text-[10.5px] tracking-widest font-medium">时间线</span>
+        <span class="text-[9.5px] tracking-widest font-medium">时间线</span>
       </router-link>
-      <router-link to="/stats" class="flex flex-col items-center gap-1 text-coffee-softGray hover:text-coffee-brown transition-colors">
+      <div class="flex-1 flex flex-col items-center">
+        <router-link to="/create" class="flex flex-col items-center gap-1 -translate-y-4 group">
+          <div class="rounded-full flex items-center justify-center shadow-lg ring-4 ring-coffee-warmWhite transition-transform duration-200 group-hover:scale-105 group-active:scale-95"
+               style="width:52px;height:52px;background:linear-gradient(145deg,#E76F51,#D4623E);">
+            <Plus class="w-5 h-5 text-white" />
+          </div>
+        </router-link>
+      </div>
+      <router-link to="/stats" class="flex-1 flex flex-col items-center gap-0.5 text-coffee-softGray hover:text-coffee-brown transition-colors">
         <BarChart3 class="w-5 h-5" />
-        <span class="text-[10.5px] tracking-widest font-medium">咖迹</span>
+        <span class="text-[9.5px] tracking-widest font-medium">咖迹</span>
       </router-link>
-      <!-- Circular Quick add button -->
-      <router-link to="/create" class="w-10 h-10 bg-coffee-espresso text-coffee-warmWhite rounded-full flex items-center justify-center -mt-8 shadow-md border-[4px] border-coffee-warmWhite hover:bg-coffee-brown transition-colors">
-        <Plus class="w-5 h-5" />
+      <router-link to="/profile" class="flex-1 flex flex-col items-center gap-0.5 text-coffee-softGray hover:text-coffee-brown transition-colors">
+        <User class="w-5 h-5" />
+        <span class="text-[9.5px] tracking-widest font-medium">我的</span>
       </router-link>
     </div>
 
@@ -156,7 +164,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useCoffeeLogStore, CoffeeLog } from '@/stores/coffeeLog'
-import { BookOpen, Calendar, BarChart3, Plus } from 'lucide-vue-next'
+import { BookOpen, Calendar, BarChart3, Plus, User } from 'lucide-vue-next'
 
 const store = useCoffeeLogStore()
 

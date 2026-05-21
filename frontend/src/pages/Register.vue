@@ -8,7 +8,7 @@
     </div>
 
     <!-- Editorial Sign Up Form -->
-    <div class="bg-coffee-cream/40 p-6 rounded-sm border border-coffee-cream/80 space-y-5 shadow-sm">
+    <div class="bg-coffee-cream/40 p-6 rounded-2xl border border-coffee-cream/80 space-y-5 shadow-sm">
       <h2 class="text-center font-serif text-lg font-light text-coffee-espresso uppercase tracking-wider border-b border-coffee-cream pb-3">CREATE ACCOUNT / 注册账户</h2>
       
       <div class="space-y-3.5">
@@ -19,7 +19,7 @@
             type="text" 
             v-model="nickname" 
             placeholder="风味探索者" 
-            class="w-full p-3 bg-white/70 border border-coffee-latte/50 focus:border-coffee-brown focus:outline-none rounded-sm text-sm"
+            class="w-full p-3 bg-white/70 border border-coffee-latte/50 focus:border-coffee-brown focus:outline-none rounded-xl text-sm"
           >
         </div>
 
@@ -30,7 +30,7 @@
             type="email" 
             v-model="email" 
             placeholder="demo@mycoffeelog.com" 
-            class="w-full p-3 bg-white/70 border border-coffee-latte/50 focus:border-coffee-brown focus:outline-none rounded-sm text-sm"
+            class="w-full p-3 bg-white/70 border border-coffee-latte/50 focus:border-coffee-brown focus:outline-none rounded-xl text-sm"
           >
         </div>
 
@@ -41,7 +41,7 @@
             type="password" 
             v-model="password" 
             placeholder="••••••" 
-            class="w-full p-3 bg-white/70 border border-coffee-latte/50 focus:border-coffee-brown focus:outline-none rounded-sm text-sm"
+            class="w-full p-3 bg-white/70 border border-coffee-latte/50 focus:border-coffee-brown focus:outline-none rounded-xl text-sm"
           >
         </div>
       </div>
@@ -49,7 +49,7 @@
       <!-- Action Button -->
       <button 
         @click="handleRegister" 
-        class="w-full py-3 bg-coffee-espresso text-coffee-warmWhite hover:bg-coffee-brown transition-colors rounded-sm text-xs font-semibold tracking-[0.25em] uppercase shadow-sm flex items-center justify-center gap-1.5"
+        class="w-full py-3 bg-coffee-espresso text-coffee-warmWhite hover:bg-coffee-brown transition-colors rounded-xl text-xs font-semibold tracking-[0.25em] uppercase shadow-sm flex items-center justify-center gap-1.5"
         :disabled="isLoading"
       >
         <template v-if="isLoading">

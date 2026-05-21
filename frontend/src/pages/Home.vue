@@ -24,7 +24,7 @@
       <div v-if="lastLog" class="block">
         <router-link 
           :to="'/coffee/' + lastLog.id" 
-          class="block group relative overflow-hidden h-[190px] bg-coffee-espresso flex flex-col justify-between p-5 rounded-sm shadow-sm hover:scale-[0.99] transition-transform duration-300"
+          class="block group relative overflow-hidden h-[190px] bg-coffee-espresso flex flex-col justify-between p-5 rounded-2xl shadow-sm hover:scale-[0.99] transition-transform duration-300"
         >
           <img :src="lastLog.image_url" class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-luminosity filter saturate-50 group-hover:scale-105 transition-all duration-700">
           
@@ -48,26 +48,74 @@
       <div v-else>
         <router-link 
           to="/create" 
-          class="block group relative overflow-hidden h-[190px] bg-coffee-espresso flex flex-col justify-between p-5 rounded-sm shadow-sm hover:scale-[0.99] transition-transform duration-300"
+          class="block group relative overflow-hidden h-[200px] flex flex-col justify-between p-5 rounded-2xl shadow-md hover:scale-[0.99] transition-transform duration-300"
+          style="background: linear-gradient(145deg, #5C3D2E 0%, #3A2418 55%, #6B4A38 100%);"
         >
-          <div class="z-10 flex justify-between items-start">
-            <span class="text-[9px] uppercase tracking-[0.2em] font-semibold text-coffee-latte">欢迎开启咖啡手账</span>
-            <span class="text-[9px] text-coffee-warmWhite border border-coffee-latte/40 px-2 py-0.5 rounded-full font-light font-serif italic">开始记录</span>
+          <!-- Paper grain overlay -->
+          <div class="absolute inset-0 opacity-[0.05]" style="background-image: radial-gradient(rgba(255,242,219,0.6) 1px, transparent 0); background-size: 18px 18px;"></div>
+
+          <!-- Subtle side gradient sheen -->
+          <div class="absolute inset-y-0 right-0 w-1/2 pointer-events-none" style="background: linear-gradient(to left, rgba(231,111,81,0.15), transparent);"></div>
+
+          <!-- Large watermark letter -->
+          <div class="absolute right-3 bottom-0 font-serif leading-none select-none pointer-events-none translate-y-3 text-coffee-warmWhite/[0.04]" style="font-size: 140px;">C</div>
+
+          <!-- Corner bracket decorations -->
+          <div class="absolute top-3.5 left-3.5 w-4 h-4 border-t border-l border-coffee-latte/25"></div>
+          <div class="absolute top-3.5 right-3.5 w-4 h-4 border-t border-r border-coffee-latte/25"></div>
+          <div class="absolute bottom-3.5 left-3.5 w-4 h-4 border-b border-l border-coffee-latte/25"></div>
+          <div class="absolute bottom-3.5 right-3.5 w-4 h-4 border-b border-r border-coffee-latte/25"></div>
+
+          <!-- Header row -->
+          <div class="relative z-10 flex justify-between items-start">
+            <span class="text-[9px] uppercase tracking-[0.22em] font-semibold text-coffee-latte/80">欢迎开启咖啡手账</span>
+            <span class="text-[9px] text-coffee-warmWhite/90 border border-coffee-latte/30 px-2.5 py-0.5 font-light font-serif italic tracking-wider">开始记录</span>
           </div>
-          <div class="z-10 text-left">
-            <h3 class="font-serif text-2xl text-coffee-warmWhite font-light">记录你的第一杯美好</h3>
-            <p class="text-[10px] text-coffee-latte tracking-wider mt-1">记录咖啡，也就是在记录你专属的生活格调。</p>
+
+          <!-- Hairline divider -->
+          <div class="relative z-10 flex items-center gap-2">
+            <div class="w-5 h-px bg-coffee-latte/30"></div>
+            <div class="flex-1 h-px" style="background: linear-gradient(to right, rgba(255,242,219,0.2), transparent);"></div>
+          </div>
+
+          <!-- Bottom text -->
+          <div class="relative z-10 text-left space-y-2">
+            <h3 class="font-serif text-[1.6rem] text-coffee-warmWhite font-light leading-snug tracking-wide">记录你的第一杯美好</h3>
+            <div class="flex items-center gap-2">
+              <div class="w-5 h-px bg-coffee-latte/40 flex-shrink-0"></div>
+              <p class="text-[10px] text-coffee-latte/75 tracking-widest font-light">记录咖啡，也就是在记录你专属的生活格调。</p>
+            </div>
           </div>
         </router-link>
       </div>
 
       <!-- AI Tasting Summary Quote (Double border editorial style) -->
-      <div class="p-5 bg-coffee-cream rounded-sm double-border text-center space-y-2.5">
-        <span class="text-[9px] uppercase tracking-[0.25em] font-bold text-coffee-brown block">今日感官摘要</span>
-        <p class="font-serif italic text-sm text-coffee-espresso leading-relaxed px-1">
-          {{ lastLog ? `“今天你享用的是一杯${lastLog.coffee_name}${lastLog.coffee_type}。明亮高亢的香气像晨曦，口感与此时此刻😌 ${lastLog.mood} 的心境极佳契合。”` : '“咖啡的香气是属于清晨与安静午后的赞美诗。期待你写下今日的第一篇味觉手账，我将在此为你吟诵今日的风味总结。”' }}
-        </p>
-        <div class="text-[9px] text-coffee-softGray font-semibold tracking-wider uppercase">优雅平缓的生活律动</div>
+      <div class="relative overflow-hidden rounded-2xl" style="background: linear-gradient(145deg, #E76F51 0%, #D4623E 55%, #E87D60 100%); border: 4px double rgba(255,242,219,0.35);">
+        <!-- Decorative large quotation mark -->
+        <div class="absolute top-0 left-3 font-serif leading-none select-none pointer-events-none text-coffee-warmWhite/[0.18]" style="font-size: 96px; line-height: 1;">&ldquo;</div>
+        <!-- Subtle bottom-right closing quote -->
+        <div class="absolute bottom-0 right-3 font-serif leading-none select-none pointer-events-none text-coffee-warmWhite/[0.10] rotate-180" style="font-size: 64px; line-height: 1;">&ldquo;</div>
+
+        <div class="relative z-10 px-5 pt-5 pb-4 text-center space-y-3">
+          <!-- Title with flanking lines -->
+          <div class="flex items-center justify-center gap-2.5">
+            <div class="h-px flex-1 max-w-[36px]" style="background: linear-gradient(to left, rgba(255,242,219,0.55), transparent);"></div>
+            <span class="text-[9px] uppercase tracking-[0.28em] font-bold text-coffee-warmWhite">今日感官摘要</span>
+            <div class="h-px flex-1 max-w-[36px]" style="background: linear-gradient(to right, rgba(255,242,219,0.55), transparent);"></div>
+          </div>
+
+          <!-- Quote text -->
+          <p class="font-serif italic text-[0.82rem] text-coffee-warmWhite leading-[1.75] px-2">
+            {{ lastLog ? `\u201c今天你享用的是一杯${lastLog.coffee_name}${lastLog.coffee_type}。明亮高亢的香气像晨曦，口感与此时此刻😌 ${lastLog.mood} 的心境极佳契合。\u201d` : '\u201c咖啡的香气是属于清晨与安静午后的赞美诗。期待你写下今日的第一篇味觉手账，我将在此为你吟诵今日的风味总结。\u201d' }}
+          </p>
+
+          <!-- Attribution with ornament -->
+          <div class="flex items-center justify-center gap-2 pt-0.5">
+            <div class="w-4 h-px bg-coffee-warmWhite/30"></div>
+            <span class="text-[8.5px] text-coffee-warmWhite/70 font-semibold tracking-[0.2em] uppercase">优雅平缓的生活律动</span>
+            <div class="w-4 h-px bg-coffee-warmWhite/30"></div>
+          </div>
+        </div>
       </div>
 
       <!-- Monthly Overview Grid -->
@@ -121,23 +169,45 @@
     </div>
 
     <!-- Sticky Bottom Navigation Bar -->
-    <div class="h-16 border-t border-coffee-cream bg-coffee-warmWhite flex items-center justify-around px-6 z-30 select-none">
-      <router-link to="/home" class="flex flex-col items-center gap-1 text-coffee-brown">
+    <div class="relative h-16 border-t border-coffee-cream/60 bg-coffee-warmWhite flex items-center z-30 select-none">
+
+      <!-- Left: 咖啡日志 -->
+      <router-link to="/home" class="flex-1 flex flex-col items-center gap-0.5 text-coffee-brown">
         <BookOpen class="w-5 h-5" />
-        <span class="text-[10.5px] tracking-widest font-medium">咖啡日志</span>
+        <span class="text-[9.5px] tracking-widest font-medium">咖啡日志</span>
       </router-link>
-      <router-link to="/timeline" class="flex flex-col items-center gap-1 text-coffee-softGray hover:text-coffee-brown transition-colors">
+
+      <!-- Left: 时间线 -->
+      <router-link to="/timeline" class="flex-1 flex flex-col items-center gap-0.5 text-coffee-softGray hover:text-coffee-brown transition-colors">
         <Calendar class="w-5 h-5" />
-        <span class="text-[10.5px] tracking-widest font-medium">时间线</span>
+        <span class="text-[9.5px] tracking-widest font-medium">时间线</span>
       </router-link>
-      <router-link to="/stats" class="flex flex-col items-center gap-1 text-coffee-softGray hover:text-coffee-brown transition-colors">
+
+      <!-- Center FAB: 记录 (elevated above bar) -->
+      <div class="flex-1 flex flex-col items-center">
+        <router-link
+          to="/create"
+          class="flex flex-col items-center gap-1 -translate-y-4 group"
+        >
+          <div class="w-13 h-13 rounded-full flex items-center justify-center shadow-lg ring-4 ring-coffee-warmWhite transition-transform duration-200 group-hover:scale-105 group-active:scale-95"
+               style="width: 52px; height: 52px; background: linear-gradient(145deg, #E76F51, #D4623E);">
+            <Plus class="w-5 h-5 text-white" />
+          </div>
+        </router-link>
+      </div>
+
+      <!-- Right: 咖迹 -->
+      <router-link to="/stats" class="flex-1 flex flex-col items-center gap-0.5 text-coffee-softGray hover:text-coffee-brown transition-colors">
         <BarChart3 class="w-5 h-5" />
-        <span class="text-[10.5px] tracking-widest font-medium">咖迹</span>
+        <span class="text-[9.5px] tracking-widest font-medium">咖迹</span>
       </router-link>
-      <!-- Circular Quick add button -->
-      <router-link to="/create" class="w-10 h-10 bg-coffee-espresso text-coffee-warmWhite rounded-full flex items-center justify-center -mt-8 shadow-md border-[4px] border-coffee-warmWhite hover:bg-coffee-brown transition-colors">
-        <Plus class="w-5 h-5" />
+
+      <!-- Right: 个人中心 -->
+      <router-link to="/profile" class="flex-1 flex flex-col items-center gap-0.5 text-coffee-softGray hover:text-coffee-brown transition-colors">
+        <User class="w-5 h-5" />
+        <span class="text-[9.5px] tracking-widest font-medium">我的</span>
       </router-link>
+
     </div>
 
   </div>
@@ -147,7 +217,7 @@
 import { computed, onMounted } from 'vue'
 import { useCoffeeLogStore } from '@/stores/coffeeLog'
 import { useAuthStore } from '@/stores/auth'
-import { BookOpen, Calendar, BarChart3, Plus, Search } from 'lucide-vue-next'
+import { BookOpen, Calendar, BarChart3, Plus, Search, User } from 'lucide-vue-next'
 
 const store = useCoffeeLogStore()
 const authStore = useAuthStore()

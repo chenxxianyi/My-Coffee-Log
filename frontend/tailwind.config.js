@@ -8,13 +8,13 @@ export default {
     extend: {
       colors: {
         coffee: {
-          warmWhite: '#F7F3EC',
-          cream: '#EFE7DA',
-          latte: '#D7C4A8',
-          brown: '#7A5638',
-          espresso: '#2A1E17',
-          charcoal: '#1E1E1E',
-          softGray: '#A8A29A',
+          warmWhite: '#FFF2DB',
+          cream: '#FDE8C2',
+          latte: '#E76F51',
+          brown: '#5C3D2E',
+          espresso: '#5C3D2E',
+          charcoal: '#2A1A0E',
+          softGray: '#C0A07C',
         }
       },
       fontFamily: {

@@ -25,7 +25,7 @@
     <div class="space-y-4 mb-4">
       <router-link
         to="/home"
-        class="w-full py-4 bg-coffee-espresso text-coffee-warmWhite hover:bg-coffee-brown transition-all duration-300 rounded-sm text-xs font-semibold tracking-[0.25em] uppercase shadow-sm flex items-center justify-center gap-2"
+        class="w-full py-4 bg-coffee-espresso text-coffee-warmWhite hover:bg-coffee-brown transition-all duration-300 rounded-xl text-xs font-semibold tracking-[0.25em] uppercase shadow-sm flex items-center justify-center gap-2"
       >
         <span>开启风味志</span>
         <ArrowRight class="w-4 h-4" />

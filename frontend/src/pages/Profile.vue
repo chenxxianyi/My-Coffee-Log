@@ -16,7 +16,7 @@
     <div class="flex-1 overflow-y-auto px-6 py-6 space-y-6 pb-24 scrollbar-none">
       
       <!-- Tactile Card: User Info -->
-      <div class="p-6 bg-coffee-cream rounded-sm double-border space-y-5 text-center relative overflow-hidden">
+      <div class="p-6 bg-coffee-cream rounded-2xl double-border space-y-5 text-center relative overflow-hidden">
         <div 
           @click="showAvatarModal = true"
           class="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-coffee-espresso relative group cursor-pointer select-none"
@@ -35,7 +35,7 @@
                 type="text" 
                 v-model="editNickname" 
                 @keyup.enter="saveNickname"
-                class="px-2 py-1 text-center font-serif text-xl border border-coffee-brown bg-white/80 focus:outline-none rounded-sm max-w-[150px]"
+                class="px-2 py-1 text-center font-serif text-xl border border-coffee-brown bg-white/80 focus:outline-none rounded-lg max-w-[150px]"
                 autofocus
               >
               <button @click="saveNickname" class="text-coffee-espresso hover:text-coffee-brown">
@@ -61,11 +61,11 @@
       <div class="space-y-3">
         <h4 class="text-[10px] uppercase tracking-widest font-semibold text-coffee-softGray mb-1 select-none">味觉手账数据</h4>
         <div class="grid grid-cols-2 gap-4">
-          <div class="p-4 bg-coffee-cream/30 border border-coffee-cream/80 rounded-sm">
-            <span class="text-[9px] uppercase tracking-wider text-coffee-softGray block">冲煮日志</span>
+          <div class="p-4 bg-coffee-cream/30 border border-coffee-cream/80 rounded-xl">
+            <span class="text-[9px] uppercase tracking-wider text-coffee-softGray block">冲煎日志</span>
             <div class="text-3xl font-serif text-coffee-espresso font-light mt-1">{{ logsStore.logs.length }} 篇</div>
           </div>
-          <div class="p-4 bg-coffee-cream/30 border border-coffee-cream/80 rounded-sm">
+          <div class="p-4 bg-coffee-cream/30 border border-coffee-cream/80 rounded-xl">
             <span class="text-[9px] uppercase tracking-wider text-coffee-softGray block">首记日期</span>
             <div class="text-[13px] font-serif text-coffee-espresso font-light mt-2 truncate">{{ firstBrewDate }}</div>
           </div>
@@ -107,29 +107,37 @@
 
     </div>
 
-    <!-- Floating Navigation Bar -->
-    <div class="h-16 border-t border-coffee-cream bg-coffee-warmWhite flex items-center justify-around px-6 z-30 select-none">
-      <router-link to="/home" class="flex flex-col items-center gap-1 text-coffee-softGray hover:text-coffee-brown transition-colors">
+    <!-- Sticky Bottom Navigation Bar -->
+    <div class="relative h-16 border-t border-coffee-cream/60 bg-coffee-warmWhite flex items-center z-30 select-none">
+      <router-link to="/home" class="flex-1 flex flex-col items-center gap-0.5 text-coffee-softGray hover:text-coffee-brown transition-colors">
         <BookOpen class="w-5 h-5" />
-        <span class="text-[10.5px] tracking-widest font-medium">咖啡日志</span>
+        <span class="text-[9.5px] tracking-widest font-medium">咖啡日志</span>
       </router-link>
-      <router-link to="/timeline" class="flex flex-col items-center gap-1 text-coffee-softGray hover:text-coffee-brown transition-colors">
+      <router-link to="/timeline" class="flex-1 flex flex-col items-center gap-0.5 text-coffee-softGray hover:text-coffee-brown transition-colors">
         <Calendar class="w-5 h-5" />
-        <span class="text-[10.5px] tracking-widest font-medium">时间线</span>
+        <span class="text-[9.5px] tracking-widest font-medium">时间线</span>
       </router-link>
-      <router-link to="/stats" class="flex flex-col items-center gap-1 text-coffee-softGray hover:text-coffee-brown transition-colors">
+      <div class="flex-1 flex flex-col items-center">
+        <router-link to="/create" class="flex flex-col items-center gap-1 -translate-y-4 group">
+          <div class="rounded-full flex items-center justify-center shadow-lg ring-4 ring-coffee-warmWhite transition-transform duration-200 group-hover:scale-105 group-active:scale-95"
+               style="width:52px;height:52px;background:linear-gradient(145deg,#E76F51,#D4623E);">
+            <Plus class="w-5 h-5 text-white" />
+          </div>
+        </router-link>
+      </div>
+      <router-link to="/stats" class="flex-1 flex flex-col items-center gap-0.5 text-coffee-softGray hover:text-coffee-brown transition-colors">
         <BarChart3 class="w-5 h-5" />
-        <span class="text-[10.5px] tracking-widest font-medium">咖迹</span>
+        <span class="text-[9.5px] tracking-widest font-medium">咖迹</span>
       </router-link>
-      <!-- Circular Quick add button -->
-      <router-link to="/create" class="w-10 h-10 bg-coffee-espresso text-coffee-warmWhite rounded-full flex items-center justify-center -mt-8 shadow-md border-[4px] border-coffee-warmWhite hover:bg-coffee-brown transition-colors">
-        <Plus class="w-5 h-5" />
+      <router-link to="/profile" class="flex-1 flex flex-col items-center gap-0.5 text-coffee-brown">
+        <User class="w-5 h-5" />
+        <span class="text-[9.5px] tracking-widest font-medium">我的</span>
       </router-link>
     </div>
 
     <!-- Avatar Selector Modal — Redesigned -->
     <div v-if="showAvatarModal" class="fixed inset-0 bg-black/65 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-      <div class="bg-coffee-warmWhite w-full max-w-[300px] rounded-sm shadow-2xl overflow-hidden">
+      <div class="bg-coffee-warmWhite w-full max-w-[300px] rounded-2xl shadow-2xl overflow-hidden">
 
         <!-- Header -->
         <div class="px-5 pt-5 pb-4 flex justify-between items-center border-b border-coffee-cream/70">
@@ -201,7 +209,7 @@
           <button
             @click="saveAvatar"
             :disabled="isSavingAvatar"
-            class="w-full py-3 bg-coffee-espresso text-coffee-warmWhite hover:bg-coffee-brown disabled:opacity-60 transition-colors rounded-sm text-xs font-semibold tracking-widest uppercase flex items-center justify-center gap-1.5"
+            class="w-full py-3 bg-coffee-espresso text-coffee-warmWhite hover:bg-coffee-brown disabled:opacity-60 transition-colors rounded-xl text-xs font-semibold tracking-widest uppercase flex items-center justify-center gap-1.5"
           >
             <template v-if="isSavingAvatar">
               <div class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -225,7 +233,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCoffeeLogStore } from '@/stores/coffeeLog'
 import request from '@/api/request'
-import { BookOpen, Calendar, BarChart3, Plus, ChevronRight, Edit2, Check, X } from 'lucide-vue-next'
+import { BookOpen, Calendar, BarChart3, Plus, ChevronRight, Edit2, Check, X, User } from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -407,7 +415,7 @@ const saveAvatar = async () => {
 
 <style scoped>
 .editorial-border {
-  border: 1px solid #E6DFD3;
-  border-radius: 2px;
+  border: 1px solid rgba(92, 61, 46, 0.2);
+  border-radius: 16px;
 }
 </style>

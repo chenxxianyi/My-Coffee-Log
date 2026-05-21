@@ -8,7 +8,7 @@
     </div>
 
     <!-- Editorial Sign In Form -->
-    <div class="bg-coffee-cream/40 p-6 rounded-sm border border-coffee-cream/80 space-y-5 shadow-sm">
+    <div class="bg-coffee-cream/40 p-6 rounded-2xl border border-coffee-cream/80 space-y-5 shadow-sm">
       <h2 class="text-center font-serif text-lg font-light text-coffee-espresso uppercase tracking-wider border-b border-coffee-cream pb-3">SIGN IN / 登录手账</h2>
       
       <div class="space-y-4">
@@ -19,7 +19,7 @@
             type="email" 
             v-model="email" 
             placeholder="demo@mycoffeelog.com" 
-            class="w-full p-3 bg-white/70 border border-coffee-latte/50 focus:border-coffee-brown focus:outline-none rounded-sm text-sm font-sans"
+            class="w-full p-3 bg-white/70 border border-coffee-latte/50 focus:border-coffee-brown focus:outline-none rounded-xl text-sm font-sans"
           >
         </div>
 
@@ -30,7 +30,7 @@
             type="password" 
             v-model="password" 
             placeholder="••••••" 
-            class="w-full p-3 bg-white/70 border border-coffee-latte/50 focus:border-coffee-brown focus:outline-none rounded-sm text-sm"
+            class="w-full p-3 bg-white/70 border border-coffee-latte/50 focus:border-coffee-brown focus:outline-none rounded-xl text-sm"
           >
         </div>
       </div>
@@ -38,7 +38,7 @@
       <!-- Action Button -->
       <button 
         @click="handleLogin" 
-        class="w-full py-3 bg-coffee-espresso text-coffee-warmWhite hover:bg-coffee-brown transition-colors rounded-sm text-xs font-semibold tracking-[0.25em] uppercase shadow-sm flex items-center justify-center gap-1.5"
+        class="w-full py-3 bg-coffee-espresso text-coffee-warmWhite hover:bg-coffee-brown transition-colors rounded-xl text-xs font-semibold tracking-[0.25em] uppercase shadow-sm flex items-center justify-center gap-1.5"
         :disabled="isLoading"
       >
         <template v-if="isLoading">
@@ -58,7 +58,7 @@
     </div>
 
     <!-- Quick Seed accounts prompt -->
-    <div class="mt-8 p-4 bg-coffee-cream/20 rounded-sm border border-dashed border-coffee-latte/50 text-[10px] text-coffee-brown space-y-1 text-center select-none">
+    <div class="mt-8 p-4 bg-coffee-cream/20 rounded-2xl border border-dashed border-coffee-latte/50 text-[10px] text-coffee-brown space-y-1 text-center select-none">
       <p class="font-bold">✨ 便捷测试通道提示</p>
       <p class="font-light leading-relaxed">
         前端路由中已注入守卫，在测试阶段如果你直接访问需鉴权的页面，系统将自动注入 Mock 登录态，完全不阻碍你的评审与流畅体验！

@@ -4,27 +4,27 @@
 
 @layer base {
   body {
-    background-color: #F7F3EC;
-    color: #1E1E1E;
+    background-color: #FFF2DB;
+    color: #2A1A0E;
     font-family: "Plus Jakarta Sans", sans-serif;
   }
 }
 
 /* tactile paper grain texture overlay */
 .paper-grain {
-  background-color: #F7F3EC;
-  background-image: radial-gradient(rgba(42, 30, 23, 0.035) 1px, transparent 0);
+  background-color: #FFF2DB;
+  background-image: radial-gradient(rgba(92, 61, 46, 0.045) 1px, transparent 0);
   background-size: 24px 24px;
 }
 
 /* retro double margin line decoration */
 .double-border {
-  border: 4px double rgba(122, 86, 56, 0.25);
+  border: 4px double rgba(92, 61, 46, 0.35);
 }
 
 /* thin subtle hairline separator */
 .editorial-border {
-  border: 1px solid rgba(122, 86, 56, 0.15);
+  border: 1px solid rgba(92, 61, 46, 0.2);
 }
 
 /* custom scrollbars */
@@ -32,10 +32,10 @@
   width: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: #F7F3EC;
+  background: #FFF2DB;
 }
 ::-webkit-scrollbar-thumb {
-  background: #D7C4A8;
+  background: #C0A07C;
   border-radius: 2px;
 }
 

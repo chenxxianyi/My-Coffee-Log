@@ -15,12 +15,12 @@
       
       <!-- Big Numbers Grid -->
       <div class="grid grid-cols-2 gap-4 select-none">
-        <div class="p-5 bg-coffee-cream rounded-sm double-border text-center space-y-1">
+        <div class="p-5 bg-coffee-cream rounded-2xl double-border text-center space-y-1">
           <span class="text-[9px] uppercase tracking-wider text-coffee-softGray">总饮用手账</span>
           <div class="text-4xl font-serif text-coffee-espresso font-light">{{ store.totalBrews }}</div>
           <span class="text-[9px] text-coffee-brown italic">Quiet mornings</span>
         </div>
-        <div class="p-5 bg-coffee-cream rounded-sm double-border text-center space-y-1">
+        <div class="p-5 bg-coffee-cream rounded-2xl double-border text-center space-y-1">
           <span class="text-[9px] uppercase tracking-wider text-coffee-softGray">本月饮用杯数</span>
           <div class="text-4xl font-serif text-coffee-espresso font-light">{{ store.monthBrews }}</div>
           <span class="text-[9px] text-coffee-brown italic">May logs</span>
@@ -50,73 +50,66 @@
       <div class="space-y-4">
         <h3 class="font-serif text-lg font-light text-coffee-espresso border-b border-coffee-cream pb-1 select-none">多维度冲煮偏好</h3>
         
-        <!-- Brew styles proportion bar -->
+        <!-- Brew styles proportion bar (real data) -->
         <div class="space-y-3">
           <div class="text-[10px] uppercase tracking-widest font-semibold text-coffee-softGray mb-1 select-none">最爱冲煮风格</div>
-          <div class="space-y-2.5">
-            <div>
+          <div v-if="brewTypeStats.length > 0" class="space-y-2.5">
+            <div v-for="(item, idx) in brewTypeStats" :key="item.type">
               <div class="flex justify-between text-xs mb-1">
-                <span>Pour Over / 手冲</span>
-                <span class="font-semibold text-coffee-espresso">12 brews (66%)</span>
+                <span>{{ item.type }}</span>
+                <span class="font-semibold text-coffee-espresso">{{ item.count }} brews ({{ item.pct }}%)</span>
               </div>
               <div class="w-full h-1.5 bg-coffee-cream rounded-full overflow-hidden select-none">
-                <div class="h-full bg-coffee-brown rounded-full" style="width: 66%;"></div>
-              </div>
-            </div>
-            
-            <div>
-              <div class="flex justify-between text-xs mb-1">
-                <span>Latte / 拿铁</span>
-                <span class="font-semibold text-coffee-espresso">4 brews (22%)</span>
-              </div>
-              <div class="w-full h-1.5 bg-coffee-cream rounded-full overflow-hidden select-none">
-                <div class="h-full bg-coffee-brown/60 rounded-full" style="width: 22%;"></div>
-              </div>
-            </div>
-
-            <div>
-              <div class="flex justify-between text-xs mb-1">
-                <span>Americano / 美式</span>
-                <span class="font-semibold text-coffee-espresso">2 brews (12%)</span>
-              </div>
-              <div class="w-full h-1.5 bg-coffee-cream rounded-full overflow-hidden select-none">
-                <div class="h-full bg-coffee-brown/30 rounded-full" style="width: 12%;"></div>
+                <div class="h-full rounded-full transition-all duration-700"
+                     :class="barColors[idx] || barColors[barColors.length - 1]"
+                     :style="`width: ${item.pct}%;`"></div>
               </div>
             </div>
           </div>
+          <p v-else class="text-[10px] text-coffee-softGray italic">暂无冲煮记录</p>
         </div>
 
-        <!-- Tag clouds proportion -->
+        <!-- Tag clouds proportion (real data) -->
         <div class="space-y-2 select-none">
           <div class="text-[10px] uppercase tracking-widest font-semibold text-coffee-softGray mb-1">高频出现的风味特征</div>
-          <div class="flex flex-wrap gap-1.5 text-xs text-coffee-espresso font-medium">
-            <span class="px-3 py-1 bg-coffee-cream/60 border border-coffee-latte/50 rounded-full">柑橘 / citrus (14杯)</span>
-            <span class="px-3 py-1 bg-coffee-cream/60 border border-coffee-latte/50 rounded-full">花香 / floral (11杯)</span>
-            <span class="px-3 py-1 bg-coffee-cream/60 border border-coffee-latte/50 rounded-full font-light text-coffee-softGray">坚果 / nutty (9杯)</span>
-            <span class="px-3 py-1 bg-coffee-cream/60 border border-coffee-latte/50 rounded-full font-light text-coffee-softGray">焦糖 / caramel (6杯)</span>
+          <div v-if="flavorTagStats.length > 0" class="flex flex-wrap gap-1.5 text-xs font-medium">
+            <span
+              v-for="(tag, idx) in flavorTagStats" :key="tag.name"
+              class="px-3 py-1 rounded-full border border-coffee-latte/50"
+              :class="idx < 2 ? 'bg-coffee-latte/15 text-coffee-espresso' : 'bg-coffee-cream/60 text-coffee-softGray font-light'"
+            >{{ tag.label }} / {{ tag.name }} ({{ tag.count }}杯)</span>
           </div>
+          <p v-else class="text-[10px] text-coffee-softGray italic">暂无风味标签记录</p>
         </div>
       </div>
 
     </div>
 
-    <!-- Floating Navigation Bar -->
-    <div class="h-16 border-t border-coffee-cream bg-coffee-warmWhite flex items-center justify-around px-6 z-30 select-none">
-      <router-link to="/home" class="flex flex-col items-center gap-1 text-coffee-softGray hover:text-coffee-brown transition-colors">
+    <!-- Sticky Bottom Navigation Bar -->
+    <div class="relative h-16 border-t border-coffee-cream/60 bg-coffee-warmWhite flex items-center z-30 select-none">
+      <router-link to="/home" class="flex-1 flex flex-col items-center gap-0.5 text-coffee-softGray hover:text-coffee-brown transition-colors">
         <BookOpen class="w-5 h-5" />
-        <span class="text-[10.5px] tracking-widest font-medium">咖啡日志</span>
+        <span class="text-[9.5px] tracking-widest font-medium">咖啡日志</span>
       </router-link>
-      <router-link to="/timeline" class="flex flex-col items-center gap-1 text-coffee-softGray hover:text-coffee-brown transition-colors">
+      <router-link to="/timeline" class="flex-1 flex flex-col items-center gap-0.5 text-coffee-softGray hover:text-coffee-brown transition-colors">
         <Calendar class="w-5 h-5" />
-        <span class="text-[10.5px] tracking-widest font-medium">时间线</span>
+        <span class="text-[9.5px] tracking-widest font-medium">时间线</span>
       </router-link>
-      <router-link to="/stats" class="flex flex-col items-center gap-1 text-coffee-brown">
+      <div class="flex-1 flex flex-col items-center">
+        <router-link to="/create" class="flex flex-col items-center gap-1 -translate-y-4 group">
+          <div class="rounded-full flex items-center justify-center shadow-lg ring-4 ring-coffee-warmWhite transition-transform duration-200 group-hover:scale-105 group-active:scale-95"
+               style="width:52px;height:52px;background:linear-gradient(145deg,#E76F51,#D4623E);">
+            <Plus class="w-5 h-5 text-white" />
+          </div>
+        </router-link>
+      </div>
+      <router-link to="/stats" class="flex-1 flex flex-col items-center gap-0.5 text-coffee-brown">
         <BarChart3 class="w-5 h-5" />
-        <span class="text-[10.5px] tracking-widest font-medium">咖迹</span>
+        <span class="text-[9.5px] tracking-widest font-medium">咖迹</span>
       </router-link>
-      <!-- Circular Quick add button -->
-      <router-link to="/create" class="w-10 h-10 bg-coffee-espresso text-coffee-warmWhite rounded-full flex items-center justify-center -mt-8 shadow-md border-[4px] border-coffee-warmWhite hover:bg-coffee-brown transition-colors">
-        <Plus class="w-5 h-5" />
+      <router-link to="/profile" class="flex-1 flex flex-col items-center gap-0.5 text-coffee-softGray hover:text-coffee-brown transition-colors">
+        <User class="w-5 h-5" />
+        <span class="text-[9.5px] tracking-widest font-medium">我的</span>
       </router-link>
     </div>
 
@@ -124,15 +117,53 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import { useCoffeeLogStore } from '@/stores/coffeeLog'
+import { getFlavorTags } from '@/api/flavorTag'
 import FlavorRadarChart from '@/components/charts/FlavorRadarChart.vue'
-import { BookOpen, Calendar, BarChart3, Plus } from 'lucide-vue-next'
+import { BookOpen, Calendar, BarChart3, Plus, User } from 'lucide-vue-next'
 
 const store = useCoffeeLogStore()
 
+const barColors = ['bg-coffee-brown', 'bg-coffee-brown/60', 'bg-coffee-brown/35', 'bg-coffee-brown/20']
+
+const brewTypeStats = computed(() => {
+  const total = store.logs.length
+  if (total === 0) return []
+  const counts: Record<string, number> = {}
+  store.logs.forEach(log => {
+    counts[log.coffee_type] = (counts[log.coffee_type] || 0) + 1
+  })
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4)
+    .map(([type, count]) => ({
+      type,
+      count,
+      pct: Math.round((count / total) * 100)
+    }))
+})
+
+const flavorTagStats = computed(() => {
+  const counts: Record<string, number> = {}
+  store.logs.forEach(log => {
+    ;(log.flavor_tags || []).forEach(tag => {
+      counts[tag] = (counts[tag] || 0) + 1
+    })
+  })
+  const labelMap: Record<string, string> = {}
+  getFlavorTags().forEach(t => { labelMap[t.name] = t.label })
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([name, count]) => ({ name, label: labelMap[name] || name, count }))
+})
+
 onMounted(async () => {
   await store.fetchStats()
+  if (store.logs.length === 0) {
+    await store.fetchLogs({ page: 1, page_size: 100 })
+  }
 })
 </script>
 
