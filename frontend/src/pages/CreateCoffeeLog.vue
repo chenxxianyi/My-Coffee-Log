@@ -6,20 +6,136 @@
       <button @click="router.push('/home')" class="text-coffee-brown hover:text-coffee-espresso">
         <X class="w-5 h-5" />
       </button>
-      <span class="font-serif text-lg font-light text-coffee-espresso uppercase tracking-wider">记录今日咖啡</span>
-      <span class="text-[10px] tracking-wider text-coffee-softGray font-semibold uppercase">步骤 {{ step }}/3</span>
+      <!-- Mode Toggle -->
+      <div class="flex items-center gap-1 bg-coffee-cream/60 rounded-full p-0.5">
+        <button 
+          @click="logMode = 'quick'" 
+          type="button"
+          class="px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-semibold transition-all duration-200"
+          :class="logMode === 'quick' ? 'bg-coffee-espresso text-coffee-warmWhite shadow-sm' : 'text-coffee-softGray hover:text-coffee-espresso'"
+        >Quick</button>
+        <button 
+          @click="logMode = 'detailed'" 
+          type="button"
+          class="px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-semibold transition-all duration-200"
+          :class="logMode === 'detailed' ? 'bg-coffee-espresso text-coffee-warmWhite shadow-sm' : 'text-coffee-softGray hover:text-coffee-espresso'"
+        >Detailed</button>
+      </div>
+      <span v-if="logMode === 'detailed'" class="text-[10px] tracking-wider text-coffee-softGray font-semibold uppercase">步骤 {{ step }}/3</span>
+      <span v-else class="text-[10px] tracking-wider text-coffee-softGray font-semibold uppercase">快速记录</span>
     </div>
 
-    <!-- Progress Indicator Bar -->
-    <div class="h-1 bg-coffee-cream w-full flex select-none">
+    <!-- Progress Indicator Bar (only in detailed mode) -->
+    <div v-if="logMode === 'detailed'" class="h-1 bg-coffee-cream w-full flex select-none">
       <div class="h-full bg-coffee-brown transition-all duration-300" :style="{ width: (step * 33.3) + '%' }"></div>
     </div>
 
     <!-- Form Body -->
     <div class="flex-1 overflow-y-auto px-6 py-5">
-      
+
+      <!-- ==================== QUICK LOG MODE ==================== -->
+      <div v-if="logMode === 'quick'" class="space-y-6">
+        <!-- Photo Selection -->
+        <div class="space-y-2">
+          <label class="text-[10px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso block select-none">封面图</label>
+          <div class="grid grid-cols-4 gap-2">
+            <div 
+              v-for="(imgUrl, idx) in store.DEFAULT_PHOTOS" 
+              :key="idx"
+              @click="quickForm.image_url = imgUrl"
+              class="aspect-square relative cursor-pointer overflow-hidden rounded-sm border transition-all"
+              :class="quickForm.image_url === imgUrl ? 'border-2 border-coffee-brown scale-[1.02]' : 'border-transparent opacity-80 hover:opacity-100'"
+            >
+              <img :src="imgUrl" class="w-full h-full object-cover">
+              <div v-if="quickForm.image_url === imgUrl" class="absolute inset-0 bg-coffee-espresso/20 flex items-center justify-center text-white">
+                <Check class="w-4 h-4" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Upload Local Photo -->
+          <div 
+            @click="triggerFileSelect"
+            class="mt-3 p-3 border border-dashed border-coffee-latte/60 hover:border-coffee-brown bg-coffee-cream/15 rounded-sm cursor-pointer transition-colors flex items-center justify-center gap-2 select-none"
+          >
+            <template v-if="isUploading">
+              <div class="w-4 h-4 border-2 border-coffee-espresso border-t-transparent rounded-full animate-spin"></div>
+              <span class="text-xs text-coffee-espresso">正在上传相片...</span>
+            </template>
+            <template v-else-if="isLocalUploaded">
+              <div class="w-6 h-6 rounded-full overflow-hidden border border-coffee-espresso">
+                <img :src="quickForm.image_url" class="w-full h-full object-cover">
+              </div>
+              <span class="text-xs text-green-700 font-medium">本地咖啡照片上传并设为封面！</span>
+            </template>
+            <template v-else>
+              <Plus class="w-4 h-4 text-coffee-softGray" />
+              <span class="text-xs text-coffee-espresso font-medium">使用手机拍摄/本地相片作为手账封面</span>
+            </template>
+          </div>
+          <input 
+            type="file" 
+            ref="fileInput" 
+            accept="image/*" 
+            @change="handleFileChange" 
+            class="hidden"
+          >
+        </div>
+
+        <!-- Coffee Type Selection -->
+        <div class="space-y-2">
+          <label class="text-[10px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso block select-none">咖啡类型</label>
+          <div class="grid grid-cols-3 gap-2">
+            <button 
+              v-for="t in typePresets" 
+              :key="t.val"
+              @click="quickForm.coffee_type = t.val"
+              type="button"
+              class="p-2.5 border rounded-sm text-center text-xs font-serif font-light transition-all duration-200"
+              :class="quickForm.coffee_type === t.val 
+                ? 'bg-coffee-cream border-coffee-brown ring-1 ring-coffee-brown text-coffee-espresso' 
+                : 'bg-coffee-cream/30 border-coffee-latte/50 hover:border-coffee-brown text-coffee-espresso'"
+            >
+              {{ t.label }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Mood Selection -->
+        <div class="space-y-2">
+          <label class="text-[10px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso block select-none">此时心情</label>
+          <div class="grid grid-cols-4 gap-2">
+            <button
+              v-for="m in moodPresets"
+              :key="m.val"
+              @click="quickForm.mood = m.val"
+              type="button"
+              class="p-2.5 border text-center rounded-sm text-xs font-serif transition-all"
+              :class="quickForm.mood === m.val
+                ? 'border-coffee-brown bg-coffee-cream text-coffee-espresso font-semibold'
+                : 'border-coffee-latte/50 text-coffee-softGray hover:border-coffee-brown'"
+            >
+              {{ m.label }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Optional: Coffee Name (quick fill) -->
+        <div class="space-y-2">
+          <label class="text-[10px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso block">咖啡名称 <span class="text-coffee-softGray font-normal normal-case">(选填)</span></label>
+          <input 
+            type="text" 
+            v-model="quickForm.coffee_name" 
+            placeholder="不填则自动生成" 
+            class="w-full p-3 bg-coffee-cream/40 border border-coffee-latte/60 focus:border-coffee-brown focus:outline-none rounded-sm font-serif text-sm transition-colors"
+          >
+        </div>
+      </div>
+
+      <!-- ==================== DETAILED LOG MODE ==================== -->
+
       <!-- STEP 1: Basic Information -->
-      <div v-if="step === 1" class="space-y-6">
+      <div v-if="logMode === 'detailed' && step === 1" class="space-y-6">
         <div class="space-y-2">
           <label class="text-[10px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso block">1. 咖啡/豆子名称 *</label>
           <input 
@@ -97,7 +213,7 @@
       </div>
 
       <!-- STEP 2: Sensory Sliders with live SVG radar rendering -->
-      <div v-if="step === 2" class="space-y-6">
+      <div v-if="logMode === 'detailed' && step === 2" class="space-y-6">
         <div class="flex justify-between items-center mb-2 select-none">
           <span class="text-[10px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso">感官风味指纹 / 6维风味参数</span>
           <span class="text-[10px] text-coffee-softGray italic">0 (无感) - 5 (浓郁)</span>
@@ -136,7 +252,7 @@
       </div>
 
       <!-- STEP 3: Flavor tags, Mood, Spot & Notes -->
-      <div v-if="step === 3" class="space-y-5">
+      <div v-if="logMode === 'detailed' && step === 3" class="space-y-5">
         <div class="space-y-2">
           <label class="text-[10px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso block font-medium select-none">1. 风味特征标签 (点击多选)</label>
           <div class="flex flex-wrap gap-1.5">
@@ -198,8 +314,9 @@
 
     <!-- Bottom Controls -->
     <div class="p-6 border-t border-coffee-cream flex gap-3 bg-coffee-warmWhite sticky bottom-0 z-10 select-none">
+      <!-- Detailed mode: show back button -->
       <button 
-        v-if="step > 1" 
+        v-if="logMode === 'detailed' && step > 1" 
         @click="step--" 
         class="flex-1 py-3 text-xs uppercase tracking-wider font-semibold bg-coffee-cream text-coffee-espresso hover:bg-coffee-latte transition-all rounded-sm"
       >
@@ -215,7 +332,8 @@
           <span>正在智能撰写感官日志...</span>
         </template>
         <template v-else>
-          <span>{{ step === 3 ? 'AI 总结并保存手账' : '下一步' }}</span>
+          <span v-if="logMode === 'quick'">一键保存</span>
+          <span v-else>{{ step === 3 ? 'AI 总结并保存手账' : '下一步' }}</span>
         </template>
       </button>
     </div>
@@ -234,6 +352,8 @@ import { X, Check, Plus } from 'lucide-vue-next'
 const router = useRouter()
 const store = useCoffeeLogStore()
 
+// Mode: 'quick' = single page, 'detailed' = 3-step wizard
+const logMode = ref<'quick' | 'detailed'>('quick')
 const step = ref(1)
 const isSubmitting = ref(false)
 
@@ -242,11 +362,19 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const isUploading = ref(false)
 const isLocalUploaded = ref(false)
 
-// State Form Data
+// Quick Log Form — minimal fields, defaults for the rest
+const quickForm = reactive({
+  image_url: store.DEFAULT_PHOTOS[1],
+  coffee_type: 'Pour Over',
+  mood: 'Calm',
+  coffee_name: ''
+})
+
+// Detailed Log Form — full 3-step wizard
 const form = reactive<NewCoffeeLog>({
   coffee_name: '',
   coffee_type: 'Pour Over',
-  image_url: store.DEFAULT_PHOTOS[1], // default pour over image
+  image_url: store.DEFAULT_PHOTOS[1],
   acidity: 4,
   bitterness: 1,
   sweetness: 3,
@@ -258,6 +386,19 @@ const form = reactive<NewCoffeeLog>({
   shop_name: '',
   notes: ''
 })
+
+// Auto-generate coffee name for quick log
+const generateQuickName = (type: string) => {
+  const typeMap: Record<string, string> = {
+    'Pour Over': '手冲咖啡',
+    'Latte': '拿铁',
+    'Americano': '美式咖啡',
+    'Cold Brew': '冷萃咖啡',
+    'Espresso': '浓缩咖啡',
+    'Dirty': 'Dirty 咖啡'
+  }
+  return typeMap[type] || '咖啡'
+}
 
 // Presets Specs
 const typePresets = [
@@ -304,6 +445,36 @@ const toggleTag = (tag: string) => {
 }
 
 const handleNext = async () => {
+  // Quick Log: save immediately
+  if (logMode.value === 'quick') {
+    isSubmitting.value = true
+    const quickLog: NewCoffeeLog = {
+      coffee_name: quickForm.coffee_name.trim() || generateQuickName(quickForm.coffee_type),
+      coffee_type: quickForm.coffee_type,
+      image_url: quickForm.image_url,
+      mood: quickForm.mood,
+      shop_name: 'Local Coffee Spot',
+      notes: '一杯温润安静的手账记录。',
+      acidity: 3,
+      bitterness: 2,
+      sweetness: 3,
+      body: 3,
+      aroma: 3,
+      aftertaste: 3,
+      flavor_tags: []
+    }
+    try {
+      const created = await store.addLog(quickLog)
+      isSubmitting.value = false
+      router.push(`/coffee/${created.id}`)
+    } catch (e: any) {
+      isSubmitting.value = false
+      alert(e.message || '保存失败，请稍后重试')
+    }
+    return
+  }
+
+  // Detailed Log: step-by-step wizard
   if (step.value === 1) {
     if (!form.coffee_name.trim()) {
       alert('请输入咖啡名称哦')
@@ -315,16 +486,12 @@ const handleNext = async () => {
     step.value = 3
   } 
   else if (step.value === 3) {
-    // Save record with Pinia
     isSubmitting.value = true
-    
-    // Create actual save parameters
     const savedLog = {
       ...form,
       shop_name: form.shop_name.trim() || 'Local Coffee Spot',
       notes: form.notes.trim() || '一杯温润安静的手账记录。'
     }
-
     try {
       const created = await store.addLog(savedLog)
       isSubmitting.value = false
@@ -366,7 +533,12 @@ const handleFileChange = async (event: Event) => {
     }) as any
 
     if (res && res.url) {
-      form.image_url = res.url
+      // Set image on the active form based on current mode
+      if (logMode.value === 'quick') {
+        quickForm.image_url = res.url
+      } else {
+        form.image_url = res.url
+      }
       isLocalUploaded.value = true
     } else {
       throw new Error('未获取到返回的图片地址')
