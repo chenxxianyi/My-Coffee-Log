@@ -83,6 +83,7 @@ func (r *Router) Setup(engine *gin.Engine) {
 		ai := protected.Group("/ai")
 		{
 			ai.POST("/flavor-summary", r.aiHandler.GenerateFlavorSummary)
+			ai.POST("/lifestyle-quote", r.aiHandler.GetLifestyleQuote)
 		}
 
 		// Uploads

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import * as coffeeLogApi from '@/api/coffeeLog'
 import * as statsApi from '@/api/stats'
+import { getLocalDateString } from '@/utils/date'
 
 export interface CoffeeLog {
   id: number
@@ -65,6 +66,16 @@ export const useCoffeeLogStore = defineStore('coffeeLog', () => {
   const monthBrews = computed(() => statsOverview.value?.month_count || 0)
   const favoriteCoffeeType = computed(() => statsOverview.value?.favorite_coffee_type || 'Pour Over')
   const favoriteFlavorTag = computed(() => statsOverview.value?.favorite_flavor_tag || 'citrus')
+  const recentFlavorTags = computed(() => statsOverview.value?.recent_flavor_tags || [])
+
+  // Lifestyle quote from AI
+  const lifestyleQuote = ref('')
+
+  // Today's log check
+  const todayLog = computed(() => {
+    const today = getLocalDateString()
+    return logs.value.find((log: CoffeeLog) => log.drink_date === today) || null
+  })
 
   const averageSensoryValues = computed(() => {
     if (flavorProfile.value) {
@@ -108,7 +119,7 @@ export const useCoffeeLogStore = defineStore('coffeeLog', () => {
   async function addLog(newLog: NewCoffeeLog): Promise<CoffeeLog> {
     const created = await coffeeLogApi.createCoffeeLog({
       ...newLog,
-      drink_date: new Date().toISOString().split('T')[0]
+      drink_date: getLocalDateString()
     })
     logs.value.unshift(created)
     return created
@@ -132,6 +143,16 @@ export const useCoffeeLogStore = defineStore('coffeeLog', () => {
     }
   }
 
+  async function fetchLifestyleQuote() {
+    try {
+      const res = await statsApi.getLifestyleQuote()
+      lifestyleQuote.value = res.quote
+    } catch (e) {
+      console.error('Failed to fetch lifestyle quote:', e)
+      lifestyleQuote.value = ''
+    }
+  }
+
   return {
     logs,
     isLoading,
@@ -141,11 +162,15 @@ export const useCoffeeLogStore = defineStore('coffeeLog', () => {
     monthBrews,
     favoriteCoffeeType,
     favoriteFlavorTag,
+    recentFlavorTags,
     averageSensoryValues,
+    lifestyleQuote,
+    todayLog,
     fetchLogs,
     fetchLogById,
     addLog,
     deleteLog,
-    fetchStats
+    fetchStats,
+    fetchLifestyleQuote
   }
 })

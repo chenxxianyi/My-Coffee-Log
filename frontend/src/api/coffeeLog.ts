@@ -1,5 +1,6 @@
 import request from './request'
 import { getFlavorTagIdByName } from './flavorTag'
+import { getLocalDateString } from '@/utils/date'
 
 export interface CoffeeLogDTO {
   id: number
@@ -85,7 +86,7 @@ function toCreatePayload(params: CreateCoffeeLogParams) {
     shop_name: params.shop_name,
     location: params.location || '',
     image_url: params.image_url,
-    drink_date: params.drink_date || new Date().toISOString().split('T')[0],
+    drink_date: params.drink_date || getLocalDateString(),
     mood: params.mood,
     notes: params.notes,
     acidity: params.acidity,

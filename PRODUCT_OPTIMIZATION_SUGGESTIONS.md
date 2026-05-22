@@ -23,7 +23,7 @@ My Coffee Log 当前最适合的方向不是“专业咖啡参数工具”，而
 | 步骤 | 优化点 | 优先级 | 核心目标 | 状态 |
 |------|--------|--------|----------|------|
 | Step 1 | Quick Log 快速记录模式 | P0 | 降低首次记录成本 | ✅ 已完成 |
-| Step 2 | 首页咖啡生活仪表盘 | P0 | 提升首页情绪价值和使用效率 | |
+| Step 2 | 首页咖啡生活仪表盘 | P0 | 提升首页情绪价值和使用效率 | ✅ 已完成 |
 | Step 3 | 记录完成后的即时正反馈 | P0 | 让用户保存后立刻获得奖励 | |
 | Step 4 | 咖啡详情页视觉强化 | P0 | 让每条记录像一页生活方式杂志 | |
 | Step 5 | AI 文案风格升级 | P0 | 从风味分析升级为 editorial 文案 | |
@@ -83,7 +83,7 @@ P0
 
 ---
 
-## Step 2：首页咖啡生活仪表盘
+## Step 2：首页咖啡生活仪表盘 ✅ 已完成
 
 ### 优先级
 
@@ -102,19 +102,38 @@ P0
 - 展示最近偏好的风味标签。
 - 展示一句 AI 生活方式文案。
 
+### 实现详情
+
+- 首页新增三种状态展示：今日已记录（绿色脉冲指示器 + 记录详情卡片）、最近记录 + Quick Log 提示、空状态欢迎卡片。
+- 新增 `todayLog` 计算属性，自动匹配当日咖啡记录。
+- 标题改为动态问候语（根据时段显示早安/午后/晚安等）。
+- AI 生活文案从硬编码改为调用后端 `/api/v1/ai/lifestyle-quote` 接口生成，文案根据月度冲煮数、偏好咖啡类型、风味标签和最近心情动态组合。
+- 月度概览从 3 列改为 2 列布局，加大数字字号，新增“偏好风味图谱”区块展示 Top 5 风味标签（带杯数统计）。
+- 最近手账列表从 2 条扩展为 3 条。
+- 后端新增 `GetRecentFlavorTags` 查询，返回用户 Top N 风味标签及使用次数。
+- 后端 Stats Overview 响应新增 `recent_flavor_tags` 字段。
+- 后端新增 `GenerateLifestyleQuote` 方法，根据月度统计、偏好类型、风味标签和心情生成编辑风格式生活文案。
+- 后端新增 `/api/v1/ai/lifestyle-quote` POST 路由和 handler。
+- 前端 Store 新增 `lifestyleQuote`、`recentFlavorTags`、`todayLog` 状态及 `fetchLifestyleQuote` action。
+- 前端 API 层新增 `FlavorTagItem` 接口、`LifestyleQuoteRequest/Response` 接口和 `getLifestyleQuote` 函数。
+
 ### 涉及模块
 
-- 首页
-- Coffee Log Store
-- Stats API
-- AI 文案生成逻辑
+- 首页 (`Home.vue`)
+- Coffee Log Store (`coffeeLog.ts`)
+- Stats API (`stats.ts`)
+- AI 文案生成逻辑 (`ai_service.go`, `ai_handler.go`)
+- Stats Repository (`stats_repository.go`)
+- Stats Service (`stats_service.go`)
+- Router (`router.go`)
 
 ### 验收标准
 
-- 首页首屏能看到明确的记录入口。
-- 首页能展示最近一条咖啡记录。
-- 首页能展示本月记录数和偏好信息。
-- 首页视觉符合 Nordic Minimal + Editorial 风格。
+- ✅ 首页首屏能看到明确的记录入口（今日已记录/Quick Log 提示/空状态引导）。
+- ✅ 首页能展示最近一条咖啡记录。
+- ✅ 首页能展示本月记录数和偏好信息（月度冲煮数、最常喝类型、偏好风味图谱）。
+- ✅ 首页展示 AI 生活方式文案（由后端动态生成）。
+- ✅ 首页视觉符合 Nordic Minimal + Editorial 风格。
 
 ---
 

@@ -233,6 +233,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCoffeeLogStore } from '@/stores/coffeeLog'
 import request from '@/api/request'
+import { getLocalDateString } from '@/utils/date'
 import { BookOpen, Calendar, BarChart3, Plus, ChevronRight, Edit2, Check, X, User } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -326,7 +327,7 @@ const exportBackup = () => {
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(logsStore.logs, null, 2))
   const downloadAnchor = document.createElement('a')
   downloadAnchor.setAttribute("href",     dataStr)
-  downloadAnchor.setAttribute("download", `mcl_backup_${new Date().toISOString().split('T')[0]}.json`)
+  downloadAnchor.setAttribute("download", `mcl_backup_${getLocalDateString()}.json`)
   document.body.appendChild(downloadAnchor)
   downloadAnchor.click()
   downloadAnchor.remove()

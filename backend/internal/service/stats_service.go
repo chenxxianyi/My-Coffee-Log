@@ -12,11 +12,18 @@ func NewStatsService(statsRepo *repository.StatsRepository) *StatsService {
 	return &StatsService{statsRepo: statsRepo}
 }
 
+type FlavorTagItem struct {
+	Name  string `json:"name"`
+	Label string `json:"label"`
+	Count int64  `json:"count"`
+}
+
 type OverviewResponse struct {
-	MonthCount        int64  `json:"month_count"`
-	TotalCount        int64  `json:"total_count"`
-	FavoriteCoffeeType string `json:"favorite_coffee_type"`
-	FavoriteFlavorTag  string `json:"favorite_flavor_tag"`
+	MonthCount         int64           `json:"month_count"`
+	TotalCount         int64           `json:"total_count"`
+	FavoriteCoffeeType string          `json:"favorite_coffee_type"`
+	FavoriteFlavorTag  string          `json:"favorite_flavor_tag"`
+	RecentFlavorTags   []FlavorTagItem `json:"recent_flavor_tags"`
 }
 
 func (s *StatsService) GetOverview(userID uint) (*OverviewResponse, error) {
@@ -40,11 +47,26 @@ func (s *StatsService) GetOverview(userID uint) (*OverviewResponse, error) {
 		return nil, err
 	}
 
+	recentTags, err := s.statsRepo.GetRecentFlavorTags(userID, 5)
+	if err != nil {
+		return nil, err
+	}
+
+	tagItems := make([]FlavorTagItem, 0, len(recentTags))
+	for _, t := range recentTags {
+		tagItems = append(tagItems, FlavorTagItem{
+			Name:  t.Name,
+			Label: t.Label,
+			Count: t.Count,
+		})
+	}
+
 	return &OverviewResponse{
-		MonthCount:        monthCount,
-		TotalCount:        totalCount,
+		MonthCount:         monthCount,
+		TotalCount:         totalCount,
 		FavoriteCoffeeType: favType,
 		FavoriteFlavorTag:  favTag,
+		RecentFlavorTags:   tagItems,
 	}, nil
 }
 
@@ -54,4 +76,8 @@ func (s *StatsService) GetFlavorProfile(userID uint) (*repository.FlavorProfile,
 
 func (s *StatsService) GetMonthly(userID uint) ([]repository.MonthlyCount, error) {
 	return s.statsRepo.GetMonthlyCounts(userID)
+}
+
+func (s *StatsService) GetRecentMood(userID uint) (string, error) {
+	return s.statsRepo.GetRecentMood(userID)
 }

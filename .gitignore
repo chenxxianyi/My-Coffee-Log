@@ -1,0 +1,11 @@
+# Local AI/tooling workspaces
+.claude/
+.codex/
+
+# Frontend dependencies and generated output
+frontend/node_modules/
+frontend/dist/
+
+# Python cache
+**/__pycache__/
+*.pyc

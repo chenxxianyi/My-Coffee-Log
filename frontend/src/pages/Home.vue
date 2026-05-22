@@ -5,7 +5,7 @@
     <div class="px-6 py-5 flex justify-between items-end border-b border-coffee-cream/80 bg-coffee-warmWhite/80 backdrop-blur-md sticky top-0 z-20">
       <div>
         <span class="text-[9px] uppercase tracking-[0.25em] font-semibold text-coffee-softGray">{{ todayDate }}</span>
-        <h2 class="font-serif text-2xl font-light text-coffee-espresso leading-none mt-1">今日风味志</h2>
+        <h2 class="font-serif text-2xl font-light text-coffee-espresso leading-none mt-1">{{ greeting }}</h2>
       </div>
       <div class="flex items-center gap-4">
         <router-link to="/timeline" class="text-coffee-espresso hover:text-coffee-brown transition-colors">
@@ -18,33 +18,88 @@
     </div>
 
     <!-- Scrollable Body Content -->
-    <div class="flex-1 overflow-y-auto px-6 py-5 space-y-6 pb-24 scrollbar-none">
+    <div class="flex-1 overflow-y-auto px-6 py-5 space-y-5 pb-24 scrollbar-none">
       
-      <!-- Hero Section: Dynamic banner for today's brew -->
-      <div v-if="lastLog" class="block">
+      <!-- Today's Record Status Card -->
+      <div v-if="store.todayLog" class="block">
         <router-link 
-          :to="'/coffee/' + lastLog.id" 
-          class="block group relative overflow-hidden h-[190px] bg-coffee-espresso flex flex-col justify-between p-5 rounded-2xl shadow-sm hover:scale-[0.99] transition-transform duration-300"
+          :to="'/coffee/' + store.todayLog.id" 
+          class="block group relative overflow-hidden bg-coffee-espresso flex flex-col justify-between p-5 rounded-sm shadow-sm hover:scale-[0.99] transition-transform duration-300"
+          style="min-height: 180px;"
         >
-          <img :src="lastLog.image_url" class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-luminosity filter saturate-50 group-hover:scale-105 transition-all duration-700">
+          <img :src="store.todayLog.image_url" class="absolute inset-0 w-full h-full object-cover opacity-35 mix-blend-luminosity filter saturate-50 group-hover:scale-105 transition-all duration-700">
           
+          <!-- Paper grain overlay -->
+          <div class="absolute inset-0 opacity-[0.04]" style="background-image: radial-gradient(rgba(255,242,219,0.6) 1px, transparent 0); background-size: 18px 18px;"></div>
+
           <div class="z-10 flex justify-between items-start">
-            <span class="text-[9px] uppercase tracking-[0.2em] font-semibold text-coffee-latte">今日风味首记</span>
-            <span class="text-[9px] text-coffee-warmWhite border border-coffee-latte/40 px-2 py-0.5 rounded-full font-light font-serif italic uppercase">查看风账详情</span>
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+              <span class="text-[9px] uppercase tracking-[0.2em] font-semibold text-coffee-latte">今日已记录</span>
+            </div>
+            <span class="text-[9px] text-coffee-warmWhite border border-coffee-latte/40 px-2 py-0.5 rounded-full font-light font-serif italic uppercase">查看详情</span>
           </div>
           
-          <div class="z-10 space-y-1">
-            <h3 class="font-serif text-2xl text-coffee-warmWhite font-light truncate max-w-[280px]">{{ lastLog.coffee_name }}</h3>
+          <div class="z-10 space-y-1.5">
+            <h3 class="font-serif text-2xl text-coffee-warmWhite font-light truncate max-w-[280px]">{{ store.todayLog.coffee_name }}</h3>
             <div class="flex items-center gap-1.5 text-[10px] text-coffee-latte tracking-wider">
-              <span class="font-serif italic">{{ lastLog.coffee_type }}</span>
-              <span>•</span>
-              <span class="truncate max-w-[180px]">{{ lastLog.shop_name.split(',')[0] }}</span>
+              <span class="font-serif italic">{{ store.todayLog.coffee_type }}</span>
+              <span>·</span>
+              <span class="truncate max-w-[180px]">{{ store.todayLog.shop_name.split(',')[0] }}</span>
+              <span>·</span>
+              <span>{{ moodLabel(store.todayLog.mood) }}</span>
             </div>
           </div>
         </router-link>
       </div>
 
-      <!-- If no logs yet, show empty welcome card -->
+      <!-- Hero: Last log when no today's record -->
+      <div v-else-if="lastLog" class="block">
+        <router-link 
+          :to="'/coffee/' + lastLog.id" 
+          class="block group relative overflow-hidden bg-coffee-espresso flex flex-col justify-between p-5 rounded-sm shadow-sm hover:scale-[0.99] transition-transform duration-300"
+          style="min-height: 160px;"
+        >
+          <img :src="lastLog.image_url" class="absolute inset-0 w-full h-full object-cover opacity-35 mix-blend-luminosity filter saturate-50 group-hover:scale-105 transition-all duration-700">
+          
+          <div class="absolute inset-0 opacity-[0.04]" style="background-image: radial-gradient(rgba(255,242,219,0.6) 1px, transparent 0); background-size: 18px 18px;"></div>
+
+          <div class="z-10 flex justify-between items-start">
+            <span class="text-[9px] uppercase tracking-[0.2em] font-semibold text-coffee-latte">最近风味记录</span>
+            <span class="text-[9px] text-coffee-warmWhite border border-coffee-latte/40 px-2 py-0.5 rounded-full font-light font-serif italic uppercase">查看详情</span>
+          </div>
+          
+          <div class="z-10 space-y-1.5">
+            <h3 class="font-serif text-2xl text-coffee-warmWhite font-light truncate max-w-[280px]">{{ lastLog.coffee_name }}</h3>
+            <div class="flex items-center gap-1.5 text-[10px] text-coffee-latte tracking-wider">
+              <span class="font-serif italic">{{ lastLog.coffee_type }}</span>
+              <span>·</span>
+              <span class="truncate max-w-[180px]">{{ lastLog.shop_name.split(',')[0] }}</span>
+            </div>
+          </div>
+        </router-link>
+
+        <!-- Quick record prompt -->
+        <router-link 
+          to="/create"
+          class="block mt-2.5 group relative overflow-hidden p-4 rounded-sm border border-dashed border-coffee-latte/40 bg-coffee-cream/20 hover:bg-coffee-cream/35 transition-colors"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: linear-gradient(145deg, #E76F51, #D4623E);">
+                <Plus class="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <span class="text-xs font-serif text-coffee-espresso font-light">记录今日咖啡</span>
+                <span class="block text-[9px] text-coffee-softGray tracking-wider">今天还未记录，点击开始</span>
+              </div>
+            </div>
+            <span class="text-[9px] text-coffee-latte font-serif italic">Quick Log →</span>
+          </div>
+        </router-link>
+      </div>
+
+      <!-- Empty welcome card when no logs at all -->
       <div v-else>
         <router-link 
           to="/create" 
@@ -89,8 +144,8 @@
         </router-link>
       </div>
 
-      <!-- AI Tasting Summary Quote (Double border editorial style) -->
-      <div class="relative overflow-hidden rounded-2xl" style="background: linear-gradient(145deg, #E76F51 0%, #D4623E 55%, #E87D60 100%); border: 4px double rgba(255,242,219,0.35);">
+      <!-- AI Lifestyle Quote (Double border editorial style) -->
+      <div class="relative overflow-hidden rounded-sm" style="background: linear-gradient(145deg, #E76F51 0%, #D4623E 55%, #E87D60 100%); border: 4px double rgba(255,242,219,0.35);">
         <!-- Decorative large quotation mark -->
         <div class="absolute top-0 left-3 font-serif leading-none select-none pointer-events-none text-coffee-warmWhite/[0.18]" style="font-size: 96px; line-height: 1;">&ldquo;</div>
         <!-- Subtle bottom-right closing quote -->
@@ -100,37 +155,56 @@
           <!-- Title with flanking lines -->
           <div class="flex items-center justify-center gap-2.5">
             <div class="h-px flex-1 max-w-[36px]" style="background: linear-gradient(to left, rgba(255,242,219,0.55), transparent);"></div>
-            <span class="text-[9px] uppercase tracking-[0.28em] font-bold text-coffee-warmWhite">今日感官摘要</span>
+            <span class="text-[9px] uppercase tracking-[0.28em] font-bold text-coffee-warmWhite">生活手账摘要</span>
             <div class="h-px flex-1 max-w-[36px]" style="background: linear-gradient(to right, rgba(255,242,219,0.55), transparent);"></div>
           </div>
 
-          <!-- Quote text -->
+          <!-- Quote text from AI -->
           <p class="font-serif italic text-[0.82rem] text-coffee-warmWhite leading-[1.75] px-2">
-            {{ lastLog ? `\u201c今天你享用的是一杯${lastLog.coffee_name}${lastLog.coffee_type}。明亮高亢的香气像晨曦，口感与此时此刻😌 ${lastLog.mood} 的心境极佳契合。\u201d` : '\u201c咖啡的香气是属于清晨与安静午后的赞美诗。期待你写下今日的第一篇味觉手账，我将在此为你吟诵今日的风味总结。\u201d' }}
+            {{ displayQuote }}
           </p>
 
           <!-- Attribution with ornament -->
           <div class="flex items-center justify-center gap-2 pt-0.5">
             <div class="w-4 h-px bg-coffee-warmWhite/30"></div>
-            <span class="text-[8.5px] text-coffee-warmWhite/70 font-semibold tracking-[0.2em] uppercase">优雅平缓的生活律动</span>
+            <span class="text-[8.5px] text-coffee-warmWhite/70 font-semibold tracking-[0.2em] uppercase">{{ quoteAttribution }}</span>
             <div class="w-4 h-px bg-coffee-warmWhite/30"></div>
           </div>
         </div>
       </div>
 
-      <!-- Monthly Overview Grid -->
-      <div class="grid grid-cols-3 gap-3 select-none">
-        <div class="p-4 bg-coffee-cream/40 border border-coffee-cream/80 text-center rounded-sm">
-          <div class="text-2xl font-serif text-coffee-espresso font-light">{{ store.monthBrews }}</div>
-          <div class="text-[9px] uppercase tracking-wider text-coffee-softGray mt-1 font-semibold">本月冲煮</div>
+      <!-- Monthly Dashboard Grid -->
+      <div class="space-y-3 select-none">
+        <div class="flex items-center gap-2">
+          <div class="w-4 h-px bg-coffee-softGray/40"></div>
+          <span class="text-[9px] uppercase tracking-[0.22em] font-semibold text-coffee-softGray">本月咖啡仪表</span>
+          <div class="flex-1 h-px bg-coffee-cream"></div>
         </div>
-        <div class="p-4 bg-coffee-cream/40 border border-coffee-cream/80 text-center rounded-sm">
-          <div class="text-2xl font-serif text-coffee-espresso font-light truncate px-1">{{ store.favoriteCoffeeType }}</div>
-          <div class="text-[9px] uppercase tracking-wider text-coffee-softGray mt-1 font-semibold">最常喝</div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <!-- Month brews count -->
+          <div class="p-4 bg-coffee-cream/40 border border-coffee-cream/80 text-center rounded-sm">
+            <div class="text-3xl font-serif font-light italic text-coffee-espresso">{{ store.monthBrews }}</div>
+            <div class="text-[9px] uppercase tracking-wider text-coffee-softGray mt-1 font-semibold">本月冲煮</div>
+          </div>
+          <!-- Favorite coffee type -->
+          <div class="p-4 bg-coffee-cream/40 border border-coffee-cream/80 text-center rounded-sm">
+            <div class="text-3xl font-serif font-light italic text-coffee-espresso truncate px-1">{{ coffeeTypeShortLabel(store.favoriteCoffeeType) }}</div>
+            <div class="text-[9px] uppercase tracking-wider text-coffee-softGray mt-1 font-semibold">最常喝</div>
+          </div>
         </div>
-        <div class="p-4 bg-coffee-cream/40 border border-coffee-cream/80 text-center rounded-sm">
-          <div class="text-2xl font-serif text-coffee-espresso font-light truncate px-1 uppercase">{{ store.favoriteFlavorTag }}</div>
-          <div class="text-[9px] uppercase tracking-wider text-coffee-softGray mt-1 font-semibold">偏好风味</div>
+
+        <!-- Recent Flavor Tags -->
+        <div v-if="store.recentFlavorTags.length > 0" class="p-4 bg-coffee-cream/30 border border-coffee-cream/60 rounded-sm">
+          <div class="text-[9px] uppercase tracking-wider text-coffee-softGray font-semibold mb-2.5">偏好风味图谱</div>
+          <div class="flex flex-wrap gap-2">
+            <span 
+              v-for="(tag, idx) in store.recentFlavorTags" 
+              :key="tag.name"
+              class="px-3 py-1.5 rounded-full text-[11px] font-medium tracking-wide border"
+              :class="idx === 0 ? 'bg-coffee-latte/15 text-coffee-espresso border-coffee-latte/40 font-semibold' : 'bg-coffee-cream/50 text-coffee-brown border-coffee-cream/80 font-light'"
+            >{{ tag.label }} <span class="text-[9px] opacity-60">{{ tag.count }}杯</span></span>
+          </div>
         </div>
       </div>
 
@@ -142,7 +216,7 @@
         </div>
         
         <div class="space-y-3">
-          <!-- Iterate over top 2 recent logs -->
+          <!-- Iterate over top 3 recent logs -->
           <router-link 
             v-for="log in recentLogs" 
             :key="log.id"
@@ -152,14 +226,14 @@
             <img :src="log.image_url" class="w-16 h-16 object-cover rounded-sm border border-coffee-cream flex-shrink-0">
             <div class="flex-1 min-w-0 space-y-1">
               <div class="flex justify-between items-center">
-                <span class="text-[9px] uppercase tracking-widest font-semibold text-coffee-softGray">{{ log.coffee_type }}</span>
+                <span class="text-[9px] uppercase tracking-widest font-semibold text-coffee-softGray">{{ coffeeTypeLabel(log.coffee_type) }}</span>
                 <span class="text-[8px] font-mono text-coffee-softGray">{{ formatMonthDay(log.drink_date) }}</span>
               </div>
               <h4 class="font-serif text-base font-light text-coffee-espresso truncate italic leading-tight">{{ log.coffee_name }}</h4>
               <p class="text-[10px] text-coffee-brown font-light truncate leading-relaxed">{{ log.notes }}</p>
               <div class="flex gap-2 items-center text-[9px] text-coffee-softGray pt-0.5">
-                <span class="px-1.5 py-0.5 bg-coffee-cream rounded-sm text-coffee-espresso">😌 {{ log.mood }}</span>
-                <span class="truncate max-w-[120px]">at {{ log.shop_name.split(',')[0] }}</span>
+                <span class="px-1.5 py-0.5 bg-coffee-cream rounded-sm text-coffee-espresso">{{ moodLabel(log.mood) }}</span>
+                <span class="truncate max-w-[120px]">在 {{ log.shop_name.split(',')[0] }}</span>
               </div>
             </div>
           </router-link>
@@ -217,6 +291,7 @@
 import { computed, onMounted } from 'vue'
 import { useCoffeeLogStore } from '@/stores/coffeeLog'
 import { useAuthStore } from '@/stores/auth'
+import { coffeeTypeShortLabel, coffeeTypeLabel, moodLabel } from '@/constants/coffee'
 import { BookOpen, Calendar, BarChart3, Plus, Search, User } from 'lucide-vue-next'
 
 const store = useCoffeeLogStore()
@@ -224,12 +299,13 @@ const authStore = useAuthStore()
 
 // Fetch data on mount
 onMounted(async () => {
-  if (store.logs.length === 0) {
-    await Promise.all([
-      store.fetchLogs({ page: 1, page_size: 10 }),
-      store.fetchStats()
-    ])
-  }
+  await Promise.all([
+    store.fetchStats(),
+    store.logs.length === 0
+      ? store.fetchLogs({ page: 1, page_size: 10 })
+      : Promise.resolve()
+  ])
+  await store.fetchLifestyleQuote()
 })
 
 // Dynamic Dates
@@ -239,9 +315,35 @@ const todayDate = computed(() => {
   return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`
 })
 
+// Greeting based on time of day
+const greeting = computed(() => {
+  const hour = new Date().getHours()
+  if (hour < 6) return '夜深了，来杯咖啡'
+  if (hour < 12) return '早安，今日风味志'
+  if (hour < 18) return '午后风味志'
+  return '晚安，今日风味志'
+})
+
 // Logs Logic
 const lastLog = computed(() => store.logs[0] || null)
-const recentLogs = computed(() => store.logs.slice(0, 2))
+const recentLogs = computed(() => store.logs.slice(0, 3))
+
+// AI Lifestyle Quote display
+const displayQuote = computed(() => {
+  if (store.lifestyleQuote) {
+    return `\u201c${store.lifestyleQuote}\u201d`
+  }
+  if (store.logs.length > 0) {
+    return '\u201c每一杯咖啡，都是生活赠予的温柔时刻。\u201d'
+  }
+  return '\u201c咖啡的香气是属于清晨与安静午后的赞美诗。期待你写下今日的第一篇味觉手账。\u201d'
+})
+
+const quoteAttribution = computed(() => {
+  if (store.monthBrews >= 10) return '醇厚的生活律动'
+  if (store.monthBrews >= 3) return '温柔的日常节奏'
+  return '期待你的风味故事'
+})
 
 // Avatar Logic
 const userAvatar = computed(() => authStore.user?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120')
@@ -252,6 +354,7 @@ const formatMonthDay = (dateStr: string) => {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
   return `${months[date.getMonth()]} ${date.getDate()}`
 }
+
 </script>
 
 <style scoped>

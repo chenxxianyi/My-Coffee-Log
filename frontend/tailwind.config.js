@@ -20,6 +20,7 @@ export default {
       fontFamily: {
         serif: ['"Cormorant Garamond"', 'serif'],
         sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+        display: ['"Ma Shan Zheng"', '"Cormorant Garamond"', 'serif'],
       }
     },
   },

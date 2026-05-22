@@ -11,15 +11,15 @@
         <button 
           @click="logMode = 'quick'" 
           type="button"
-          class="px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-semibold transition-all duration-200"
+          class="px-3 py-1 rounded-full text-[10px] tracking-wider font-semibold transition-all duration-200"
           :class="logMode === 'quick' ? 'bg-coffee-espresso text-coffee-warmWhite shadow-sm' : 'text-coffee-softGray hover:text-coffee-espresso'"
-        >Quick</button>
+        >快速记录</button>
         <button 
           @click="logMode = 'detailed'" 
           type="button"
-          class="px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-semibold transition-all duration-200"
+          class="px-3 py-1 rounded-full text-[10px] tracking-wider font-semibold transition-all duration-200"
           :class="logMode === 'detailed' ? 'bg-coffee-espresso text-coffee-warmWhite shadow-sm' : 'text-coffee-softGray hover:text-coffee-espresso'"
-        >Detailed</button>
+        >精细记录</button>
       </div>
       <span v-if="logMode === 'detailed'" class="text-[10px] tracking-wider text-coffee-softGray font-semibold uppercase">步骤 {{ step }}/3</span>
       <span v-else class="text-[10px] tracking-wider text-coffee-softGray font-semibold uppercase">快速记录</span>
@@ -110,14 +110,74 @@
               :key="m.val"
               @click="quickForm.mood = m.val"
               type="button"
-              class="p-2.5 border text-center rounded-sm text-xs font-serif transition-all"
+              class="p-2.5 border rounded-sm text-xs font-serif transition-all flex flex-col items-center gap-1"
               :class="quickForm.mood === m.val
                 ? 'border-coffee-brown bg-coffee-cream text-coffee-espresso font-semibold'
                 : 'border-coffee-latte/50 text-coffee-softGray hover:border-coffee-brown'"
             >
-              {{ m.label }}
+              <component :is="m.icon" class="w-3.5 h-3.5 flex-shrink-0" />
+              <span>{{ m.label }}</span>
             </button>
           </div>
+        </div>
+
+        <!-- Flavor Impression Quick Selector -->
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <label class="text-[10px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso select-none">风味印象 <span class="text-coffee-softGray font-normal normal-case">(选填)</span></label>
+            <button
+              v-if="quickForm.flavor_preset"
+              @click="quickForm.flavor_preset = ''"
+              type="button"
+              class="text-[9px] text-coffee-softGray hover:text-coffee-brown tracking-wider transition-colors"
+            >清除选择</button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              v-for="f in flavorPresets"
+              :key="f.val"
+              @click="quickForm.flavor_preset = quickForm.flavor_preset === f.val ? '' : f.val"
+              type="button"
+              class="p-3 border rounded-sm text-left transition-all duration-200 flex items-center gap-3"
+              :class="quickForm.flavor_preset === f.val
+                ? 'border-coffee-brown bg-coffee-cream text-coffee-espresso'
+                : 'border-coffee-latte/50 text-coffee-softGray hover:border-coffee-brown'"
+            >
+              <component :is="f.icon" class="w-4 h-4 flex-shrink-0" />
+              <div>
+                <div class="text-xs font-semibold font-serif leading-none">{{ f.label }}</div>
+                <div class="text-[10px] mt-1 opacity-70">{{ f.desc }}</div>
+              </div>
+            </button>
+          </div>
+
+          <!-- Live Radar Preview -->
+          <Transition name="fade">
+            <div v-if="quickForm.flavor_preset" class="flex items-center gap-4 p-3 bg-coffee-cream/30 border border-coffee-latte/40 rounded-sm">
+              <div class="w-[72px] h-[72px] flex-shrink-0">
+                <FlavorRadarChart
+                  :values="quickRadarValues"
+                  :size="72"
+                  :show-labels="false"
+                  :dot-radius="1.5"
+                />
+              </div>
+              <div class="flex-1 space-y-1">
+                <div class="text-[9px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso">
+                  {{ flavorPresets.find(f => f.val === quickForm.flavor_preset)?.label }} 风味图谱
+                </div>
+                <div class="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[9px] text-coffee-softGray">
+                  <span>酸度 <span class="font-mono text-coffee-espresso">{{ quickRadarValues[0] }}</span></span>
+                  <span>苦感 <span class="font-mono text-coffee-espresso">{{ quickRadarValues[1] }}</span></span>
+                  <span>甜感 <span class="font-mono text-coffee-espresso">{{ quickRadarValues[2] }}</span></span>
+                  <span>醇厚 <span class="font-mono text-coffee-espresso">{{ quickRadarValues[3] }}</span></span>
+                  <span>香气 <span class="font-mono text-coffee-espresso">{{ quickRadarValues[4] }}</span></span>
+                  <span>余韵 <span class="font-mono text-coffee-espresso">{{ quickRadarValues[5] }}</span></span>
+                </div>
+              </div>
+            </div>
+          </Transition>
         </div>
 
         <!-- Optional: Coffee Name (quick fill) -->
@@ -210,6 +270,23 @@
             class="hidden"
           >
         </div>
+
+        <!-- 4. Diary Writing Section -->
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <label class="text-[10px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso select-none">4. 手账日记 <span class="text-coffee-softGray font-normal normal-case">(选填)</span></label>
+          </div>
+          <div class="relative">
+            <textarea 
+              v-model="form.notes"
+              rows="5"
+              placeholder="今天在哪里？除了咖啡还有什么让你印象深刻？就用这段文字，把这一刻永久留下来……"
+              class="w-full p-4 bg-coffee-cream/30 border border-coffee-latte/40 focus:border-coffee-brown focus:outline-none rounded-sm text-sm font-serif leading-relaxed resize-none transition-colors placeholder:text-coffee-softGray/60 placeholder:italic"
+            ></textarea>
+            <div class="absolute bottom-3 right-3 text-[9px] text-coffee-softGray/50 font-mono select-none">{{ form.notes.length }} 字</div>
+          </div>
+          <p class="text-[9px] text-coffee-softGray/70 italic select-none">AI 将在保存时参考这段文字，生成更有温度的感官评语。</p>
+        </div>
       </div>
 
       <!-- STEP 2: Sensory Sliders with live SVG radar rendering -->
@@ -279,12 +356,13 @@
               :key="m.val"
               @click="form.mood = m.val"
               type="button"
-              class="p-2 border text-center rounded-sm text-xs font-serif transition-all"
+              class="p-2 border rounded-sm text-xs font-serif transition-all flex flex-col items-center gap-1"
               :class="form.mood === m.val
                 ? 'border-coffee-brown bg-coffee-cream text-coffee-espresso font-semibold'
                 : 'border-coffee-latte/50 text-coffee-softGray hover:border-coffee-brown'"
             >
-              {{ m.label }}
+              <component :is="m.icon" class="w-3.5 h-3.5 flex-shrink-0" />
+              <span>{{ m.label }}</span>
             </button>
           </div>
         </div>
@@ -299,15 +377,6 @@
           >
         </div>
 
-        <div class="space-y-2">
-          <label class="text-[10px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso block">4. 味觉手账备忘 / Notes</label>
-          <textarea 
-            v-model="form.notes"
-            rows="3" 
-            placeholder="写下属于这杯咖啡、此时此刻的心情和香气备注..." 
-            class="w-full p-2.5 bg-coffee-cream/40 border border-coffee-latte/60 focus:border-coffee-brown focus:outline-none rounded-sm text-xs font-serif"
-          ></textarea>
-        </div>
       </div>
 
     </div>
@@ -342,12 +411,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCoffeeLogStore, NewCoffeeLog } from '@/stores/coffeeLog'
 import FlavorRadarChart from '@/components/charts/FlavorRadarChart.vue'
 import request from '@/api/request'
-import { X, Check, Plus } from 'lucide-vue-next'
+import { X, Check, Plus, Smile, Zap, Moon, CloudRain, Sun, Leaf, Heart, Flame } from 'lucide-vue-next'
 
 const router = useRouter()
 const store = useCoffeeLogStore()
@@ -367,7 +436,8 @@ const quickForm = reactive({
   image_url: store.DEFAULT_PHOTOS[1],
   coffee_type: 'Pour Over',
   mood: 'Calm',
-  coffee_name: ''
+  coffee_name: '',
+  flavor_preset: ''
 })
 
 // Detailed Log Form — full 3-step wizard
@@ -429,11 +499,51 @@ const tagPresets = [
   { name: 'creamy', label: '奶油' },
   { name: 'winey', label: '酒香' }
 ]
+const flavorPresets = [
+  {
+    val: 'bright',
+    label: '清新明亮',
+    desc: '高酸 · 轻盈',
+    icon: Sun,
+    values: { acidity: 5, bitterness: 1, sweetness: 3, body: 2, aroma: 4, aftertaste: 3 }
+  },
+  {
+    val: 'floral',
+    label: '花果芬芳',
+    desc: '果香 · 花香',
+    icon: Leaf,
+    values: { acidity: 4, bitterness: 1, sweetness: 4, body: 2, aroma: 5, aftertaste: 3 }
+  },
+  {
+    val: 'smooth',
+    label: '甜美柔滑',
+    desc: '低酸 · 甜润',
+    icon: Heart,
+    values: { acidity: 2, bitterness: 1, sweetness: 5, body: 3, aroma: 3, aftertaste: 4 }
+  },
+  {
+    val: 'bold',
+    label: '浓郁醇厚',
+    desc: '厚重 · 回甘',
+    icon: Flame,
+    values: { acidity: 1, bitterness: 4, sweetness: 2, body: 5, aroma: 4, aftertaste: 5 }
+  }
+]
+
+const quickRadarValues = computed(() => {
+  const preset = flavorPresets.find(f => f.val === quickForm.flavor_preset)
+  if (preset) {
+    const v = preset.values
+    return [v.acidity, v.bitterness, v.sweetness, v.body, v.aroma, v.aftertaste]
+  }
+  return [3, 2, 3, 3, 3, 3]
+})
+
 const moodPresets = [
-  { val: 'Calm', label: '😌 Calm' },
-  { val: 'Energetic', label: '⚡ Joy' },
-  { val: 'Reflective', label: '💭 Mood' },
-  { val: 'Tired', label: '🥱 Tired' }
+  { val: 'Calm', label: '平静', icon: Smile },
+  { val: 'Energetic', label: '愉悦', icon: Zap },
+  { val: 'Reflective', label: '沉浸', icon: Moon },
+  { val: 'Tired', label: '疲惫', icon: CloudRain }
 ]
 
 const toggleTag = (tag: string) => {
@@ -455,12 +565,7 @@ const handleNext = async () => {
       mood: quickForm.mood,
       shop_name: 'Local Coffee Spot',
       notes: '一杯温润安静的手账记录。',
-      acidity: 3,
-      bitterness: 2,
-      sweetness: 3,
-      body: 3,
-      aroma: 3,
-      aftertaste: 3,
+      ...(flavorPresets.find(f => f.val === quickForm.flavor_preset)?.values ?? { acidity: 3, bitterness: 2, sweetness: 3, body: 3, aroma: 3, aftertaste: 3 }),
       flavor_tags: []
     }
     try {
@@ -553,6 +658,9 @@ const handleFileChange = async (event: Event) => {
 </script>
 
 <style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(-4px); }
+
 /* Range slider styling */
 input[type="range"]::-webkit-slider-thumb {
   border-radius: 50%;

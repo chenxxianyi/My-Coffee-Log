@@ -79,12 +79,12 @@ func (r *StatsRepository) GetFavoriteFlavorTag(userID uint) (string, error) {
 }
 
 type FlavorProfile struct {
-	Acidity     float64 `json:"acidity"`
-	Bitterness  float64 `json:"bitterness"`
-	Sweetness   float64 `json:"sweetness"`
-	Body        float64 `json:"body"`
-	Aroma       float64 `json:"aroma"`
-	Aftertaste  float64 `json:"aftertaste"`
+	Acidity    float64 `json:"acidity"`
+	Bitterness float64 `json:"bitterness"`
+	Sweetness  float64 `json:"sweetness"`
+	Body       float64 `json:"body"`
+	Aroma      float64 `json:"aroma"`
+	Aftertaste float64 `json:"aftertaste"`
 }
 
 func (r *StatsRepository) GetFlavorProfile(userID uint) (*FlavorProfile, error) {
@@ -96,6 +96,51 @@ func (r *StatsRepository) GetFlavorProfile(userID uint) (*FlavorProfile, error) 
 		return nil, err
 	}
 	return &profile, nil
+}
+
+type FlavorTagCount struct {
+	Name  string `json:"name"`
+	Label string `json:"label"`
+	Count int64  `json:"count"`
+}
+
+func (r *StatsRepository) GetRecentFlavorTags(userID uint, limit int) ([]FlavorTagCount, error) {
+	if limit <= 0 || limit > 20 {
+		limit = 5
+	}
+
+	since := time.Now().AddDate(0, -1, 0)
+
+	var results []FlavorTagCount
+	if err := r.db.Table("coffee_log_flavor_tags").
+		Select("flavor_tags.name, flavor_tags.label, COUNT(*) as count").
+		Joins("JOIN coffee_logs ON coffee_logs.id = coffee_log_flavor_tags.coffee_log_id").
+		Joins("JOIN flavor_tags ON flavor_tags.id = coffee_log_flavor_tags.flavor_tag_id").
+		Where("coffee_logs.user_id = ? AND coffee_logs.drink_date >= ?", userID, since).
+		Group("flavor_tags.id, flavor_tags.name, flavor_tags.label").
+		Order("count DESC").
+		Limit(limit).
+		Find(&results).Error; err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
+func (r *StatsRepository) GetRecentMood(userID uint) (string, error) {
+	var result struct {
+		Mood string `json:"mood"`
+	}
+	if err := r.db.Model(&model.CoffeeLog{}).
+		Select("mood").
+		Where("user_id = ?", userID).
+		Order("drink_date DESC, created_at DESC").
+		First(&result).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return "", nil
+		}
+		return "", err
+	}
+	return result.Mood, nil
 }
 
 type MonthlyCount struct {

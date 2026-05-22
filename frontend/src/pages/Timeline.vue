@@ -57,7 +57,7 @@
                 <div class="space-y-1">
                   <div class="flex justify-between items-baseline text-[8px] font-mono text-coffee-softGray select-none">
                     <span>{{ getDayNum(log.drink_date) }} {{ getMonthAbbr(log.drink_date) }}</span>
-                    <span class="uppercase">{{ log.coffee_type }}</span>
+                    <span class="uppercase">{{ coffeeTypeLabel(log.coffee_type) }}</span>
                   </div>
                   <h4 class="font-serif text-lg font-light text-coffee-espresso group-hover:text-coffee-brown italic leading-tight transition-colors break-words">{{ log.coffee_name }}</h4>
                   <p class="text-[10px] text-coffee-brown leading-relaxed font-light line-clamp-3 font-serif">
@@ -65,8 +65,8 @@
                   </p>
                 </div>
                 <div class="flex justify-between items-center text-[9px] text-coffee-softGray select-none">
-                  <span class="truncate max-w-[120px]">{{ log.shop_name.split(',')[0] }}</span>
-                  <span class="font-mono">😌 {{ log.mood }}</span>
+                  <span class="truncate max-w-[120px]">在 {{ log.shop_name.split(',')[0] }}</span>
+                  <span class="font-mono">{{ moodLabel(log.mood) }}</span>
                 </div>
               </div>
             </router-link>
@@ -80,15 +80,15 @@
               <div class="space-y-2">
                 <div class="flex justify-between items-center text-[8px] font-mono text-coffee-softGray select-none">
                   <span>{{ getDayNum(log.drink_date) }} {{ getMonthAbbr(log.drink_date) }}</span>
-                  <span class="uppercase">{{ log.coffee_type }}</span>
+                  <span class="uppercase">{{ coffeeTypeLabel(log.coffee_type) }}</span>
                 </div>
                 <h4 class="font-serif text-base font-light text-coffee-espresso italic group-hover:text-coffee-brown transition-colors break-words">{{ log.coffee_name }}</h4>
                 <p class="font-serif italic text-xs text-coffee-brown leading-relaxed line-clamp-3">
                   “{{ log.notes }}”
                 </p>
                 <div class="flex justify-between items-center text-[9px] text-coffee-softGray pt-1.5 border-t border-coffee-cream/40 select-none">
-                  <span class="truncate max-w-[150px]">{{ log.shop_name.split(',')[0] }}</span>
-                  <span class="font-mono uppercase">★ {{ log.mood }}</span>
+                  <span class="truncate max-w-[150px]">在 {{ log.shop_name.split(',')[0] }}</span>
+                  <span class="font-mono uppercase">{{ moodLabel(log.mood) }}</span>
                 </div>
               </div>
             </router-link>
@@ -105,7 +105,7 @@
               <div class="space-y-1">
                 <div class="flex justify-between items-center text-[8px] font-mono text-coffee-softGray select-none">
                   <span>{{ getDayNum(log.drink_date) }} {{ getMonthAbbr(log.drink_date) }}</span>
-                  <span class="uppercase">{{ log.coffee_type }}</span>
+                  <span class="uppercase">{{ coffeeTypeLabel(log.coffee_type) }}</span>
                 </div>
                 <div class="flex justify-between items-baseline">
                   <h4 class="font-serif text-base font-light text-coffee-espresso group-hover:text-coffee-brown italic leading-none transition-colors break-words">{{ log.coffee_name }}</h4>
@@ -164,6 +164,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useCoffeeLogStore, CoffeeLog } from '@/stores/coffeeLog'
+import { coffeeTypeLabel, moodLabel } from '@/constants/coffee'
 import { BookOpen, Calendar, BarChart3, Plus, User } from 'lucide-vue-next'
 
 const store = useCoffeeLogStore()

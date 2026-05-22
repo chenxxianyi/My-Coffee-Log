@@ -1,10 +1,17 @@
 import request from './request'
 
+export interface FlavorTagItem {
+  name: string
+  label: string
+  count: number
+}
+
 export interface StatsOverview {
   month_count: number
   total_count: number
   favorite_coffee_type: string
   favorite_flavor_tag: string
+  recent_flavor_tags: FlavorTagItem[]
 }
 
 export interface FlavorProfile {
@@ -31,4 +38,12 @@ export async function getFlavorProfile(): Promise<FlavorProfile> {
 
 export async function getMonthlyStats(): Promise<MonthlyCount[]> {
   return request.get('/stats/monthly') as unknown as Promise<MonthlyCount[]>
+}
+
+export interface LifestyleQuoteResponse {
+  quote: string
+}
+
+export async function getLifestyleQuote(): Promise<LifestyleQuoteResponse> {
+  return request.post('/ai/lifestyle-quote') as unknown as Promise<LifestyleQuoteResponse>
 }
