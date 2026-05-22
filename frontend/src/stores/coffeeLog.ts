@@ -32,6 +32,7 @@ export interface NewCoffeeLog {
   image_url: string
   mood: string
   notes: string
+  generate_ai?: boolean
   acidity: number
   bitterness: number
   sweetness: number
@@ -125,9 +126,15 @@ export const useCoffeeLogStore = defineStore('coffeeLog', () => {
     return created
   }
 
-  async function deleteLog(id: number) {
-    await coffeeLogApi.deleteCoffeeLog(id)
+  function removeLogFromCache(id: number) {
     logs.value = logs.value.filter((log: CoffeeLog) => log.id !== id)
+  }
+
+  async function deleteLog(id: number, options?: { removeFromCache?: boolean }) {
+    await coffeeLogApi.deleteCoffeeLog(id)
+    if (options?.removeFromCache !== false) {
+      removeLogFromCache(id)
+    }
   }
 
   async function fetchStats() {
@@ -170,6 +177,7 @@ export const useCoffeeLogStore = defineStore('coffeeLog', () => {
     fetchLogById,
     addLog,
     deleteLog,
+    removeLogFromCache,
     fetchStats,
     fetchLifestyleQuote
   }

@@ -66,6 +66,7 @@ export interface CreateCoffeeLogParams {
   drink_date?: string
   mood: string
   notes: string
+  generate_ai?: boolean
   acidity: number
   bitterness: number
   sweetness: number
@@ -89,6 +90,7 @@ function toCreatePayload(params: CreateCoffeeLogParams) {
     drink_date: params.drink_date || getLocalDateString(),
     mood: params.mood,
     notes: params.notes,
+    generate_ai: params.generate_ai ?? false,
     acidity: params.acidity,
     bitterness: params.bitterness,
     sweetness: params.sweetness,

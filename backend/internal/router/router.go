@@ -1,6 +1,8 @@
 package router
 
 import (
+	"time"
+
 	"my-coffee-log/internal/handler"
 	"my-coffee-log/internal/middleware"
 
@@ -81,9 +83,11 @@ func (r *Router) Setup(engine *gin.Engine) {
 
 		// AI
 		ai := protected.Group("/ai")
+		ai.Use(middleware.MaxBodyBytes(8<<10), middleware.RateLimit(20, time.Minute))
 		{
 			ai.POST("/flavor-summary", r.aiHandler.GenerateFlavorSummary)
 			ai.POST("/lifestyle-quote", r.aiHandler.GetLifestyleQuote)
+			ai.POST("/flavor-insight", r.aiHandler.GetFlavorInsight)
 		}
 
 		// Uploads

@@ -382,29 +382,42 @@
     </div>
 
     <!-- Bottom Controls -->
-    <div class="p-6 border-t border-coffee-cream flex gap-3 bg-coffee-warmWhite sticky bottom-0 z-10 select-none">
-      <!-- Detailed mode: show back button -->
-      <button 
-        v-if="logMode === 'detailed' && step > 1" 
-        @click="step--" 
-        class="flex-1 py-3 text-xs uppercase tracking-wider font-semibold bg-coffee-cream text-coffee-espresso hover:bg-coffee-latte transition-all rounded-sm"
-      >
-        上一步
-      </button>
-      <button 
-        @click="handleNext" 
-        class="flex-1 py-3 text-xs uppercase tracking-wider font-semibold bg-coffee-espresso text-coffee-warmWhite hover:bg-coffee-brown transition-all rounded-sm flex items-center justify-center gap-1.5"
-        :disabled="isSubmitting"
-      >
-        <template v-if="isSubmitting">
-          <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-          <span>正在智能撰写感官日志...</span>
-        </template>
-        <template v-else>
-          <span v-if="logMode === 'quick'">一键保存</span>
-          <span v-else>{{ step === 3 ? 'AI 总结并保存手账' : '下一步' }}</span>
-        </template>
-      </button>
+    <div class="p-6 border-t border-coffee-cream bg-coffee-warmWhite sticky bottom-0 z-10 select-none space-y-3">
+      <label class="flex items-start gap-3 p-3 rounded-sm border border-coffee-cream bg-coffee-cream/25 cursor-pointer">
+        <input
+          v-model="generateAI"
+          type="checkbox"
+          class="mt-0.5 h-4 w-4 accent-coffee-espresso"
+        >
+        <span class="space-y-0.5">
+          <span class="block text-[10px] uppercase tracking-[0.22em] font-semibold text-coffee-espresso">云端 AI 文案</span>
+          <span class="block text-[10px] leading-relaxed text-coffee-softGray">开启后会将咖啡名称、风味分数与笔记发送至已配置的 AI 服务；关闭时仅使用本地摘要。</span>
+        </span>
+      </label>
+      <div class="flex gap-3">
+        <!-- Detailed mode: show back button -->
+        <button 
+          v-if="logMode === 'detailed' && step > 1" 
+          @click="step--" 
+          class="flex-1 py-3 text-xs uppercase tracking-wider font-semibold bg-coffee-cream text-coffee-espresso hover:bg-coffee-latte transition-all rounded-sm"
+        >
+          上一步
+        </button>
+        <button 
+          @click="handleNext" 
+          class="flex-1 py-3 text-xs uppercase tracking-wider font-semibold bg-coffee-espresso text-coffee-warmWhite hover:bg-coffee-brown transition-all rounded-sm flex items-center justify-center gap-1.5"
+          :disabled="isSubmitting"
+        >
+          <template v-if="isSubmitting">
+            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <span>{{ generateAI ? '正在保存并准备云端文案...' : '正在保存本地摘要...' }}</span>
+          </template>
+          <template v-else>
+            <span v-if="logMode === 'quick'">{{ generateAI ? '保存并启用 AI' : '一键保存' }}</span>
+            <span v-else>{{ step === 3 ? (generateAI ? '保存并启用 AI 文案' : '保存手账') : '下一步' }}</span>
+          </template>
+        </button>
+      </div>
     </div>
 
   </div>
@@ -425,6 +438,7 @@ const store = useCoffeeLogStore()
 const logMode = ref<'quick' | 'detailed'>('quick')
 const step = ref(1)
 const isSubmitting = ref(false)
+const generateAI = ref(false)
 
 // File upload states
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -565,13 +579,15 @@ const handleNext = async () => {
       mood: quickForm.mood,
       shop_name: 'Local Coffee Spot',
       notes: '一杯温润安静的手账记录。',
+      generate_ai: generateAI.value,
       ...(flavorPresets.find(f => f.val === quickForm.flavor_preset)?.values ?? { acidity: 3, bitterness: 2, sweetness: 3, body: 3, aroma: 3, aftertaste: 3 }),
       flavor_tags: []
     }
     try {
       const created = await store.addLog(quickLog)
       isSubmitting.value = false
-      router.push(`/coffee/${created.id}`)
+      store.fetchStats()
+      router.push(`/coffee/${created.id}?just_created=true`)
     } catch (e: any) {
       isSubmitting.value = false
       alert(e.message || '保存失败，请稍后重试')
@@ -595,12 +611,14 @@ const handleNext = async () => {
     const savedLog = {
       ...form,
       shop_name: form.shop_name.trim() || 'Local Coffee Spot',
-      notes: form.notes.trim() || '一杯温润安静的手账记录。'
+      notes: form.notes.trim() || '一杯温润安静的手账记录。',
+      generate_ai: generateAI.value
     }
     try {
       const created = await store.addLog(savedLog)
       isSubmitting.value = false
-      router.push(`/coffee/${created.id}`)
+      store.fetchStats()
+      router.push(`/coffee/${created.id}?just_created=true`)
     } catch (e: any) {
       isSubmitting.value = false
       alert(e.message || '保存失败，请稍后重试')

@@ -23,6 +23,8 @@ type Config struct {
 	OpenAIAPIKey   string `mapstructure:"OPENAI_API_KEY"`
 	OpenAIBaseURL  string `mapstructure:"OPENAI_BASE_URL"`
 	OpenAIModel    string `mapstructure:"OPENAI_MODEL"`
+	AIEnabled      bool   `mapstructure:"AI_ENABLED"`
+	OpenAITimeout  int    `mapstructure:"OPENAI_REQUEST_TIMEOUT_SECONDS"`
 }
 
 var AppConfig *Config
@@ -49,6 +51,8 @@ func LoadConfig() {
 	viper.SetDefault("REDIS_PASSWORD", "")
 	viper.SetDefault("JWT_SECRET", "please_change_me")
 	viper.SetDefault("JWT_EXPIRE_HOURS", 168)
+	viper.SetDefault("AI_ENABLED", false)
+	viper.SetDefault("OPENAI_REQUEST_TIMEOUT_SECONDS", 5)
 
 	AppConfig = &Config{}
 	if err := viper.Unmarshal(AppConfig); err != nil {

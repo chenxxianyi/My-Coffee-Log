@@ -56,7 +56,7 @@
           <div v-if="brewTypeStats.length > 0" class="space-y-2.5">
             <div v-for="(item, idx) in brewTypeStats" :key="item.type">
               <div class="flex justify-between text-xs mb-1">
-                <span>{{ item.type }}</span>
+                <span>{{ coffeeTypeLabel(item.type) }}</span>
                 <span class="font-semibold text-coffee-espresso">{{ item.count }} brews ({{ item.pct }}%)</span>
               </div>
               <div class="w-full h-1.5 bg-coffee-cream rounded-full overflow-hidden select-none">
@@ -121,6 +121,7 @@ import { onMounted, computed } from 'vue'
 import { useCoffeeLogStore } from '@/stores/coffeeLog'
 import { getFlavorTags } from '@/api/flavorTag'
 import FlavorRadarChart from '@/components/charts/FlavorRadarChart.vue'
+import { coffeeTypeLabel } from '@/constants/coffee'
 import { BookOpen, Calendar, BarChart3, Plus, User } from 'lucide-vue-next'
 
 const store = useCoffeeLogStore()

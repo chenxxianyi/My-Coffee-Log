@@ -24,10 +24,10 @@ My Coffee Log 当前最适合的方向不是“专业咖啡参数工具”，而
 |------|--------|--------|----------|------|
 | Step 1 | Quick Log 快速记录模式 | P0 | 降低首次记录成本 | ✅ 已完成 |
 | Step 2 | 首页咖啡生活仪表盘 | P0 | 提升首页情绪价值和使用效率 | ✅ 已完成 |
-| Step 3 | 记录完成后的即时正反馈 | P0 | 让用户保存后立刻获得奖励 | |
-| Step 4 | 咖啡详情页视觉强化 | P0 | 让每条记录像一页生活方式杂志 | |
-| Step 5 | AI 文案风格升级 | P0 | 从风味分析升级为 editorial 文案 | |
-| Step 6 | 分享卡片模板优化 | P0 | 提升外部传播能力 | |
+| Step 3 | 记录完成后的即时正反馈 | P0 | 让用户保存后立刻获得奖励 | ✅ 已完成 |
+| Step 4 | 咖啡详情页视觉强化 | P0 | 让每条记录像一页生活方式杂志 | ✅ 已完成 |
+| Step 5 | AI 文案风格升级 | P0 | 从风味分析升级为 editorial 文案 | ✅ 已完成 |
+| Step 6 | 分享卡片模板优化 | P0 | 提升外部传播能力 | ✅ 已完成 |
 | Step 7 | 咖啡心情日记 | P1 | 让记录从咖啡扩展到生活状态 | |
 | Step 8 | 统计页升级为个人咖啡画像 | P1 | 提升统计页情绪价值和分享价值 | |
 | Step 9 | 复刻上一杯 | P1 | 提高重复记录效率 | |
@@ -137,7 +137,7 @@ P0
 
 ---
 
-## Step 3：记录完成后的即时正反馈
+## Step 3：记录完成后的即时正反馈 ✅ 已完成
 
 ### 优先级
 
@@ -155,23 +155,40 @@ P0
 - 展示分享卡片入口。
 - 展示本月记录进度提示。
 
+### 实现详情
+
+- 创建页保存成功后携带 `?just_created=true` 查询参数跳转详情页。
+- 创建页保存成功后异步刷新统计数据（`store.fetchStats()`），确保详情页月度进度数据实时更新。
+- 详情页检测 `just_created` 状态，触发即时正反馈体验：
+  - **庆祝横幅**：顶部滑入「手账记录成功」Banner，显示绿色勾选图标 + 本月第 N 杯计数，3 秒后自动淡出。
+  - **庆祝粒子**：8 颗咖啡色系圆点粒子从底部向上飘升，配合 Banner 同步展示与消失。
+  - **月度进度卡片**：在详情内容区展示「本月咖啡进度」卡片，包含渐变进度条（latte→terracotta）、里程碑标签（3/5/10/15/20 杯）、editorial 风格里程碑文案。
+  - **分享 CTA 卡片**：深色底分享引导区块，突出「生成分享海报」按钮，鼓励用户即时分享。
+  - **再记一杯按钮**：在操作栏替换原「生成分享海报」为「再记一杯」，引导连续记录。
+  - **入场动画**：封面图 fade-in、标题区 slide-up、AI 评语延迟 0.15s、雷达图延迟 0.3s、标签区延迟 0.4s，形成交错式入场节奏。
+- 非创建状态进入详情页时，不显示庆祝效果，保持原有静态展示。
+
 ### 涉及模块
 
-- 创建页
-- 咖啡详情页
-- AI Summary
-- 分享卡片入口
-- 统计数据刷新
+- 创建页 (`CreateCoffeeLog.vue`)
+- 咖啡详情页 (`CoffeeDetail.vue`)
+- Coffee Log Store (`coffeeLog.ts`)
+- Stats API (`stats.ts`)
 
 ### 验收标准
 
-- 创建成功后自动跳转详情页。
-- 详情页展示 AI 文案和风味雷达图。
-- 用户可以从详情页直接进入分享卡片。
+- ✅ 创建成功后自动跳转详情页。
+- ✅ 详情页展示 AI 文案和风味雷达图。
+- ✅ 用户可以从详情页直接进入分享卡片。
+- ✅ 创建后详情页展示庆祝横幅和粒子动画。
+- ✅ 创建后详情页展示本月咖啡进度卡片（含进度条和里程碑文案）。
+- ✅ 创建后详情页展示分享 CTA 和「再记一杯」按钮。
+- ✅ 创建后详情页各区域有交错式入场动画。
+- ✅ 非创建状态进入详情页无庆祝效果，保持原有展示。
 
 ---
 
-## Step 4：咖啡详情页视觉强化
+## Step 4：咖啡详情页视觉强化 ✅ 已完成
 
 ### 优先级
 
@@ -190,22 +207,38 @@ P0
 - 优化风味雷达图展示位置。
 - 增加明显的分享按钮。
 
+### 实现详情
+
+- **封面大图强化**：高度从 h-72 提升至 h-[340px]，增加 scale-105 微放大效果；多层渐变叠加（底部 warmWhite 渐变 + 顶部黑色渐变）营造杂志深度感；增加 paper grain 纸质纹理叠加；增加左上/右上角 bracket 装饰元素。
+- **咖啡类型徽章**：从单行 badge 升级为双语展示（英文 + `/ 中文`），使用 espresso/90 底色 + backdrop-blur。
+- **杂志式标题排版**：标题字号从 38px 提升至 42px，增加 tracking-wide 和 leading-[1.05]；日期两侧增加渐变 flanking lines 装饰；meta 信息条增加 MapPin 图标 + 竖线分隔 + moodLabel 中文标签。
+- **Hairline 分隔线**：从单线升级为三段式（短灰线 + 长奶油线 + 短灰线），增加编辑感。
+- **AI Editorial 文案强化**：增加 72px 装饰性大引号 `&ldquo;`；标题改为「AI 感官评语 / Editorial」双语；正文字号从 13.5px 提升至 15px，行高从 leading-relaxed 提升至 leading-[1.8]；增加 closing ornament（线 + 圆点 + 线）装饰；背景改为 bg-coffee-cream/60。
+- **风味雷达图优化**：从左侧 2/5 布局改为居中展示；尺寸从 110px 提升至 150px；外框改为 170px 圆形容器（bg-coffee-cream/30 + border-coffee-latte/25）；维度标签改为英文缩写（Acid/Bitter/Sweet/Body/Aroma/After）；分数列表从右侧列表改为雷达下方 3 列网格，双语标签 + 简洁数字。
+- **风味标签强化**：标题增加两侧 flanking lines；标签样式从 bg-coffee-cream 升级为 bg-coffee-warmWhite + shadow-sm，增加 tracking-wider。
+- **味觉日记强化**：标题增加两侧 flanking lines；正文增加左侧 border-l-2 border-coffee-latte/30 引用线装饰；字号从 text-xs 提升至 text-[13px]，行高 leading-[1.75]。
+- **浮动分享按钮**：新增右下角固定 FAB 按钮（terracotta 渐变 + 4px ring + hover:scale-110 + active:scale-95），底部标注「分享」文字。
+- **底部操作栏重构**：分享按钮升级为全宽主按钮（py-3.5 + Share2 图标）；新增「再记一杯」按钮始终可见；删除按钮降级为次要操作。
+
 ### 涉及模块
 
-- 咖啡详情页
-- 风味雷达图组件
-- 分享入口组件
-- Tailwind 主题样式
+- 咖啡详情页 (`CoffeeDetail.vue`)
+- 风味雷达图组件 (`FlavorRadarChart.vue`)
+- 咖啡常量 (`coffee.ts`) — 新增 `coffeeTypeShortLabel`, `moodLabel` 引用
 
 ### 验收标准
 
-- 详情页首屏具备明显视觉吸引力。
-- 用户能一眼看到照片、咖啡名称、AI 文案和核心风味。
-- 详情页可以自然承接分享卡片功能。
+- ✅ 详情页首屏具备明显视觉吸引力（340px 大图 + 多层渐变 + 角括号装饰）。
+- ✅ 用户能一眼看到照片、咖啡名称、AI 文案和核心风味。
+- ✅ 详情页可以自然承接分享卡片功能（浮动 FAB + 底部全宽分享按钮）。
+- ✅ 杂志式标题排版（42px serif italic + flanking lines + 双语 meta 信息）。
+- ✅ AI editorial 文案具备杂志感（装饰性大引号 + closing ornament + 15px 正文）。
+- ✅ 风味雷达图居中展示，尺寸更大，分数列表清晰双语。
+- ✅ 分享入口明显且多入口（浮动 FAB + 顶栏按钮 + 底部主按钮）。
 
 ---
 
-## Step 5：AI 文案风格升级
+## Step 5：AI 文案风格升级 ✅ 已完成
 
 ### 优先级
 
@@ -238,23 +271,34 @@ P0
 
 > A bright and gentle cup, like a quiet morning with citrus light and a soft floral finish.
 
+### 实现详情
+
+- **DeepSeek API 客户端**：新增 `callDeepSeekAPI()` 函数，通过 OpenAI 兼容接口调用 DeepSeek Chat Completions API，支持 `OPENAI_API_KEY`、`OPENAI_BASE_URL`、`OPENAI_MODEL` 三个环境变量配置，默认模型 `deepseek-chat`，Temperature 0.85，MaxTokens 512。
+- **Editorial 风格 System Prompt**：为三种场景分别设计了 editorial 风格的 system prompt，参考 Nordic minimal、日式手账、Kinfolk 杂志风格，要求用画面感、比喻和情绪传达风味，不直接罗列参数数值。
+- **风味感官评语升级**：`GenerateFlavorSummary()` 优先调用 DeepSeek API 生成 editorial 风格评语，API 不可用时自动 fallback 到 `generateMockSummary()` 模板文案。请求结构新增 `coffee_name`、`mood`、`notes` 字段，为 AI 提供更丰富的上下文。
+- **生活方式文案升级**：`GenerateLifestyleQuote()` 优先调用 DeepSeek API，API 不可用时 fallback 到 `generateMockLifestyleQuote()` 模板文案。
+- **新增偏好洞察接口**：`POST /ai/flavor-insight` — 根据用户月度统计数据（杯数、偏好类型、风味标签、平均酸度/醇厚/甜感、最近心情）生成偏好洞察文案，用于统计页和月报场景。`GenerateFlavorInsightForUser()` 自动从 StatsService 获取 FlavorProfile 数据。
+- **CoffeeLogService 联动**：创建和更新咖啡记录时，改用新的 `GenerateFlavorSummary()` 接口，传入完整上下文（咖啡名、心情、笔记），AI 评语质量显著提升。
+- **优雅降级**：所有 AI 接口均实现 DeepSeek API → Mock 模板的双层 fallback，确保 API 不可用时产品仍正常运行。
+
 ### 涉及模块
 
-- 后端 AI Service
-- Coffee Log 创建逻辑
-- 详情页
-- 分享卡片
-- 统计页
+- 后端 AI Service (`ai_service.go`) — 全面重写
+- Coffee Log 创建/更新逻辑 (`coffee_log_service.go`) — 联动升级
+- AI Handler (`ai_handler.go`) — 新增 insight 端点
+- 路由 (`router.go`) — 注册 `/ai/flavor-insight` 路由
 
 ### 验收标准
 
-- AI 文案不只描述酸甜苦等参数。
-- AI 文案具备生活方式、画面感和 editorial 风格。
-- 同一条记录可以支持不同场景的文案展示。
+- ✅ AI 文案不只描述酸甜苦等参数，具备画面感和 editorial 风格。
+- ✅ AI 文案具备生活方式、画面感和 editorial 风格（DeepSeek API 生成）。
+- ✅ 同一条记录可以支持不同场景的文案展示（风味摘要 / 生活方式 / 偏好洞察）。
+- ✅ DeepSeek API 不可用时自动 fallback 到 Mock 模板文案，产品不中断。
+- ✅ 新增 `/ai/flavor-insight` 端点，为统计页和月报提供偏好洞察文案。
 
 ---
 
-## Step 6：分享卡片模板优化
+## Step 6：分享卡片模板优化 ✅ 已完成
 
 ### 优先级
 
@@ -284,20 +328,26 @@ P0
 - AI 文案
 - My Coffee Log 小水印
 
+### 实现详情
+
+- **模板切换器**：新增顶部模板切换栏（极简 / 杂志 / 小票），使用与比例切换器一致的 pill-button 风格，切换时卡片平滑过渡。
+- **Minimal 极简模板**：暖奶油色底（#FFF2DB），圆角 4px；仅展示照片 + 咖啡名 + 店名 + AI 文案片段 + 日期/类型；无雷达图，信息极简；品牌水印以淡色 `MY COFFEE LOG / MINIMAL` 呈现。
+- **Magazine 杂志模板**：保留原有 double-border 经典设计；照片带类型徽章（espresso/85 底色）；包含风味雷达图；品牌水印 `MY COFFEE LOG / CHRONICLE OF FLAVOR`；底部展示日期 + 心情 emoji。
+- **Cafe Receipt 小票模板**：米白纸色底（#FFFEF7），极小圆角 2px + 细边框模拟热敏纸；虚线分隔（border-dashed）；咖啡信息以 receipt line-item 格式展示（COFFEE / TYPE / SHOP / MOOD）；风味分数以 3×2 mono grid 展示；底部装饰性条形码图案；品牌水印 `MY COFFEE LOG` + 条形码装饰。
+- **品牌水印**：所有模板均包含 `MY COFFEE LOG` 品牌标识，位置和风格随模板调性变化。
+- **导出逻辑升级**：导出文件名包含模板名（`MCL-{template}-{id}-{ratio}.png`）；小票模板使用 `#FFFEF7` 背景色导出，其他模板使用 `#FFF2DB`；底部提示文案动态显示当前模板风格 + 比例 + 渲染倍率。
+- **moodEmoji 工具函数**：新增心情到 emoji 的映射（Calm→😌 / Energetic→⚡ / Reflective→💭 / Tired→🥱）。
+
 ### 涉及模块
 
-- 分享卡片页
-- html2canvas 导出
-- 咖啡详情数据
-- 风味雷达图组件
-- 模板切换组件
+- 分享卡片页 (`ShareCard.vue`) — 全面重写
 
 ### 验收标准
 
-- 至少支持 3 套分享模板。
-- 用户可以切换模板预览。
-- 用户可以导出高清 PNG。
-- 导出的图片包含品牌标识。
+- ✅ 至少支持 3 套分享模板（Minimal / Magazine / Cafe Receipt）。
+- ✅ 用户可以切换模板预览（pill-button 切换栏）。
+- ✅ 用户可以导出高清 PNG（3x 超采样渲染）。
+- ✅ 导出的图片包含品牌标识（MY COFFEE LOG）。
 
 ---
 

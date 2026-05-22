@@ -25,39 +25,41 @@ func NewCoffeeLogService(coffeeLogRepo *repository.CoffeeLogRepository, flavorTa
 }
 
 type CreateCoffeeLogRequest struct {
-	CoffeeName  string `json:"coffee_name"`
-	CoffeeType  string `json:"coffee_type"`
-	ShopName    string `json:"shop_name"`
-	Location    string `json:"location"`
-	ImageURL    string `json:"image_url"`
-	DrinkDate   string `json:"drink_date"`
-	Mood        string `json:"mood"`
-	Notes       string `json:"notes"`
-	Acidity     int    `json:"acidity"`
-	Bitterness  int    `json:"bitterness"`
-	Sweetness   int    `json:"sweetness"`
-	Body        int    `json:"body"`
-	Aroma       int    `json:"aroma"`
-	Aftertaste  int    `json:"aftertaste"`
+	CoffeeName   string `json:"coffee_name"`
+	CoffeeType   string `json:"coffee_type"`
+	ShopName     string `json:"shop_name"`
+	Location     string `json:"location"`
+	ImageURL     string `json:"image_url"`
+	DrinkDate    string `json:"drink_date"`
+	Mood         string `json:"mood"`
+	Notes        string `json:"notes"`
+	GenerateAI   bool   `json:"generate_ai"`
+	Acidity      int    `json:"acidity"`
+	Bitterness   int    `json:"bitterness"`
+	Sweetness    int    `json:"sweetness"`
+	Body         int    `json:"body"`
+	Aroma        int    `json:"aroma"`
+	Aftertaste   int    `json:"aftertaste"`
 	FlavorTagIDs []uint `json:"flavor_tag_ids"`
 }
 
 type UpdateCoffeeLogRequest struct {
-	CoffeeName  string `json:"coffee_name"`
-	CoffeeType  string `json:"coffee_type"`
-	ShopName    string `json:"shop_name"`
-	Location    string `json:"location"`
-	ImageURL    string `json:"image_url"`
-	DrinkDate   string `json:"drink_date"`
-	Mood        string `json:"mood"`
-	Notes       string `json:"notes"`
-	Acidity     *int   `json:"acidity"`
-	Bitterness  *int   `json:"bitterness"`
-	Sweetness   *int   `json:"sweetness"`
-	Body        *int   `json:"body"`
-	Aroma       *int   `json:"aroma"`
-	Aftertaste  *int   `json:"aftertaste"`
-	FlavorTagIDs []uint `json:"flavor_tag_ids"`
+	CoffeeName   string  `json:"coffee_name"`
+	CoffeeType   string  `json:"coffee_type"`
+	ShopName     string  `json:"shop_name"`
+	Location     string  `json:"location"`
+	ImageURL     string  `json:"image_url"`
+	DrinkDate    string  `json:"drink_date"`
+	Mood         string  `json:"mood"`
+	Notes        string  `json:"notes"`
+	GenerateAI   *bool   `json:"generate_ai"`
+	Acidity      *int    `json:"acidity"`
+	Bitterness   *int    `json:"bitterness"`
+	Sweetness    *int    `json:"sweetness"`
+	Body         *int    `json:"body"`
+	Aroma        *int    `json:"aroma"`
+	Aftertaste   *int    `json:"aftertaste"`
+	FlavorTagIDs *[]uint `json:"flavor_tag_ids"`
 }
 
 func (s *CoffeeLogService) validateFlavorScores(acidity, bitterness, sweetness, body, aroma, aftertaste int) error {
@@ -80,17 +82,43 @@ func (s *CoffeeLogService) validateFlavorScores(acidity, bitterness, sweetness, 
 	return nil
 }
 
+func (s *CoffeeLogService) validateFlavorTagIDs(ids []uint) ([]model.FlavorTag, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	tags, err := s.flavorTagRepo.FindByIDs(ids)
+	if err != nil || len(tags) != len(ids) {
+		return nil, errors.New("one or more flavor tags not found")
+	}
+	return tags, nil
+}
+
+func flavorTagNames(tags []model.FlavorTag) []string {
+	names := make([]string, 0, len(tags))
+	for _, tag := range tags {
+		names = append(names, tag.Name)
+	}
+	return names
+}
+
+func (s *CoffeeLogService) generateAndStoreAISummary(logID uint, userID uint, req FlavorSummaryRequest) {
+	aiResp, err := s.aiService.GenerateFlavorSummary(req)
+	if err != nil || aiResp == nil {
+		return
+	}
+	_ = s.coffeeLogRepo.UpdateAISummary(logID, userID, aiResp.Summary)
+}
+
 func (s *CoffeeLogService) Create(userID uint, req CreateCoffeeLogRequest) (*model.CoffeeLog, error) {
 	if err := s.validateFlavorScores(req.Acidity, req.Bitterness, req.Sweetness, req.Body, req.Aroma, req.Aftertaste); err != nil {
 		return nil, err
 	}
 
-	if len(req.FlavorTagIDs) > 0 {
-		tags, err := s.flavorTagRepo.FindByIDs(req.FlavorTagIDs)
-		if err != nil || len(tags) != len(req.FlavorTagIDs) {
-			return nil, errors.New("one or more flavor tags not found")
-		}
+	tags, err := s.validateFlavorTagIDs(req.FlavorTagIDs)
+	if err != nil {
+		return nil, err
 	}
+	tagNames := flavorTagNames(tags)
 
 	var drinkDate *time.Time
 	if req.DrinkDate != "" {
@@ -101,15 +129,20 @@ func (s *CoffeeLogService) Create(userID uint, req CreateCoffeeLogRequest) (*mod
 		drinkDate = &parsed
 	}
 
-	tagNames := []string{}
-	if len(req.FlavorTagIDs) > 0 {
-		tags, _ := s.flavorTagRepo.FindByIDs(req.FlavorTagIDs)
-		for _, t := range tags {
-			tagNames = append(tagNames, t.Name)
-		}
+	aiReq := FlavorSummaryRequest{
+		CoffeeName: req.CoffeeName,
+		CoffeeType: req.CoffeeType,
+		Tags:       tagNames,
+		Acidity:    req.Acidity,
+		Bitterness: req.Bitterness,
+		Sweetness:  req.Sweetness,
+		Body:       req.Body,
+		Aroma:      req.Aroma,
+		Aftertaste: req.Aftertaste,
+		Mood:       req.Mood,
+		Notes:      req.Notes,
 	}
-
-	aiSummary := s.aiService.GenerateMockSummary(req.CoffeeType, tagNames, req.Acidity, req.Bitterness, req.Sweetness, req.Body, req.Aroma, req.Aftertaste)
+	aiSummary := s.aiService.generateMockSummary(req.CoffeeType, tagNames, req.Acidity, req.Bitterness, req.Sweetness, req.Body, req.Aroma, req.Aftertaste)
 
 	log := &model.CoffeeLog{
 		UserID:     userID,
@@ -132,6 +165,10 @@ func (s *CoffeeLogService) Create(userID uint, req CreateCoffeeLogRequest) (*mod
 
 	if err := s.coffeeLogRepo.Create(log, req.FlavorTagIDs); err != nil {
 		return nil, err
+	}
+
+	if req.GenerateAI && externalAIEnabled() {
+		go s.generateAndStoreAISummary(log.ID, userID, aiReq)
 	}
 
 	created, err := s.coffeeLogRepo.FindByID(log.ID, userID)
@@ -165,12 +202,15 @@ func (s *CoffeeLogService) Update(id, userID uint, req UpdateCoffeeLogRequest) (
 	body := existing.Body
 	aroma := existing.Aroma
 	aftertaste := existing.Aftertaste
+	aiInputChanged := false
 
 	if req.CoffeeName != "" {
 		existing.CoffeeName = req.CoffeeName
+		aiInputChanged = true
 	}
 	if req.CoffeeType != "" {
 		existing.CoffeeType = req.CoffeeType
+		aiInputChanged = true
 	}
 	if req.ShopName != "" {
 		existing.ShopName = req.ShopName
@@ -190,59 +230,86 @@ func (s *CoffeeLogService) Update(id, userID uint, req UpdateCoffeeLogRequest) (
 	}
 	if req.Mood != "" {
 		existing.Mood = req.Mood
+		aiInputChanged = true
 	}
 	if req.Notes != "" {
 		existing.Notes = req.Notes
+		aiInputChanged = true
 	}
 	if req.Acidity != nil {
 		acidity = *req.Acidity
 		existing.Acidity = *req.Acidity
+		aiInputChanged = true
 	}
 	if req.Bitterness != nil {
 		bitterness = *req.Bitterness
 		existing.Bitterness = *req.Bitterness
+		aiInputChanged = true
 	}
 	if req.Sweetness != nil {
 		sweetness = *req.Sweetness
 		existing.Sweetness = *req.Sweetness
+		aiInputChanged = true
 	}
 	if req.Body != nil {
 		body = *req.Body
 		existing.Body = *req.Body
+		aiInputChanged = true
 	}
 	if req.Aroma != nil {
 		aroma = *req.Aroma
 		existing.Aroma = *req.Aroma
+		aiInputChanged = true
 	}
 	if req.Aftertaste != nil {
 		aftertaste = *req.Aftertaste
 		existing.Aftertaste = *req.Aftertaste
+		aiInputChanged = true
 	}
 
 	if err := s.validateFlavorScores(acidity, bitterness, sweetness, body, aroma, aftertaste); err != nil {
 		return nil, err
 	}
 
-	needRegenAI := req.Acidity != nil || req.Bitterness != nil || req.Sweetness != nil ||
-		req.Body != nil || req.Aroma != nil || req.Aftertaste != nil || len(req.FlavorTagIDs) > 0
-
-	if needRegenAI {
-		tagNames := []string{}
-		if len(req.FlavorTagIDs) > 0 {
-			tags, _ := s.flavorTagRepo.FindByIDs(req.FlavorTagIDs)
-			for _, t := range tags {
-				tagNames = append(tagNames, t.Name)
-			}
-		} else {
-			for _, t := range existing.FlavorTags {
-				tagNames = append(tagNames, t.Name)
-			}
+	var flavorTagIDs []uint
+	tagNames := flavorTagNames(existing.FlavorTags)
+	tagIDsProvided := req.FlavorTagIDs != nil
+	if tagIDsProvided {
+		flavorTagIDs = *req.FlavorTagIDs
+		tags, err := s.validateFlavorTagIDs(flavorTagIDs)
+		if err != nil {
+			return nil, err
 		}
-		existing.AISummary = s.aiService.GenerateMockSummary(existing.CoffeeType, tagNames, acidity, bitterness, sweetness, body, aroma, aftertaste)
+		tagNames = flavorTagNames(tags)
 	}
 
-	if err := s.coffeeLogRepo.Update(existing, req.FlavorTagIDs); err != nil {
+	needRegenAI := aiInputChanged || tagIDsProvided
+	var aiReq FlavorSummaryRequest
+	generateExternalAI := false
+	if needRegenAI {
+		aiReq = FlavorSummaryRequest{
+			CoffeeName: existing.CoffeeName,
+			CoffeeType: existing.CoffeeType,
+			Tags:       tagNames,
+			Acidity:    acidity,
+			Bitterness: bitterness,
+			Sweetness:  sweetness,
+			Body:       body,
+			Aroma:      aroma,
+			Aftertaste: aftertaste,
+			Mood:       existing.Mood,
+			Notes:      existing.Notes,
+		}
+		existing.AISummary = s.aiService.generateMockSummary(existing.CoffeeType, tagNames, acidity, bitterness, sweetness, body, aroma, aftertaste)
+		generateExternalAI = req.GenerateAI != nil && *req.GenerateAI && externalAIEnabled()
+	}
+
+	if err := s.coffeeLogRepo.Update(existing, flavorTagIDs); err != nil {
 		return nil, err
+	}
+
+	if generateExternalAI {
+		go s.generateAndStoreAISummary(id, userID, aiReq)
 	}
 
 	updated, err := s.coffeeLogRepo.FindByID(id, userID)

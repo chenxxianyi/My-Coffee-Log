@@ -180,7 +180,12 @@ const filterTypes = [
   { val: 'all', label: 'All Brews / 全部' },
   { val: 'Pour Over', label: 'Pour Over / 手冲' },
   { val: 'Latte', label: 'Latte / 拿铁' },
-  { val: 'Americano', label: 'Americano / 美式' }
+  { val: 'Americano', label: 'Americano / 美式' },
+  { val: 'Cold Brew', label: 'Cold Brew / 冷萃' },
+  { val: 'Espresso', label: 'Espresso / 浓缩' },
+  { val: 'Dirty', label: 'Dirty / 脏咖啡' },
+  { val: 'Cappuccino', label: 'Cappuccino / 卡布奇诺' },
+  { val: 'Flat White', label: 'Flat White / 馥芮白' }
 ]
 
 // Grouping logic inside computed (Groups logs by Year-Month)

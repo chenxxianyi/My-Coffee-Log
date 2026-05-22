@@ -102,6 +102,12 @@ func (r *CoffeeLogRepository) Delete(id uint, userID uint) error {
 	return r.db.Where("id = ? AND user_id = ?", id, userID).Delete(&model.CoffeeLog{}).Error
 }
 
+func (r *CoffeeLogRepository) UpdateAISummary(id uint, userID uint, summary string) error {
+	return r.db.Model(&model.CoffeeLog{}).
+		Where("id = ? AND user_id = ?", id, userID).
+		Update("ai_summary", summary).Error
+}
+
 func (r *CoffeeLogRepository) FindRecentByUserID(userID uint, limit int) ([]model.CoffeeLog, error) {
 	var logs []model.CoffeeLog
 	if err := r.db.Preload("FlavorTags").Where("user_id = ?", userID).
