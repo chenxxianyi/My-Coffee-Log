@@ -20,8 +20,8 @@ func NewCoffeeLogHandler(coffeeLogService *service.CoffeeLogService) *CoffeeLogH
 }
 
 func (h *CoffeeLogHandler) Create(c *gin.Context) {
-	userID, exists := c.Get(middleware.ContextUserID)
-	if !exists {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
 		response.ErrorUnauthorized(c, "user not found in context")
 		return
 	}
@@ -32,7 +32,7 @@ func (h *CoffeeLogHandler) Create(c *gin.Context) {
 		return
 	}
 
-	log, err := h.coffeeLogService.Create(userID.(uint), req)
+	log, err := h.coffeeLogService.Create(userID, req)
 	if err != nil {
 		response.Error(c, 40001, err.Error())
 		return
@@ -42,8 +42,8 @@ func (h *CoffeeLogHandler) Create(c *gin.Context) {
 }
 
 func (h *CoffeeLogHandler) GetList(c *gin.Context) {
-	userID, exists := c.Get(middleware.ContextUserID)
-	if !exists {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
 		response.ErrorUnauthorized(c, "user not found in context")
 		return
 	}
@@ -54,12 +54,12 @@ func (h *CoffeeLogHandler) GetList(c *gin.Context) {
 	}
 
 	if pageStr := c.Query("page"); pageStr != "" {
-		if p, err := strconv.Atoi(pageStr); err == nil {
+		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
 			pagination.Page = p
 		}
 	}
 	if pageSizeStr := c.Query("page_size"); pageSizeStr != "" {
-		if ps, err := strconv.Atoi(pageSizeStr); err == nil {
+		if ps, err := strconv.Atoi(pageSizeStr); err == nil && ps > 0 {
 			pagination.PageSize = ps
 		}
 	}
@@ -73,7 +73,7 @@ func (h *CoffeeLogHandler) GetList(c *gin.Context) {
 		}
 	}
 
-	logs, total, err := h.coffeeLogService.GetList(userID.(uint), &pagination, month, coffeeType, tagID)
+	logs, total, err := h.coffeeLogService.GetList(userID, &pagination, month, coffeeType, tagID)
 	if err != nil {
 		response.Error(c, 50000, err.Error())
 		return
@@ -83,8 +83,8 @@ func (h *CoffeeLogHandler) GetList(c *gin.Context) {
 }
 
 func (h *CoffeeLogHandler) GetByID(c *gin.Context) {
-	userID, exists := c.Get(middleware.ContextUserID)
-	if !exists {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
 		response.ErrorUnauthorized(c, "user not found in context")
 		return
 	}
@@ -95,7 +95,7 @@ func (h *CoffeeLogHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	log, err := h.coffeeLogService.GetByID(uint(id), userID.(uint))
+	log, err := h.coffeeLogService.GetByID(uint(id), userID)
 	if err != nil {
 		response.ErrorNotFound(c, err.Error())
 		return
@@ -105,8 +105,8 @@ func (h *CoffeeLogHandler) GetByID(c *gin.Context) {
 }
 
 func (h *CoffeeLogHandler) Update(c *gin.Context) {
-	userID, exists := c.Get(middleware.ContextUserID)
-	if !exists {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
 		response.ErrorUnauthorized(c, "user not found in context")
 		return
 	}
@@ -123,7 +123,7 @@ func (h *CoffeeLogHandler) Update(c *gin.Context) {
 		return
 	}
 
-	log, err := h.coffeeLogService.Update(uint(id), userID.(uint), req)
+	log, err := h.coffeeLogService.Update(uint(id), userID, req)
 	if err != nil {
 		response.Error(c, 40001, err.Error())
 		return
@@ -133,8 +133,8 @@ func (h *CoffeeLogHandler) Update(c *gin.Context) {
 }
 
 func (h *CoffeeLogHandler) Delete(c *gin.Context) {
-	userID, exists := c.Get(middleware.ContextUserID)
-	if !exists {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
 		response.ErrorUnauthorized(c, "user not found in context")
 		return
 	}
@@ -145,7 +145,7 @@ func (h *CoffeeLogHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	if err := h.coffeeLogService.Delete(uint(id), userID.(uint)); err != nil {
+	if err := h.coffeeLogService.Delete(uint(id), userID); err != nil {
 		response.Error(c, 40001, err.Error())
 		return
 	}

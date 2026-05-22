@@ -17,6 +17,8 @@ type Router struct {
 	aiHandler        *handler.AIHandler
 	flavorTagHandler *handler.FlavorTagHandler
 	uploadHandler    *handler.UploadHandler
+	shopHandler      *handler.CoffeeShopHandler
+	beanHandler      *handler.CoffeeBeanHandler
 }
 
 func NewRouter(
@@ -27,6 +29,8 @@ func NewRouter(
 	aiHandler *handler.AIHandler,
 	flavorTagHandler *handler.FlavorTagHandler,
 	uploadHandler *handler.UploadHandler,
+	shopHandler *handler.CoffeeShopHandler,
+	beanHandler *handler.CoffeeBeanHandler,
 ) *Router {
 	return &Router{
 		authHandler:      authHandler,
@@ -36,13 +40,12 @@ func NewRouter(
 		aiHandler:        aiHandler,
 		flavorTagHandler: flavorTagHandler,
 		uploadHandler:    uploadHandler,
+		shopHandler:      shopHandler,
+		beanHandler:      beanHandler,
 	}
 }
 
 func (r *Router) Setup(engine *gin.Engine) {
-	// Serve uploaded files
-	engine.Static("/uploads", "./uploads")
-
 	api := engine.Group("/api/v1")
 
 	// Public routes
@@ -79,6 +82,8 @@ func (r *Router) Setup(engine *gin.Engine) {
 			stats.GET("/overview", r.statsHandler.GetOverview)
 			stats.GET("/flavor-profile", r.statsHandler.GetFlavorProfile)
 			stats.GET("/monthly", r.statsHandler.GetMonthly)
+			stats.GET("/personality", r.statsHandler.GetPersonality)
+			stats.GET("/monthly-review", r.statsHandler.GetMonthlyReview)
 		}
 
 		// AI
@@ -88,15 +93,46 @@ func (r *Router) Setup(engine *gin.Engine) {
 			ai.POST("/flavor-summary", r.aiHandler.GenerateFlavorSummary)
 			ai.POST("/lifestyle-quote", r.aiHandler.GetLifestyleQuote)
 			ai.POST("/flavor-insight", r.aiHandler.GetFlavorInsight)
+			ai.GET("/monthly-review", r.aiHandler.GetMonthlyReview)
+			ai.GET("/status", r.aiHandler.GetAIStatus)
+			ai.POST("/share-copy", r.aiHandler.GenerateShareCopy)
+			ai.POST("/coffee-profile", r.aiHandler.GenerateCoffeeProfile)
+			ai.POST("/preference-insight", r.aiHandler.GeneratePreferenceInsight)
 		}
 
-		// Uploads
-		protected.POST("/upload", r.uploadHandler.UploadFile)
+		// Uploads (rate limited)
+		protected.POST("/upload", middleware.RateLimit(10, time.Minute), r.uploadHandler.UploadFile)
+
+		// Serve uploaded files behind auth
+		protected.Static("/uploads", "./uploads")
 
 		// Flavor Tags
 		flavorTags := protected.Group("/flavor-tags")
 		{
 			flavorTags.GET("", r.flavorTagHandler.GetAll)
+		}
+
+		// Coffee Shops
+		shops := protected.Group("/coffee-shops")
+		{
+			shops.POST("", r.shopHandler.Create)
+			shops.GET("", r.shopHandler.GetList)
+			shops.GET("/names", r.shopHandler.GetShopNames)
+			shops.GET("/:id", r.shopHandler.GetByID)
+			shops.PUT("/:id", r.shopHandler.Update)
+			shops.DELETE("/:id", r.shopHandler.Delete)
+			shops.GET("/:id/logs", r.shopHandler.GetRelatedLogs)
+		}
+
+		// Coffee Beans
+		beans := protected.Group("/coffee-beans")
+		{
+			beans.POST("", r.beanHandler.Create)
+			beans.GET("", r.beanHandler.GetList)
+			beans.GET("/list", r.beanHandler.GetBeanList)
+			beans.GET("/:id", r.beanHandler.GetByID)
+			beans.PUT("/:id", r.beanHandler.Update)
+			beans.DELETE("/:id", r.beanHandler.Delete)
 		}
 	}
 }

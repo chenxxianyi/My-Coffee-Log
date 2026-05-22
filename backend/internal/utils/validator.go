@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -9,6 +10,8 @@ import (
 )
 
 var validate *validator.Validate
+
+var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 
 func init() {
 	validate = validator.New()
@@ -26,29 +29,35 @@ func ValidateStruct(s interface{}) map[string]string {
 		return nil
 	}
 
-	errors := make(map[string]string)
-	for _, err := range err.(validator.ValidationErrors) {
-		field := err.Field()
-		switch err.Tag() {
+	var valErrs validator.ValidationErrors
+	if !errors.As(err, &valErrs) {
+		return map[string]string{"error": err.Error()}
+	}
+
+	errs := make(map[string]string)
+	for _, e := range valErrs {
+		field := e.Field()
+		switch e.Tag() {
 		case "required":
-			errors[field] = fmt.Sprintf("%s is required", field)
+			errs[field] = fmt.Sprintf("%s is required", field)
 		case "email":
-			errors[field] = fmt.Sprintf("%s must be a valid email", field)
+			errs[field] = fmt.Sprintf("%s must be a valid email", field)
 		case "min":
-			errors[field] = fmt.Sprintf("%s must be at least %s characters", field, err.Param())
+			errs[field] = fmt.Sprintf("%s must be at least %s characters", field, e.Param())
+		case "max":
+			errs[field] = fmt.Sprintf("%s must be at most %s characters", field, e.Param())
 		case "flavor_score":
-			errors[field] = fmt.Sprintf("%s must be between 0 and 5", field)
+			errs[field] = fmt.Sprintf("%s must be between 0 and 5", field)
 		default:
-			errors[field] = fmt.Sprintf("%s is invalid", field)
+			errs[field] = fmt.Sprintf("%s is invalid", field)
 		}
 	}
 
-	return errors
+	return errs
 }
 
 func IsEmail(email string) bool {
-	re := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
-	return re.MatchString(email)
+	return emailRegex.MatchString(email)
 }
 
 func IsNil(i interface{}) bool {

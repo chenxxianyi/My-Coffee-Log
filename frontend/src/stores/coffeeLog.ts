@@ -21,7 +21,25 @@ export interface CoffeeLog {
   aroma: number
   aftertaste: number
   ai_summary: string
+  mood_tags: string[]
+  scene_tags: string[]
+  pairing_tags: string[]
   flavor_tags: string[]
+  bean_id?: number | null
+  bean?: CoffeeBeanInfo | null
+  brew_ratio: string
+  water_temp: string
+  grind_size: string
+}
+
+export interface CoffeeBeanInfo {
+  id: number
+  name: string
+  origin: string
+  processing_method: string
+  roast_level: string
+  roaster: string
+  image_url: string
 }
 
 export interface NewCoffeeLog {
@@ -40,6 +58,14 @@ export interface NewCoffeeLog {
   aroma: number
   aftertaste: number
   flavor_tags: string[]
+  mood_tags?: string[]
+  scene_tags?: string[]
+  pairing_tags?: string[]
+  bean_id?: number | null
+  bean_name?: string
+  brew_ratio?: string
+  water_temp?: string
+  grind_size?: string
 }
 
 export const useCoffeeLogStore = defineStore('coffeeLog', () => {
@@ -71,6 +97,22 @@ export const useCoffeeLogStore = defineStore('coffeeLog', () => {
 
   // Lifestyle quote from AI
   const lifestyleQuote = ref('')
+
+  // Coffee Personality
+  const personalities = ref<statsApi.PersonalityTag[]>([])
+
+  // Monthly Review
+  const monthlyReview = ref<statsApi.MonthlyReviewData | null>(null)
+  const monthlyReviewAI = ref('')
+
+  // AI Status
+  const aiStatus = ref<statsApi.AIStatus | null>(null)
+
+  // AI Coffee Profile
+  const coffeeProfileAI = ref('')
+
+  // AI Preference Insight
+  const preferenceInsight = ref('')
 
   // Today's log check
   const todayLog = computed(() => {
@@ -160,6 +202,57 @@ export const useCoffeeLogStore = defineStore('coffeeLog', () => {
     }
   }
 
+  async function fetchPersonality() {
+    try {
+      const res = await statsApi.getPersonality()
+      personalities.value = res.personalities || []
+    } catch (e) {
+      console.error('Failed to fetch personality:', e)
+      personalities.value = []
+    }
+  }
+
+  async function fetchMonthlyReview(month?: string) {
+    try {
+      const [review, aiRes] = await Promise.all([
+        statsApi.getMonthlyReview(month),
+        statsApi.getMonthlyReviewAI(month)
+      ])
+      monthlyReview.value = review
+      monthlyReviewAI.value = aiRes.summary || ''
+    } catch (e) {
+      console.error('Failed to fetch monthly review:', e)
+    }
+  }
+
+  async function fetchAIStatus() {
+    try {
+      aiStatus.value = await statsApi.getAIStatus()
+    } catch (e) {
+      console.error('Failed to fetch AI status:', e)
+    }
+  }
+
+  async function fetchCoffeeProfile() {
+    try {
+      const res = await statsApi.generateCoffeeProfile()
+      coffeeProfileAI.value = res.profile || ''
+    } catch (e) {
+      console.error('Failed to fetch coffee profile:', e)
+      coffeeProfileAI.value = ''
+    }
+  }
+
+  async function fetchPreferenceInsight() {
+    try {
+      const res = await statsApi.generatePreferenceInsight()
+      preferenceInsight.value = res.insight || ''
+    } catch (e) {
+      console.error('Failed to fetch preference insight:', e)
+      preferenceInsight.value = ''
+    }
+  }
+
   return {
     logs,
     isLoading,
@@ -173,12 +266,23 @@ export const useCoffeeLogStore = defineStore('coffeeLog', () => {
     averageSensoryValues,
     lifestyleQuote,
     todayLog,
+    personalities,
+    monthlyReview,
+    monthlyReviewAI,
+    aiStatus,
+    coffeeProfileAI,
+    preferenceInsight,
     fetchLogs,
     fetchLogById,
     addLog,
     deleteLog,
     removeLogFromCache,
     fetchStats,
-    fetchLifestyleQuote
+    fetchLifestyleQuote,
+    fetchPersonality,
+    fetchMonthlyReview,
+    fetchAIStatus,
+    fetchCoffeeProfile,
+    fetchPreferenceInsight
   }
 })

@@ -220,6 +220,20 @@
 
     <!-- Download CTA -->
     <div class="space-y-3">
+      <!-- AI Share Copy -->
+      <button @click="generateAIShareCopy" :disabled="isGeneratingCopy" class="w-full py-3.5 text-[10px] uppercase tracking-widest font-semibold bg-white/10 text-white hover:bg-white/20 transition-all rounded-sm flex items-center justify-center gap-2 border border-white/20">
+        <template v-if="isGeneratingCopy">
+          <span class="animate-pulse">AI 文案生成中...</span>
+        </template>
+        <template v-else>
+          <Sparkles class="w-4 h-4" />
+          <span>AI 生成分享文案</span>
+        </template>
+      </button>
+      <div v-if="aiCopy" class="p-3 bg-white/5 border border-white/10 rounded-sm space-y-2">
+        <p class="text-[11px] text-white/80 font-serif italic leading-relaxed">{{ aiCopy }}</p>
+        <button @click="copyAIText" class="text-[9px] text-white/50 hover:text-white/80 transition-colors uppercase tracking-wider font-semibold">复制文案</button>
+      </div>
       <button 
         @click="exportCardImage" 
         class="w-full py-4 bg-coffee-cream text-coffee-espresso hover:bg-coffee-latte transition-all duration-300 rounded-xl text-xs font-semibold tracking-[0.25em] uppercase shadow-md flex items-center justify-center gap-2"
@@ -252,8 +266,9 @@
 import { ref, computed } from 'vue'
 import { useCoffeeLogStore } from '@/stores/coffeeLog'
 import FlavorRadarChart from '@/components/charts/FlavorRadarChart.vue'
-import { X, Download, Coffee } from 'lucide-vue-next'
+import { X, Download, Coffee, Sparkles } from 'lucide-vue-next'
 import html2canvas from 'html2canvas'
+import * as statsApi from '@/api/stats'
 
 const props = defineProps<{
   id: string
@@ -265,6 +280,8 @@ const log = computed(() => store.getLogById(parseInt(props.id)))
 const ratio = ref('3:4')
 const cardTemplate = ref('magazine')
 const isExporting = ref(false)
+const aiCopy = ref('')
+const isGeneratingCopy = ref(false)
 
 const templates = [
   { id: 'minimal', label: '极简' },
@@ -327,6 +344,33 @@ const formatFullDate = (dateStr: string) => {
   const date = new Date(dateStr)
   const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
   return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
+}
+
+async function generateAIShareCopy() {
+  if (!log.value || isGeneratingCopy.value) return
+  isGeneratingCopy.value = true
+  try {
+    const res = await statsApi.generateShareCopy({
+      coffee_name: log.value.coffee_name,
+      coffee_type: log.value.coffee_type,
+      shop_name: log.value.shop_name,
+      mood: log.value.mood,
+      notes: log.value.notes
+    })
+    aiCopy.value = res.copy || ''
+  } catch (e) {
+    console.error('Failed to generate AI share copy:', e)
+    aiCopy.value = ''
+  } finally {
+    isGeneratingCopy.value = false
+  }
+}
+
+function copyAIText() {
+  if (!aiCopy.value) return
+  navigator.clipboard.writeText(aiCopy.value).then(() => {
+    alert('AI 文案已复制到剪贴板！')
+  }).catch(() => {})
 }
 </script>
 

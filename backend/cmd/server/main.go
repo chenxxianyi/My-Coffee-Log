@@ -39,6 +39,8 @@ func main() {
 		&model.CoffeeLog{},
 		&model.FlavorTag{},
 		&model.CardTemplate{},
+		&model.CoffeeShop{},
+		&model.CoffeeBean{},
 	); err != nil {
 		log.Fatalf("Failed to auto migrate: %v", err)
 	}
@@ -51,13 +53,17 @@ func main() {
 	userRepo := repository.NewUserRepository(database.DB)
 	coffeeLogRepo := repository.NewCoffeeLogRepository(database.DB)
 	statsRepo := repository.NewStatsRepository(database.DB)
+	shopRepo := repository.NewCoffeeShopRepository(database.DB)
+	beanRepo := repository.NewCoffeeBeanRepository(database.DB)
 
 	// Init services
 	authService := service.NewAuthService(userRepo)
 	userService := service.NewUserService(userRepo)
 	statsService := service.NewStatsService(statsRepo)
 	aiService := service.NewAIService(statsService)
-	coffeeLogService := service.NewCoffeeLogService(coffeeLogRepo, flavorTagRepo, aiService)
+	shopService := service.NewCoffeeShopService(shopRepo, coffeeLogRepo)
+	beanService := service.NewCoffeeBeanService(beanRepo)
+	coffeeLogService := service.NewCoffeeLogService(coffeeLogRepo, flavorTagRepo, aiService, shopService, beanService)
 
 	// Init handlers
 	authHandler := handler.NewAuthHandler(authService)
@@ -67,9 +73,11 @@ func main() {
 	aiHandler := handler.NewAIHandler(aiService)
 	flavorTagHandler := handler.NewFlavorTagHandler(flavorTagRepo)
 	uploadHandler := handler.NewUploadHandler()
+	shopHandler := handler.NewCoffeeShopHandler(shopService)
+	beanHandler := handler.NewCoffeeBeanHandler(beanService)
 
 	// Init router
-	r := router.NewRouter(authHandler, userHandler, coffeeLogHandler, statsHandler, aiHandler, flavorTagHandler, uploadHandler)
+	r := router.NewRouter(authHandler, userHandler, coffeeLogHandler, statsHandler, aiHandler, flavorTagHandler, uploadHandler, shopHandler, beanHandler)
 
 	// Setup Gin
 	engine := gin.New()

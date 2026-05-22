@@ -28,15 +28,15 @@ My Coffee Log 当前最适合的方向不是“专业咖啡参数工具”，而
 | Step 4 | 咖啡详情页视觉强化 | P0 | 让每条记录像一页生活方式杂志 | ✅ 已完成 |
 | Step 5 | AI 文案风格升级 | P0 | 从风味分析升级为 editorial 文案 | ✅ 已完成 |
 | Step 6 | 分享卡片模板优化 | P0 | 提升外部传播能力 | ✅ 已完成 |
-| Step 7 | 咖啡心情日记 | P1 | 让记录从咖啡扩展到生活状态 | |
-| Step 8 | 统计页升级为个人咖啡画像 | P1 | 提升统计页情绪价值和分享价值 | |
-| Step 9 | 复刻上一杯 | P1 | 提高重复记录效率 | |
-| Step 10 | 月度咖啡回顾 | P1 | 提升留存和月度分享 | |
-| Step 11 | 咖啡店收藏 | P1 | 沉淀用户长期消费场景 | |
-| Step 12 | 咖啡豆档案 | P2 | 服务深度手冲用户 | |
+| Step 7 | 咖啡心情日记 | P1 | 让记录从咖啡扩展到生活状态 | ✅ 已完成 |
+| Step 8 | 统计页升级为个人咖啡画像 | P1 | 提升统计页情绪价值和分享价值 | ✅ 已完成 |
+| Step 9 | 复刻上一杯 | P1 | 提高重复记录效率 | ✅ 已完成 |
+| Step 10 | 月度咖啡回顾 | P1 | 提升留存和月度分享 | ✅ 已完成 |
+| Step 11 | 咖啡店收藏 | P1 | 沉淀用户长期消费场景 | ✅ 已完成 |
+| Step 12 | 咖啡豆档案 | P2 | 服务深度手冲用户 | ✅ 已完成 |
 | Step 13 | 冲煮参数记录 | P2 | 扩展专业记录能力 | |
 | Step 14 | 咖啡地图 | P2 | 扩展城市咖啡生活场景 | |
-| Step 15 | 真实 AI 接入 | P2 | 提升文案与洞察个性化能力 | |
+| Step 15 | 真实 AI 接入 | P2 | 提升文案与洞察个性化能力 | ✅ 已完成 |
 | Step 16 | 轻量成就系统 | P2 | 增强长期记录动力 | |
 
 ---
@@ -351,7 +351,7 @@ P0
 
 ---
 
-## Step 7：咖啡心情日记
+## Step 7：咖啡心情日记 ✅
 
 ### 优先级
 
@@ -364,9 +364,9 @@ P1
 ### 核心改动
 
 - 扩展 mood 字段表达能力。
-- 增加心情标签。
-- 增加场景标签。
-- 增加搭配标签。
+- 增加心情标签（mood_tags）。
+- 增加场景标签（scene_tags）。
+- 增加搭配标签（pairing_tags）。
 - 在详情页展示生活方式标签。
 - 后续支持按心情或场景统计。
 
@@ -391,9 +391,16 @@ P1
 - 详情页能展示这些生活方式标签。
 - 后续统计页可以基于这些标签生成洞察。
 
+### 实现记录
+
+- **后端**：CoffeeLog 模型新增 `mood_tags`、`scene_tags`、`pairing_tags` 三个 JSON 字段（varchar(500)），通过 GORM AutoMigrate 自动迁移。Create/Update 请求结构体新增对应字段，后端校验标签值在预设白名单内且单类最多 5 个。
+- **前端**：`constants/coffee.ts` 新增 `LIFESTYLE_MOOD_TAGS`、`LIFESTYLE_SCENE_TAGS`、`LIFESTYLE_PAIRING_TAGS` 常量。API 层 `CoffeeLogDTO` 和 `CreateCoffeeLogParams` 新增对应字段，`toCoffeeLog` 自动 JSON.parse。Store 接口同步更新。
+- **创建页**：快速记录和精细记录（步骤 3）均新增生活标签多选区域，心情/场景/搭配分别以 amber/sky/rose 色系区分。
+- **详情页**：新增「生活标签 / Lifestyle」区块，按分类展示已选标签，无标签时自动隐藏。
+
 ---
 
-## Step 8：统计页升级为个人咖啡画像
+## Step 8：统计页升级为个人咖啡画像 ✅
 
 ### 优先级
 
@@ -416,6 +423,11 @@ P1
 - Creamy Comfort Seeker：偏爱奶咖、焦糖、坚果、顺滑口感。
 - Slow Morning Brewer：常在早晨记录手冲，偏好安静、轻盈的风味。
 - Urban Latte Lover：偏好咖啡店、拿铁、通勤场景。
+- Bold Espresso Purist：追求浓烈、醇厚、苦甜交织的深度体验。
+- Rainy Day Reader：阴雨天、独处、阅读的安静咖啡时光。
+- Social Weekend Explorer：周末、朋友、甜点的社交咖啡。
+- Productive Hustler：专注、高效、工作的燃料咖啡。
+- Coffee Explorer：正在探索咖啡世界的入门者（兜底人格）。
 
 ### 涉及模块
 
@@ -431,9 +443,14 @@ P1
 - 人格标签有对应说明文案。
 - 用户可以将咖啡人格生成分享图。
 
+### 实现记录
+
+- **后端**：`stats_repository.go` 新增 `GetLifestyleTagCounts` 方法，聚合 mood_tags/scene_tags/pairing_tags JSON 字段中的标签使用频次。`stats_service.go` 新增 `GetPersonality` 方法，基于 8 条人格规则（匹配 + 评分）从风味特征、咖啡类型偏好、生活方式标签中推导出最多 3 个人格标签，无匹配时兜底为 Coffee Explorer。`stats_handler.go` 新增 `GetPersonality` 接口，路由 `GET /api/v1/stats/personality`。
+- **前端**：`api/stats.ts` 新增 `PersonalityTag`、`PersonalityResponse` 类型和 `getPersonality` API 调用。Store 新增 `personalities` ref 和 `fetchPersonality` action。`Stats.vue` 新增「你的咖啡人格 / Coffee Personality」模块，包含主人格卡片（图标 + 标题 + 副标题 + 描述）、次人格标签列表、分享按钮（Web Share API / 剪贴板兜底）。
+
 ---
 
-## Step 9：复刻上一杯
+## Step 9：复刻上一杯 ✅
 
 ### 优先级
 
@@ -472,9 +489,13 @@ P1
 - 创建页能自动填充原记录信息。
 - 保存后生成一条新的咖啡记录。
 
+### 实现记录
+
+- **前端**：`CoffeeDetail.vue` 将"再记一杯"改为"复刻这杯"按钮，链接到 `/create?from_log_id={id}`。`Timeline.vue` 三种卡片类型均新增 hover 显示的复制按钮（Copy icon），链接到 `/create?from_log_id={id}`。`CreateCoffeeLog.vue` 新增 `onMounted` 钩子，读取 `route.query.from_log_id`，从 store 或 API 获取源记录，自动填充 quickForm 和 form 的咖啡类型、风味参数、风味标签、心情、店铺、备注、生活方式标签等字段。保存时生成新记录，不覆盖原记录。
+
 ---
 
-## Step 10：月度咖啡回顾
+## Step 10：月度咖啡回顾 ✅ 已完成
 
 ### 优先级
 
@@ -515,9 +536,20 @@ P1
 - 月报包含数据总结和 AI 文案。
 - 月报可以导出为分享图片。
 
+### 实现记录
+
+- **后端**：`stats_repository.go` 新增 `GetMonthCountByMonth`、`GetFavoriteCoffeeTypeByMonth`、`GetTopCoffeeTypesByMonth`、`GetTopFlavorTagsByMonth`、`GetTopCoffeeNamesByMonth`、`GetTopDrinkWeekdayByMonth`、`GetLifestyleTagCountsByMonth`、`GetFlavorProfileByMonth` 8 个按月聚合查询方法，支持传入 `YYYY-MM` 格式月份参数。新增 `CoffeeTypeCount`、`CoffeeNameCount`、`WeekdayCount` 数据结构。
+- **后端**：`stats_service.go` 新增 `GetMonthlyReview` 方法，聚合月度杯数、偏好类型、类型分布、风味标签 Top N、常喝咖啡名 Top N、最常喝咖啡的星期、心情/场景/搭配标签、月度风味雷达数据。新增 `generateMonthlyKeywords` 方法，根据偏好类型、风味、心情、场景、星期自动生成 6 个中文关键词（如"拿铁爱好者""柑橘风味""平静时光"等）。新增 `MonthlyReviewResponse` 结构体包含完整月报数据。
+- **后端**：`ai_service.go` 新增 `GenerateMonthlyReview` 方法和 `GenerateMonthlyReviewForUser` 便捷方法，支持 DeepSeek API 生成 editorial 风格月度回顾文案，API 不可用时自动 fallback 到 `generateMockMonthlyReview` 模板文案。System Prompt 要求 3-5 句话、80-150 字、画面感和比喻风格。新增 `GET /api/v1/ai/monthly-review` 路由。
+- **后端**：`stats_handler.go` 新增 `GetMonthlyReview` handler，接受 `month` 查询参数（默认当前月）。新增 `GET /api/v1/stats/monthly-review` 路由。
+- **前端**：`api/stats.ts` 新增 `MonthlyReviewData`、`MonthlyReviewFlavorTag`、`MonthlyReviewCoffeeType`、`MonthlyReviewCoffeeName`、`MonthlyReviewLifestyleTag`、`MonthlyReviewFlavorProfile`、`MonthlyReviewAIResponse` 类型和 `getMonthlyReview`、`getMonthlyReviewAI` API 调用。
+- **前端**：Store 新增 `monthlyReview` ref、`monthlyReviewAI` ref 和 `fetchMonthlyReview` action，并行请求月报数据和 AI 文案。
+- **前端**：新增 `MonthlyReview.vue` 页面，包含月度杯数大数字 + 关键词卡片、AI Editorial 月度回顾文案（装饰性大引号 + closing ornament）、冲煮偏好分布条形图、风味图谱标签云、月度风味雷达图、常喝咖啡 Top 排行、生活标签（心情/场景/搭配三色系）、最常喝咖啡的星期、分享按钮（Web Share API / 剪贴板兜底）。支持左右箭头切换月份，空月展示引导状态。
+- **前端**：`Stats.vue` 新增「月度咖啡回顾」入口卡片（📅 图标 + editorial 渐变背景 + ChevronRight 箭头），链接到 `/monthly-review`。
+
 ---
 
-## Step 11：咖啡店收藏
+## Step 11：咖啡店收藏 ✅ 已完成
 
 ### 优先级
 
@@ -558,9 +590,24 @@ P1
 - 用户可以查看自己记录过的咖啡店。
 - 店铺详情能展示到访次数和关联咖啡记录。
 
+### 实现记录
+
+- **后端**：新增 `model/coffee_shop.go` CoffeeShop 数据模型，包含 Name、Address、Rating、ImageURL、VisitCount、LastVisitAt 等字段，支持软删除。
+- **后端**：新增 `repository/coffee_shop_repository.go`，包含 Create、FindByID、FindList（分页+搜索）、FindByName、Update、Delete、FindShopNames、IncrementVisitCount 等方法。新增 `repository/coffee_log_repository.go` 的 `FindByShopName` 方法按店铺名称查询关联咖啡记录。
+- **后端**：新增 `service/coffee_shop_service.go`，包含 CRUD 操作、`EnsureShopForLog`（创建咖啡记录时自动创建或更新店铺记录并递增到访次数）、`GetRelatedLogs`（获取店铺关联咖啡记录）等业务逻辑。
+- **后端**：`service/coffee_log_service.go` 的 Create 方法集成 `EnsureShopForLog`，用户创建咖啡记录时自动维护店铺收藏数据。
+- **后端**：新增 `handler/coffee_shop_handler.go`，包含 Create、GetByID、GetList、Update、Delete、GetShopNames、GetRelatedLogs 七个 handler。新增路由组 `coffee-shops`，包含 `POST /`、`GET /`、`GET /names`、`GET /:id`、`PUT /:id`、`DELETE /:id`、`GET /:id/logs`。
+- **后端**：`main.go` 新增 CoffeeShop AutoMigrate、shopRepo、shopService、shopHandler 依赖注入，调整服务初始化顺序避免循环依赖。
+- **前端**：新增 `api/coffeeShop.ts`，定义 CoffeeShop、CreateCoffeeShopParams、UpdateCoffeeShopParams 类型和 getCoffeeShops、getCoffeeShopById、createCoffeeShop、updateCoffeeShop、deleteCoffeeShop、getShopNames、getShopLogs API 调用。
+- **前端**：新增 `CoffeeShops.vue` 咖啡店列表页，包含搜索栏、店铺卡片（名称/地址/评分/到访次数/最近到访）、添加店铺弹窗（名称/地址/星级评分）、空状态引导。
+- **前端**：新增 `CoffeeShopDetail.vue` 咖啡店详情页，包含封面图/店铺信息卡（名称/地址/评分/到访统计/最近到访/关联记录数）、关联咖啡记录列表、编辑店铺弹窗（名称/地址/评分/删除）。
+- **前端**：`router/index.ts` 新增 `/coffee-shops` 和 `/coffee-shops/:id` 路由。
+- **前端**：`Profile.vue` 系统偏好菜单新增「咖啡店收藏」入口，链接到 `/coffee-shops`。
+- **前端**：`CreateCoffeeLog.vue` 精细记录模式 Step 3 店铺输入框增加自动补全下拉，聚焦时加载历史店铺名称列表，输入时实时过滤，点击补全项自动填充。
+
 ---
 
-## Step 12：咖啡豆档案
+## Step 12：咖啡豆档案 ✅ 已完成
 
 ### 优先级
 
@@ -602,6 +649,22 @@ P2
 - 普通用户不填写豆子信息也能完成记录。
 - 高级用户可以记录并复用咖啡豆信息。
 - 咖啡详情页能展示豆子档案。
+
+### 实现记录
+
+- **后端**：新增 `model/coffee_bean.go` CoffeeBean 数据模型，包含 Name、Origin、ProcessingMethod、RoastLevel、Roaster、ImageURL、UsageCount 等字段，支持软删除。
+- **后端**：`model/coffee_log.go` 新增 BeanID（外键关联 CoffeeBean）、BrewRatio、WaterTemp、GrindSize 字段，新增 Bean 关联预加载。
+- **后端**：新增 `repository/coffee_bean_repository.go`，包含 Create、FindByID、FindList（分页+搜索）、FindByName、Update、Delete、FindBeanNames、IncrementUsageCount 等方法。
+- **后端**：新增 `service/coffee_bean_service.go`，包含 CRUD 操作、`EnsureBeanForLog`（创建咖啡记录时自动创建或查找咖啡豆记录并递增使用次数）等业务逻辑。
+- **后端**：`service/coffee_log_service.go` 新增 beanService 依赖，Create 方法集成 `EnsureBeanForLog`，Create/Update 请求结构体新增 BeanID、BeanName、BrewRatio、WaterTemp、GrindSize 字段。
+- **后端**：`repository/coffee_log_repository.go` FindByID 新增 Preload("Bean") 预加载。
+- **后端**：新增 `handler/coffee_bean_handler.go`，包含 Create、GetByID、GetList、Update、Delete、GetBeanList 六个 handler。新增路由组 `coffee-beans`，包含 `POST /`、`GET /`、`GET /list`、`GET /:id`、`PUT /:id`、`DELETE /:id`。
+- **后端**：`main.go` 新增 CoffeeBean AutoMigrate、beanRepo、beanService、beanHandler 依赖注入。
+- **前端**：新增 `api/coffeeBean.ts`，定义 CoffeeBean、CreateCoffeeBeanParams、UpdateCoffeeBeanParams 类型和 getCoffeeBeans、getCoffeeBeanById、createCoffeeBean、updateCoffeeBean、deleteCoffeeBean、getBeanList API 调用。
+- **前端**：`api/coffeeLog.ts` CoffeeLogDTO 新增 bean_id、bean、brew_ratio、water_temp、grind_size 字段，toCoffeeLog 映射新增对应字段，CreateCoffeeLogParams 和 toCreatePayload 新增 bean_id、bean_name、brew_ratio、water_temp、grind_size。
+- **前端**：`stores/coffeeLog.ts` CoffeeLog 接口新增 bean_id、bean（CoffeeBeanInfo）、brew_ratio、water_temp、grind_size 字段，NewCoffeeLog 接口新增 bean_id、bean_name、brew_ratio、water_temp、grind_size 可选字段。
+- **前端**：`CreateCoffeeLog.vue` 精细记录模式 Step 2 新增冲煮参数区域（粉水比/水温/研磨度输入框），Step 3 新增咖啡豆档案区域（已保存豆子下拉选择 + 手动填写豆子名称/产地/处理法/烘焙度/烘焙商），提交时自动创建内联豆子记录。
+- **前端**：`CoffeeDetail.vue` 新增咖啡豆档案展示区域（豆子名称/产地/处理法/烘焙度/烘焙商 + 冲煮参数粉水比/水温/研磨度），仅在有豆子信息时显示。
 
 ---
 
@@ -680,7 +743,7 @@ P2
 
 ---
 
-## Step 15：真实 AI 接入
+## Step 15：真实 AI 接入 ✅ 已完成
 
 ### 优先级
 
@@ -724,6 +787,18 @@ P2
 - 未配置 API Key 时可以继续使用 Mock AI。
 - 配置 API Key 后可以生成真实 AI 文案。
 - AI 请求失败时不会影响用户保存记录。
+
+### 实现记录
+
+- **后端**：`service/ai_service.go` 已有 `callDeepSeekAPI()` 函数支持真实 OpenAI 兼容 API 调用，新增 `ExternalAIEnabled()` 公共方法供 handler 调用。
+- **后端**：`service/ai_service.go` 新增 `GenerateShareCopy` 分享卡片文案生成（含 mock 降级）、`GenerateCoffeeProfileForUser` 个人咖啡画像 AI 生成、`GeneratePreferenceInsightForUser` 偏好变化洞察 AI 生成，三个新 AI 能力均支持真实 API 调用 + Mock 降级。
+- **后端**：`handler/ai_handler.go` 新增 `GetAIStatus`（返回 AI 启用状态和模型名）、`GenerateShareCopy`、`GenerateCoffeeProfile`、`GeneratePreferenceInsight` 四个 handler。
+- **后端**：`router/router.go` AI 路由组新增 `GET /status`、`POST /share-copy`、`POST /coffee-profile`、`POST /preference-insight` 四个端点。
+- **后端**：`.env.example` 新增 `AI_ENABLED` 和 `OPENAI_REQUEST_TIMEOUT_SECONDS` 配置项说明。
+- **前端**：`api/stats.ts` 新增 `AIStatus`、`ShareCopyRequest/Response`、`CoffeeProfileResponse`、`PreferenceInsightResponse` 类型和 `getAIStatus`、`generateShareCopy`、`generateCoffeeProfile`、`generatePreferenceInsight` API 调用。
+- **前端**：`stores/coffeeLog.ts` 新增 `aiStatus`、`coffeeProfileAI`、`preferenceInsight` 状态和 `fetchAIStatus`、`fetchCoffeeProfile`、`fetchPreferenceInsight` actions。
+- **前端**：`Stats.vue` 新增 AI 咖啡画像展示区、偏好洞察展示区、AI 引擎状态指示器（显示启用/禁用状态和模型名），onMounted 自动获取 AI 状态和文案。
+- **前端**：`ShareCard.vue` 新增「AI 生成分享文案」按钮，调用后端 AI 生成分享短文案，支持复制到剪贴板。
 
 ---
 

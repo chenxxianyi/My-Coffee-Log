@@ -20,7 +20,15 @@ export interface CoffeeLogDTO {
   aroma: number
   aftertaste: number
   ai_summary: string
+  mood_tags: string
+  scene_tags: string
+  pairing_tags: string
   flavor_tags: { id: number; name: string; label: string; color: string }[]
+  bean_id: number | null
+  bean: { id: number; name: string; origin: string; processing_method: string; roast_level: string; roaster: string; image_url: string } | null
+  brew_ratio: string
+  water_temp: string
+  grind_size: string
   created_at: string
   updated_at: string
 }
@@ -53,7 +61,15 @@ export function toCoffeeLog(dto: CoffeeLogDTO) {
     aroma: dto.aroma,
     aftertaste: dto.aftertaste,
     ai_summary: dto.ai_summary || '',
-    flavor_tags: dto.flavor_tags?.map(t => t.name) || []
+    mood_tags: dto.mood_tags ? JSON.parse(dto.mood_tags) : [],
+    scene_tags: dto.scene_tags ? JSON.parse(dto.scene_tags) : [],
+    pairing_tags: dto.pairing_tags ? JSON.parse(dto.pairing_tags) : [],
+    flavor_tags: dto.flavor_tags?.map(t => t.name) || [],
+    bean_id: dto.bean_id || null,
+    bean: dto.bean || null,
+    brew_ratio: dto.brew_ratio || '',
+    water_temp: dto.water_temp || '',
+    grind_size: dto.grind_size || ''
   }
 }
 
@@ -74,6 +90,14 @@ export interface CreateCoffeeLogParams {
   aroma: number
   aftertaste: number
   flavor_tags: string[]
+  mood_tags?: string[]
+  scene_tags?: string[]
+  pairing_tags?: string[]
+  bean_id?: number | null
+  bean_name?: string
+  brew_ratio?: string
+  water_temp?: string
+  grind_size?: string
 }
 
 function toCreatePayload(params: CreateCoffeeLogParams) {
@@ -97,7 +121,15 @@ function toCreatePayload(params: CreateCoffeeLogParams) {
     body: params.body,
     aroma: params.aroma,
     aftertaste: params.aftertaste,
-    flavor_tag_ids
+    flavor_tag_ids,
+    mood_tags: params.mood_tags || [],
+    scene_tags: params.scene_tags || [],
+    pairing_tags: params.pairing_tags || [],
+    bean_id: params.bean_id || null,
+    bean_name: params.bean_name || '',
+    brew_ratio: params.brew_ratio || '',
+    water_temp: params.water_temp || '',
+    grind_size: params.grind_size || ''
   }
 }
 

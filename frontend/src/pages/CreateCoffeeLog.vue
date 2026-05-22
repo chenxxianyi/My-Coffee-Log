@@ -121,6 +121,59 @@
           </div>
         </div>
 
+        <!-- Lifestyle Tags: Mood / Scene / Pairing -->
+        <div class="space-y-3">
+          <label class="text-[10px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso block select-none">生活标签 <span class="text-coffee-softGray font-normal normal-case">(选填)</span></label>
+          <!-- Mood Tags -->
+          <div class="space-y-1.5">
+            <span class="text-[9px] uppercase tracking-wider text-coffee-softGray font-semibold select-none">心情 Mood</span>
+            <div class="flex flex-wrap gap-1.5">
+              <button
+                v-for="t in LIFESTYLE_MOOD_TAGS"
+                :key="t.val"
+                @click="toggleLifestyleTag(quickForm.mood_tags, t.val)"
+                type="button"
+                class="px-2.5 py-1 text-[10px] border rounded-full transition-all duration-150"
+                :class="quickForm.mood_tags.includes(t.val)
+                  ? 'bg-amber-100 text-amber-800 border-amber-400'
+                  : 'bg-coffee-cream/30 text-coffee-espresso border-coffee-latte/50 hover:border-coffee-brown'"
+              >{{ t.label }}</button>
+            </div>
+          </div>
+          <!-- Scene Tags -->
+          <div class="space-y-1.5">
+            <span class="text-[9px] uppercase tracking-wider text-coffee-softGray font-semibold select-none">场景 Scene</span>
+            <div class="flex flex-wrap gap-1.5">
+              <button
+                v-for="t in LIFESTYLE_SCENE_TAGS"
+                :key="t.val"
+                @click="toggleLifestyleTag(quickForm.scene_tags, t.val)"
+                type="button"
+                class="px-2.5 py-1 text-[10px] border rounded-full transition-all duration-150"
+                :class="quickForm.scene_tags.includes(t.val)
+                  ? 'bg-sky-100 text-sky-800 border-sky-400'
+                  : 'bg-coffee-cream/30 text-coffee-espresso border-coffee-latte/50 hover:border-coffee-brown'"
+              >{{ t.label }}</button>
+            </div>
+          </div>
+          <!-- Pairing Tags -->
+          <div class="space-y-1.5">
+            <span class="text-[9px] uppercase tracking-wider text-coffee-softGray font-semibold select-none">搭配 Pairing</span>
+            <div class="flex flex-wrap gap-1.5">
+              <button
+                v-for="t in LIFESTYLE_PAIRING_TAGS"
+                :key="t.val"
+                @click="toggleLifestyleTag(quickForm.pairing_tags, t.val)"
+                type="button"
+                class="px-2.5 py-1 text-[10px] border rounded-full transition-all duration-150"
+                :class="quickForm.pairing_tags.includes(t.val)
+                  ? 'bg-rose-100 text-rose-800 border-rose-400'
+                  : 'bg-coffee-cream/30 text-coffee-espresso border-coffee-latte/50 hover:border-coffee-brown'"
+              >{{ t.label }}</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Flavor Impression Quick Selector -->
         <div class="space-y-3">
           <div class="flex justify-between items-center">
@@ -326,6 +379,28 @@
             />
           </div>
         </div>
+
+        <!-- Brew Parameters (optional, for advanced users) -->
+        <div class="space-y-3 mt-4 pt-4 border-t border-coffee-cream">
+          <div class="flex items-center gap-2 select-none">
+            <span class="text-[9px] uppercase tracking-[0.2em] font-semibold text-coffee-softGray">冲煮参数 / Brew Params</span>
+            <span class="text-[9px] text-coffee-softGray/60 normal-case">(选填)</span>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="space-y-1">
+              <label class="text-[9px] uppercase tracking-wider text-coffee-softGray select-none">粉水比</label>
+              <input type="text" v-model="form.brew_ratio" placeholder="1:15" class="w-full p-2 bg-coffee-cream/40 border border-coffee-latte/60 focus:border-coffee-brown focus:outline-none rounded-sm text-xs">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[9px] uppercase tracking-wider text-coffee-softGray select-none">水温</label>
+              <input type="text" v-model="form.water_temp" placeholder="92°C" class="w-full p-2 bg-coffee-cream/40 border border-coffee-latte/60 focus:border-coffee-brown focus:outline-none rounded-sm text-xs">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[9px] uppercase tracking-wider text-coffee-softGray select-none">研磨度</label>
+              <input type="text" v-model="form.grind_size" placeholder="中细" class="w-full p-2 bg-coffee-cream/40 border border-coffee-latte/60 focus:border-coffee-brown focus:outline-none rounded-sm text-xs">
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- STEP 3: Flavor tags, Mood, Spot & Notes -->
@@ -367,14 +442,127 @@
           </div>
         </div>
 
-        <div class="space-y-2">
+        <div class="space-y-2 relative">
           <label class="text-[10px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso block">3. 咖啡出品馆 / Shop & Spot</label>
           <input 
             type="text" 
             v-model="form.shop_name" 
+            @focus="loadShopNames"
+            @input="filterShopNames"
             placeholder="例如: Blue Bottle, 上海" 
             class="w-full p-2.5 bg-coffee-cream/40 border border-coffee-latte/60 focus:border-coffee-brown focus:outline-none rounded-sm text-xs"
           >
+          <!-- Autocomplete Dropdown -->
+          <div v-if="showShopDropdown && filteredShopNames.length > 0" class="absolute left-0 right-0 top-full mt-1 bg-coffee-warmWhite border border-coffee-latte/50 rounded-sm shadow-lg z-20 max-h-32 overflow-y-auto">
+            <button 
+              v-for="name in filteredShopNames" 
+              :key="name"
+              @mousedown.prevent="selectShopName(name)"
+              class="w-full text-left px-3 py-2 text-xs text-coffee-espresso hover:bg-coffee-cream/60 transition-colors flex items-center gap-2"
+            >
+              <MapPin class="w-3 h-3 text-coffee-softGray flex-shrink-0" />
+              <span>{{ name }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Coffee Bean Selection (optional, for advanced users) -->
+        <div class="space-y-2">
+          <label class="text-[10px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso block select-none">4. 咖啡豆档案 <span class="text-coffee-softGray font-normal normal-case">(选填)</span></label>
+          <!-- Select existing bean -->
+          <div class="relative">
+            <button 
+              @click="loadBeanList" 
+              type="button"
+              class="w-full p-2.5 bg-coffee-cream/40 border border-coffee-latte/60 rounded-sm text-xs text-left flex items-center justify-between hover:border-coffee-brown transition-colors"
+            >
+              <span :class="form.bean_id ? 'text-coffee-espresso font-medium' : 'text-coffee-softGray'">
+                {{ selectedBeanLabel || '选择已保存的咖啡豆...' }}
+              </span>
+              <ChevronDown class="w-3.5 h-3.5 text-coffee-softGray" />
+            </button>
+            <!-- Bean dropdown -->
+            <div v-if="showBeanDropdown && beanList.length > 0" class="absolute left-0 right-0 top-full mt-1 bg-coffee-warmWhite border border-coffee-latte/50 rounded-sm shadow-lg z-20 max-h-36 overflow-y-auto">
+              <button 
+                v-for="bean in beanList" 
+                :key="bean.id"
+                @mousedown.prevent="selectBean(bean)"
+                class="w-full text-left px-3 py-2 text-xs text-coffee-espresso hover:bg-coffee-cream/60 transition-colors flex items-center justify-between"
+              >
+                <div>
+                  <span class="font-medium">{{ bean.name }}</span>
+                  <span v-if="bean.origin" class="text-coffee-softGray ml-1.5">{{ bean.origin }}</span>
+                </div>
+                <span v-if="bean.roast_level" class="text-[9px] text-coffee-brown">{{ bean.roast_level }}</span>
+              </button>
+            </div>
+          </div>
+          <!-- Or fill inline -->
+          <div class="space-y-2 pt-1">
+            <div class="text-[9px] text-coffee-softGray select-none">或手动填写豆子信息</div>
+            <div class="grid grid-cols-2 gap-2">
+              <input type="text" v-model="form.bean_name" placeholder="豆子名称" class="p-2 bg-coffee-cream/40 border border-coffee-latte/60 focus:border-coffee-brown focus:outline-none rounded-sm text-xs">
+              <input type="text" v-model="beanOrigin" placeholder="产地 (如: 埃塞俄比亚)" class="p-2 bg-coffee-cream/40 border border-coffee-latte/60 focus:border-coffee-brown focus:outline-none rounded-sm text-xs">
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              <input type="text" v-model="beanProcess" placeholder="处理法" class="p-2 bg-coffee-cream/40 border border-coffee-latte/60 focus:border-coffee-brown focus:outline-none rounded-sm text-xs">
+              <input type="text" v-model="beanRoast" placeholder="烘焙度" class="p-2 bg-coffee-cream/40 border border-coffee-latte/60 focus:border-coffee-brown focus:outline-none rounded-sm text-xs">
+              <input type="text" v-model="beanRoaster" placeholder="烘焙商" class="p-2 bg-coffee-cream/40 border border-coffee-latte/60 focus:border-coffee-brown focus:outline-none rounded-sm text-xs">
+            </div>
+          </div>
+        </div>
+
+        <!-- Lifestyle Tags: Mood / Scene / Pairing -->
+        <div class="space-y-3">
+          <label class="text-[10px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso block font-medium select-none">5. 生活标签 <span class="text-coffee-softGray font-normal normal-case">(选填)</span></label>
+          <!-- Mood Tags -->
+          <div class="space-y-1.5">
+            <span class="text-[9px] uppercase tracking-wider text-coffee-softGray font-semibold select-none">心情 Mood</span>
+            <div class="flex flex-wrap gap-1.5">
+              <button
+                v-for="t in LIFESTYLE_MOOD_TAGS"
+                :key="t.val"
+                @click="toggleLifestyleTag(form.mood_tags!, t.val)"
+                type="button"
+                class="px-2.5 py-1 text-[10px] border rounded-full transition-all duration-150"
+                :class="form.mood_tags?.includes(t.val)
+                  ? 'bg-amber-100 text-amber-800 border-amber-400'
+                  : 'bg-coffee-cream/30 text-coffee-espresso border-coffee-latte/50 hover:border-coffee-brown'"
+              >{{ t.label }}</button>
+            </div>
+          </div>
+          <!-- Scene Tags -->
+          <div class="space-y-1.5">
+            <span class="text-[9px] uppercase tracking-wider text-coffee-softGray font-semibold select-none">场景 Scene</span>
+            <div class="flex flex-wrap gap-1.5">
+              <button
+                v-for="t in LIFESTYLE_SCENE_TAGS"
+                :key="t.val"
+                @click="toggleLifestyleTag(form.scene_tags!, t.val)"
+                type="button"
+                class="px-2.5 py-1 text-[10px] border rounded-full transition-all duration-150"
+                :class="form.scene_tags?.includes(t.val)
+                  ? 'bg-sky-100 text-sky-800 border-sky-400'
+                  : 'bg-coffee-cream/30 text-coffee-espresso border-coffee-latte/50 hover:border-coffee-brown'"
+              >{{ t.label }}</button>
+            </div>
+          </div>
+          <!-- Pairing Tags -->
+          <div class="space-y-1.5">
+            <span class="text-[9px] uppercase tracking-wider text-coffee-softGray font-semibold select-none">搭配 Pairing</span>
+            <div class="flex flex-wrap gap-1.5">
+              <button
+                v-for="t in LIFESTYLE_PAIRING_TAGS"
+                :key="t.val"
+                @click="toggleLifestyleTag(form.pairing_tags!, t.val)"
+                type="button"
+                class="px-2.5 py-1 text-[10px] border rounded-full transition-all duration-150"
+                :class="form.pairing_tags?.includes(t.val)
+                  ? 'bg-rose-100 text-rose-800 border-rose-400'
+                  : 'bg-coffee-cream/30 text-coffee-espresso border-coffee-latte/50 hover:border-coffee-brown'"
+              >{{ t.label }}</button>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -424,14 +612,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useCoffeeLogStore, NewCoffeeLog } from '@/stores/coffeeLog'
 import FlavorRadarChart from '@/components/charts/FlavorRadarChart.vue'
 import request from '@/api/request'
-import { X, Check, Plus, Smile, Zap, Moon, CloudRain, Sun, Leaf, Heart, Flame } from 'lucide-vue-next'
+import { X, Check, Plus, Smile, Zap, Moon, CloudRain, Sun, Leaf, Heart, Flame, MapPin, ChevronDown } from 'lucide-vue-next'
+import { LIFESTYLE_MOOD_TAGS, LIFESTYLE_SCENE_TAGS, LIFESTYLE_PAIRING_TAGS } from '@/constants/coffee'
+import * as shopApi from '@/api/coffeeShop'
+import * as beanApi from '@/api/coffeeBean'
 
 const router = useRouter()
+const route = useRoute()
 const store = useCoffeeLogStore()
 
 // Mode: 'quick' = single page, 'detailed' = 3-step wizard
@@ -445,13 +637,114 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const isUploading = ref(false)
 const isLocalUploaded = ref(false)
 
+// Shop autocomplete
+const shopNames = ref<string[]>([])
+const showShopDropdown = ref(false)
+const filteredShopNames = computed(() => {
+  const q = form.shop_name.trim().toLowerCase()
+  if (!q) return shopNames.value.slice(0, 8)
+  return shopNames.value.filter(n => n.toLowerCase().includes(q)).slice(0, 8)
+})
+
+async function loadShopNames() {
+  if (shopNames.value.length === 0) {
+    try {
+      shopNames.value = await shopApi.getShopNames()
+    } catch { /* ignore */ }
+  }
+  showShopDropdown.value = true
+}
+
+function filterShopNames() {
+  showShopDropdown.value = true
+}
+
+function selectShopName(name: string) {
+  form.shop_name = name
+  showShopDropdown.value = false
+}
+
+// Bean autocomplete
+const beanList = ref<beanApi.CoffeeBean[]>([])
+const showBeanDropdown = ref(false)
+const beanOrigin = ref('')
+const beanProcess = ref('')
+const beanRoast = ref('')
+const beanRoaster = ref('')
+const selectedBeanLabel = computed(() => {
+  if (!form.bean_id) return ''
+  const found = beanList.value.find(b => b.id === form.bean_id)
+  return found ? `${found.name}${found.origin ? ' - ' + found.origin : ''}` : ''
+})
+
+async function loadBeanList() {
+  if (beanList.value.length === 0) {
+    try {
+      beanList.value = await beanApi.getBeanList()
+    } catch { /* ignore */ }
+  }
+  showBeanDropdown.value = true
+}
+
+function selectBean(bean: beanApi.CoffeeBean) {
+  form.bean_id = bean.id
+  form.bean_name = ''
+  beanOrigin.value = ''
+  beanProcess.value = ''
+  beanRoast.value = ''
+  beanRoaster.value = ''
+  showBeanDropdown.value = false
+}
+
 // Quick Log Form — minimal fields, defaults for the rest
 const quickForm = reactive({
   image_url: store.DEFAULT_PHOTOS[1],
   coffee_type: 'Pour Over',
   mood: 'Calm',
   coffee_name: '',
-  flavor_preset: ''
+  flavor_preset: '',
+  mood_tags: [] as string[],
+  scene_tags: [] as string[],
+  pairing_tags: [] as string[]
+})
+
+// Prefill from existing log (Brew Again)
+onMounted(async () => {
+  const fromLogId = route.query.from_log_id
+  if (fromLogId) {
+    const id = Number(fromLogId)
+    if (!Number.isNaN(id)) {
+      let sourceLog = store.getLogById(id)
+      if (!sourceLog) {
+        try { sourceLog = await store.fetchLogById(id) } catch { /* ignore */ }
+      }
+      if (sourceLog) {
+        // Prefill quick form
+        quickForm.coffee_type = sourceLog.coffee_type
+        quickForm.mood = sourceLog.mood || 'Calm'
+        quickForm.image_url = sourceLog.image_url || store.DEFAULT_PHOTOS[1]
+        quickForm.mood_tags = [...(sourceLog.mood_tags || [])]
+        quickForm.scene_tags = [...(sourceLog.scene_tags || [])]
+        quickForm.pairing_tags = [...(sourceLog.pairing_tags || [])]
+        // Prefill detailed form
+        form.coffee_type = sourceLog.coffee_type
+        form.image_url = sourceLog.image_url || store.DEFAULT_PHOTOS[1]
+        form.acidity = sourceLog.acidity
+        form.bitterness = sourceLog.bitterness
+        form.sweetness = sourceLog.sweetness
+        form.body = sourceLog.body
+        form.aroma = sourceLog.aroma
+        form.aftertaste = sourceLog.aftertaste
+        form.flavor_tags = [...(sourceLog.flavor_tags || [])]
+        form.mood = sourceLog.mood || 'Calm'
+        form.shop_name = sourceLog.shop_name || ''
+        form.notes = sourceLog.notes || ''
+        form.mood_tags = [...(sourceLog.mood_tags || [])]
+        form.scene_tags = [...(sourceLog.scene_tags || [])]
+        form.pairing_tags = [...(sourceLog.pairing_tags || [])]
+      }
+    }
+  }
 })
 
 // Detailed Log Form — full 3-step wizard
@@ -468,7 +761,15 @@ const form = reactive<NewCoffeeLog>({
   flavor_tags: ['citrus', 'floral'],
   mood: 'Calm',
   shop_name: '',
-  notes: ''
+  notes: '',
+  mood_tags: [],
+  scene_tags: [],
+  pairing_tags: [],
+  bean_id: null as number | null,
+  bean_name: '',
+  brew_ratio: '',
+  water_temp: '',
+  grind_size: ''
 })
 
 // Auto-generate coffee name for quick log
@@ -568,6 +869,15 @@ const toggleTag = (tag: string) => {
   }
 }
 
+const toggleLifestyleTag = (arr: string[], tag: string) => {
+  const idx = arr.indexOf(tag)
+  if (idx >= 0) {
+    arr.splice(idx, 1)
+  } else {
+    arr.push(tag)
+  }
+}
+
 const handleNext = async () => {
   // Quick Log: save immediately
   if (logMode.value === 'quick') {
@@ -581,7 +891,10 @@ const handleNext = async () => {
       notes: '一杯温润安静的手账记录。',
       generate_ai: generateAI.value,
       ...(flavorPresets.find(f => f.val === quickForm.flavor_preset)?.values ?? { acidity: 3, bitterness: 2, sweetness: 3, body: 3, aroma: 3, aftertaste: 3 }),
-      flavor_tags: []
+      flavor_tags: [],
+      mood_tags: quickForm.mood_tags,
+      scene_tags: quickForm.scene_tags,
+      pairing_tags: quickForm.pairing_tags
     }
     try {
       const created = await store.addLog(quickLog)
@@ -608,6 +921,28 @@ const handleNext = async () => {
   } 
   else if (step.value === 3) {
     isSubmitting.value = true
+
+    // If inline bean info provided and no bean_id selected, create bean first
+    if (!form.bean_id && form.bean_name?.trim()) {
+      try {
+        const newBean = await beanApi.createCoffeeBean({
+          name: form.bean_name!.trim(),
+          origin: beanOrigin.value.trim() || undefined,
+          processing_method: beanProcess.value.trim() || undefined,
+          roast_level: beanRoast.value.trim() || undefined,
+          roaster: beanRoaster.value.trim() || undefined
+        })
+        form.bean_id = newBean.id
+      } catch (e: any) {
+        // Bean creation failed (e.g. duplicate name) — try to find existing
+        try {
+          const beans = await beanApi.getBeanList()
+          const existing = beans.find(b => b.name === form.bean_name!.trim())
+          if (existing) form.bean_id = existing.id
+        } catch { /* proceed without bean_id */ }
+      }
+    }
+
     const savedLog = {
       ...form,
       shop_name: form.shop_name.trim() || 'Local Coffee Spot',

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -11,10 +12,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var allowedMIMETypes = map[string]bool{
+	"image/jpeg": true,
+	"image/png":  true,
+	"image/webp": true,
+	"image/gif":  true,
+}
+
+var allowedExtensions = map[string]bool{
+	".jpg": true, ".jpeg": true, ".png": true, ".webp": true, ".gif": true,
+}
+
 type UploadHandler struct{}
 
 func NewUploadHandler() *UploadHandler {
-	// Create uploads directory if not exists
 	if _, err := os.Stat("./uploads"); os.IsNotExist(err) {
 		_ = os.MkdirAll("./uploads", 0755)
 	}
@@ -28,25 +39,45 @@ func (h *UploadHandler) UploadFile(c *gin.Context) {
 		return
 	}
 
-	// Validate size (max 5MB)
 	if file.Size > 5*1024*1024 {
 		response.ErrorBadRequest(c, "File size exceeds limit (5MB)")
 		return
 	}
 
-	// Validate extension
 	ext := filepath.Ext(file.Filename)
-	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp" && ext != ".gif" {
+	if !allowedExtensions[ext] {
 		response.ErrorBadRequest(c, "Invalid file format. Allowed formats: jpg, jpeg, png, webp, gif")
 		return
 	}
 
-	// Ensure uploads directory exists again securely
+	// Validate MIME type from header
+	contentType := file.Header.Get("Content-Type")
+	if !allowedMIMETypes[contentType] {
+		response.ErrorBadRequest(c, "Invalid MIME type")
+		return
+	}
+
+	// Validate actual file content via magic bytes
+	src, err := file.Open()
+	if err != nil {
+		response.ErrorInternal(c, "Failed to read file")
+		return
+	}
+	buf := make([]byte, 512)
+	n, _ := src.Read(buf)
+	src.Close()
+	if n > 0 {
+		detected := http.DetectContentType(buf[:n])
+		if !allowedMIMETypes[detected] {
+			response.ErrorBadRequest(c, "File content does not match allowed image type")
+			return
+		}
+	}
+
 	if _, err := os.Stat("./uploads"); os.IsNotExist(err) {
 		_ = os.MkdirAll("./uploads", 0755)
 	}
 
-	// Generate clean unique filename
 	filename := fmt.Sprintf("%d%s", time.Now().UnixNano(), ext)
 	targetPath := filepath.Join("uploads", filename)
 
@@ -55,7 +86,6 @@ func (h *UploadHandler) UploadFile(c *gin.Context) {
 		return
 	}
 
-	// Return absolute path mapping under dev domain/relative path
 	fileURL := "/uploads/" + filename
 	response.Success(c, gin.H{
 		"url": fileURL,

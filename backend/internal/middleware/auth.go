@@ -38,3 +38,14 @@ func AuthMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+// GetUserID safely extracts uint userID from gin context.
+// Returns (0, false) if not found or wrong type.
+func GetUserID(c *gin.Context) (uint, bool) {
+	val, exists := c.Get(ContextUserID)
+	if !exists {
+		return 0, false
+	}
+	uid, ok := val.(uint)
+	return uid, ok
+}

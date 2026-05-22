@@ -6,6 +6,9 @@ import Timeline from '@/pages/Timeline.vue'
 import ShareCard from '@/pages/ShareCard.vue'
 import CreateCoffeeLog from '@/pages/CreateCoffeeLog.vue'
 import Stats from '@/pages/Stats.vue'
+import MonthlyReview from '@/pages/MonthlyReview.vue'
+import CoffeeShops from '@/pages/CoffeeShops.vue'
+import CoffeeShopDetail from '@/pages/CoffeeShopDetail.vue'
 import Login from '@/pages/Login.vue'
 import Register from '@/pages/Register.vue'
 import Profile from '@/pages/Profile.vue'
@@ -51,6 +54,22 @@ const routes = [
     path: '/stats',
     name: 'stats',
     component: Stats
+  },
+  {
+    path: '/monthly-review',
+    name: 'monthly-review',
+    component: MonthlyReview
+  },
+  {
+    path: '/coffee-shops',
+    name: 'coffee-shops',
+    component: CoffeeShops
+  },
+  {
+    path: '/coffee-shops/:id',
+    name: 'coffee-shop-detail',
+    component: CoffeeShopDetail,
+    props: true
   },
   {
     path: '/profile',

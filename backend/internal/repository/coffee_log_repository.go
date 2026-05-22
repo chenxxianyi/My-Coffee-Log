@@ -3,6 +3,7 @@ package repository
 import (
 	"my-coffee-log/internal/model"
 	"my-coffee-log/internal/utils"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -37,7 +38,7 @@ func (r *CoffeeLogRepository) Create(log *model.CoffeeLog, flavorTagIDs []uint) 
 
 func (r *CoffeeLogRepository) FindByID(id uint, userID uint) (*model.CoffeeLog, error) {
 	var log model.CoffeeLog
-	if err := r.db.Preload("FlavorTags").Where("id = ? AND user_id = ?", id, userID).First(&log).Error; err != nil {
+	if err := r.db.Preload("FlavorTags").Preload("Bean").Where("id = ? AND user_id = ?", id, userID).First(&log).Error; err != nil {
 		return nil, err
 	}
 	return &log, nil
@@ -50,7 +51,11 @@ func (r *CoffeeLogRepository) FindList(userID uint, pagination *utils.Pagination
 	query := r.db.Model(&model.CoffeeLog{}).Where("user_id = ?", userID)
 
 	if month != "" {
-		query = query.Where("DATE_FORMAT(drink_date, '%Y-%m') = ?", month)
+		start, err := time.Parse("2006-01", month)
+		if err == nil {
+			end := start.AddDate(0, 1, 0)
+			query = query.Where("drink_date >= ? AND drink_date < ?", start, end)
+		}
 	}
 	if coffeeType != "" {
 		query = query.Where("coffee_type = ?", coffeeType)
@@ -117,4 +122,26 @@ func (r *CoffeeLogRepository) FindRecentByUserID(userID uint, limit int) ([]mode
 		return nil, err
 	}
 	return logs, nil
+}
+
+func (r *CoffeeLogRepository) FindByShopName(userID uint, shopName string, pagination *utils.Pagination) ([]model.CoffeeLog, int64, error) {
+	var logs []model.CoffeeLog
+	var total int64
+
+	query := r.db.Model(&model.CoffeeLog{}).Where("user_id = ? AND shop_name = ?", userID, shopName)
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if err := query.Preload("FlavorTags").
+		Order("drink_date DESC, created_at DESC").
+		Offset(pagination.GetOffset()).
+		Limit(pagination.GetLimit()).
+		Find(&logs).Error; err != nil {
+		return nil, 0, err
+	}
+
+	pagination.Total = total
+	return logs, total, nil
 }

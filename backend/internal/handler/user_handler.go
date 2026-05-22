@@ -17,13 +17,13 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 }
 
 func (h *UserHandler) GetCurrentUser(c *gin.Context) {
-	userID, exists := c.Get(middleware.ContextUserID)
-	if !exists {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
 		response.ErrorUnauthorized(c, "user not found in context")
 		return
 	}
 
-	user, err := h.userService.GetCurrentUser(userID.(uint))
+	user, err := h.userService.GetCurrentUser(userID)
 	if err != nil {
 		response.ErrorNotFound(c, "user not found")
 		return
@@ -33,8 +33,8 @@ func (h *UserHandler) GetCurrentUser(c *gin.Context) {
 }
 
 func (h *UserHandler) UpdateCurrentUser(c *gin.Context) {
-	userID, exists := c.Get(middleware.ContextUserID)
-	if !exists {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
 		response.ErrorUnauthorized(c, "user not found in context")
 		return
 	}
@@ -45,7 +45,7 @@ func (h *UserHandler) UpdateCurrentUser(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userService.UpdateUser(userID.(uint), req)
+	user, err := h.userService.UpdateUser(userID, req)
 	if err != nil {
 		response.Error(c, 40001, err.Error())
 		return

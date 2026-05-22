@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -14,52 +15,113 @@ type CoffeeLogService struct {
 	coffeeLogRepo *repository.CoffeeLogRepository
 	flavorTagRepo *repository.FlavorTagRepository
 	aiService     *AIService
+	shopService   *CoffeeShopService
+	beanService   *CoffeeBeanService
 }
 
-func NewCoffeeLogService(coffeeLogRepo *repository.CoffeeLogRepository, flavorTagRepo *repository.FlavorTagRepository, aiService *AIService) *CoffeeLogService {
+func NewCoffeeLogService(coffeeLogRepo *repository.CoffeeLogRepository, flavorTagRepo *repository.FlavorTagRepository, aiService *AIService, shopService *CoffeeShopService, beanService *CoffeeBeanService) *CoffeeLogService {
 	return &CoffeeLogService{
 		coffeeLogRepo: coffeeLogRepo,
 		flavorTagRepo: flavorTagRepo,
 		aiService:     aiService,
+		shopService:   shopService,
+		beanService:   beanService,
 	}
 }
 
 type CreateCoffeeLogRequest struct {
-	CoffeeName   string `json:"coffee_name"`
-	CoffeeType   string `json:"coffee_type"`
-	ShopName     string `json:"shop_name"`
-	Location     string `json:"location"`
-	ImageURL     string `json:"image_url"`
-	DrinkDate    string `json:"drink_date"`
-	Mood         string `json:"mood"`
-	Notes        string `json:"notes"`
-	GenerateAI   bool   `json:"generate_ai"`
-	Acidity      int    `json:"acidity"`
-	Bitterness   int    `json:"bitterness"`
-	Sweetness    int    `json:"sweetness"`
-	Body         int    `json:"body"`
-	Aroma        int    `json:"aroma"`
-	Aftertaste   int    `json:"aftertaste"`
-	FlavorTagIDs []uint `json:"flavor_tag_ids"`
+	CoffeeName   string   `json:"coffee_name" binding:"required,max=120"`
+	CoffeeType   string   `json:"coffee_type" binding:"required,max=50"`
+	ShopName     string   `json:"shop_name" binding:"max=255"`
+	Location     string   `json:"location" binding:"max=255"`
+	ImageURL     string   `json:"image_url" binding:"max=500"`
+	DrinkDate    string   `json:"drink_date" binding:"max=20"`
+	Mood         string   `json:"mood" binding:"max=50"`
+	Notes        string   `json:"notes" binding:"max=2000"`
+	GenerateAI   bool     `json:"generate_ai"`
+	Acidity      int      `json:"acidity"`
+	Bitterness   int      `json:"bitterness"`
+	Sweetness    int      `json:"sweetness"`
+	Body         int      `json:"body"`
+	Aroma        int      `json:"aroma"`
+	Aftertaste   int      `json:"aftertaste"`
+	FlavorTagIDs []uint   `json:"flavor_tag_ids"`
+	MoodTags     []string `json:"mood_tags"`
+	SceneTags    []string `json:"scene_tags"`
+	PairingTags  []string `json:"pairing_tags"`
+	BeanID       *uint    `json:"bean_id"`
+	BeanName     string   `json:"bean_name" binding:"max=120"`
+	BrewRatio    string   `json:"brew_ratio" binding:"max=50"`
+	WaterTemp    string   `json:"water_temp" binding:"max=50"`
+	GrindSize    string   `json:"grind_size" binding:"max=50"`
 }
 
 type UpdateCoffeeLogRequest struct {
-	CoffeeName   string  `json:"coffee_name"`
-	CoffeeType   string  `json:"coffee_type"`
-	ShopName     string  `json:"shop_name"`
-	Location     string  `json:"location"`
-	ImageURL     string  `json:"image_url"`
-	DrinkDate    string  `json:"drink_date"`
-	Mood         string  `json:"mood"`
-	Notes        string  `json:"notes"`
-	GenerateAI   *bool   `json:"generate_ai"`
-	Acidity      *int    `json:"acidity"`
-	Bitterness   *int    `json:"bitterness"`
-	Sweetness    *int    `json:"sweetness"`
-	Body         *int    `json:"body"`
-	Aroma        *int    `json:"aroma"`
-	Aftertaste   *int    `json:"aftertaste"`
-	FlavorTagIDs *[]uint `json:"flavor_tag_ids"`
+	CoffeeName   string    `json:"coffee_name"`
+	CoffeeType   string    `json:"coffee_type"`
+	ShopName     string    `json:"shop_name"`
+	Location     string    `json:"location"`
+	ImageURL     string    `json:"image_url"`
+	DrinkDate    string    `json:"drink_date"`
+	Mood         string    `json:"mood"`
+	Notes        string    `json:"notes"`
+	GenerateAI   *bool     `json:"generate_ai"`
+	Acidity      *int      `json:"acidity"`
+	Bitterness   *int      `json:"bitterness"`
+	Sweetness    *int      `json:"sweetness"`
+	Body         *int      `json:"body"`
+	Aroma        *int      `json:"aroma"`
+	Aftertaste   *int      `json:"aftertaste"`
+	FlavorTagIDs *[]uint   `json:"flavor_tag_ids"`
+	MoodTags     *[]string `json:"mood_tags"`
+	SceneTags    *[]string `json:"scene_tags"`
+	PairingTags  *[]string `json:"pairing_tags"`
+	BeanID       *uint     `json:"bean_id"`
+	BrewRatio    *string   `json:"brew_ratio"`
+	WaterTemp    *string   `json:"water_temp"`
+	GrindSize    *string   `json:"grind_size"`
+}
+
+const maxLifestyleTags = 5
+const maxLifestyleTagLen = 30
+
+var validMoodTags = map[string]bool{
+	"Calm": true, "Focused": true, "Tired": true, "Happy": true,
+	"Rainy": true, "Slow": true, "Productive": true,
+}
+var validSceneTags = map[string]bool{
+	"Morning": true, "Office": true, "Weekend": true, "Cafe": true,
+	"Travel": true, "Home": true, "Study": true,
+}
+var validPairingTags = map[string]bool{
+	"Book": true, "Music": true, "Work": true, "Dessert": true,
+	"Alone": true, "Friends": true,
+}
+
+func validateLifestyleTags(tags []string, validSet map[string]bool, maxCount int, label string) error {
+	if len(tags) > maxCount {
+		return fmt.Errorf("too many %s (max %d)", label, maxCount)
+	}
+	for _, t := range tags {
+		if len(t) > maxLifestyleTagLen {
+			return fmt.Errorf("%s tag too long", label)
+		}
+		if !validSet[t] {
+			return fmt.Errorf("invalid %s tag: %s", label, t)
+		}
+	}
+	return nil
+}
+
+func tagsToJSON(tags []string) string {
+	if len(tags) == 0 {
+		return ""
+	}
+	b, err := json.Marshal(tags)
+	if err != nil {
+		return "[]"
+	}
+	return string(b)
 }
 
 func (s *CoffeeLogService) validateFlavorScores(acidity, bitterness, sweetness, body, aroma, aftertaste int) error {
@@ -114,6 +176,16 @@ func (s *CoffeeLogService) Create(userID uint, req CreateCoffeeLogRequest) (*mod
 		return nil, err
 	}
 
+	if err := validateLifestyleTags(req.MoodTags, validMoodTags, maxLifestyleTags, "mood"); err != nil {
+		return nil, err
+	}
+	if err := validateLifestyleTags(req.SceneTags, validSceneTags, maxLifestyleTags, "scene"); err != nil {
+		return nil, err
+	}
+	if err := validateLifestyleTags(req.PairingTags, validPairingTags, maxLifestyleTags, "pairing"); err != nil {
+		return nil, err
+	}
+
 	tags, err := s.validateFlavorTagIDs(req.FlavorTagIDs)
 	if err != nil {
 		return nil, err
@@ -144,23 +216,39 @@ func (s *CoffeeLogService) Create(userID uint, req CreateCoffeeLogRequest) (*mod
 	}
 	aiSummary := s.aiService.generateMockSummary(req.CoffeeType, tagNames, req.Acidity, req.Bitterness, req.Sweetness, req.Body, req.Aroma, req.Aftertaste)
 
+	// Resolve bean_id: either from direct reference or inline bean_name
+	var beanID *uint
+	if s.beanService != nil {
+		resolvedID, err := s.beanService.EnsureBeanForLog(userID, req.BeanID, req.BeanName)
+		if err == nil && resolvedID != nil {
+			beanID = resolvedID
+		}
+	}
+
 	log := &model.CoffeeLog{
-		UserID:     userID,
-		CoffeeName: req.CoffeeName,
-		CoffeeType: req.CoffeeType,
-		ShopName:   req.ShopName,
-		Location:   req.Location,
-		ImageURL:   req.ImageURL,
-		DrinkDate:  drinkDate,
-		Mood:       req.Mood,
-		Notes:      req.Notes,
-		Acidity:    req.Acidity,
-		Bitterness: req.Bitterness,
-		Sweetness:  req.Sweetness,
-		Body:       req.Body,
-		Aroma:      req.Aroma,
-		Aftertaste: req.Aftertaste,
-		AISummary:  aiSummary,
+		UserID:      userID,
+		CoffeeName:  req.CoffeeName,
+		CoffeeType:  req.CoffeeType,
+		ShopName:    req.ShopName,
+		Location:    req.Location,
+		ImageURL:    req.ImageURL,
+		DrinkDate:   drinkDate,
+		Mood:        req.Mood,
+		Notes:       req.Notes,
+		Acidity:     req.Acidity,
+		Bitterness:  req.Bitterness,
+		Sweetness:   req.Sweetness,
+		Body:        req.Body,
+		Aroma:       req.Aroma,
+		Aftertaste:  req.Aftertaste,
+		AISummary:   aiSummary,
+		MoodTags:    tagsToJSON(req.MoodTags),
+		SceneTags:   tagsToJSON(req.SceneTags),
+		PairingTags: tagsToJSON(req.PairingTags),
+		BeanID:      beanID,
+		BrewRatio:   req.BrewRatio,
+		WaterTemp:   req.WaterTemp,
+		GrindSize:   req.GrindSize,
 	}
 
 	if err := s.coffeeLogRepo.Create(log, req.FlavorTagIDs); err != nil {
@@ -169,6 +257,11 @@ func (s *CoffeeLogService) Create(userID uint, req CreateCoffeeLogRequest) (*mod
 
 	if req.GenerateAI && externalAIEnabled() {
 		go s.generateAndStoreAISummary(log.ID, userID, aiReq)
+	}
+
+	// Auto-create or update coffee shop record
+	if s.shopService != nil {
+		_ = s.shopService.EnsureShopForLog(userID, req.ShopName)
 	}
 
 	created, err := s.coffeeLogRepo.FindByID(log.ID, userID)
@@ -264,6 +357,27 @@ func (s *CoffeeLogService) Update(id, userID uint, req UpdateCoffeeLogRequest) (
 	if req.Aftertaste != nil {
 		aftertaste = *req.Aftertaste
 		existing.Aftertaste = *req.Aftertaste
+		aiInputChanged = true
+	}
+	if req.MoodTags != nil {
+		if err := validateLifestyleTags(*req.MoodTags, validMoodTags, maxLifestyleTags, "mood"); err != nil {
+			return nil, err
+		}
+		existing.MoodTags = tagsToJSON(*req.MoodTags)
+		aiInputChanged = true
+	}
+	if req.SceneTags != nil {
+		if err := validateLifestyleTags(*req.SceneTags, validSceneTags, maxLifestyleTags, "scene"); err != nil {
+			return nil, err
+		}
+		existing.SceneTags = tagsToJSON(*req.SceneTags)
+		aiInputChanged = true
+	}
+	if req.PairingTags != nil {
+		if err := validateLifestyleTags(*req.PairingTags, validPairingTags, maxLifestyleTags, "pairing"); err != nil {
+			return nil, err
+		}
+		existing.PairingTags = tagsToJSON(*req.PairingTags)
 		aiInputChanged = true
 	}
 

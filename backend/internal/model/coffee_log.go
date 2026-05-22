@@ -24,10 +24,18 @@ type CoffeeLog struct {
 	Aroma       int            `json:"aroma" gorm:"default:0"`
 	Aftertaste  int            `json:"aftertaste" gorm:"default:0"`
 	AISummary   string         `json:"ai_summary" gorm:"type:text"`
+	MoodTags    string         `json:"mood_tags" gorm:"type:varchar(500)"`
+	SceneTags   string         `json:"scene_tags" gorm:"type:varchar(500)"`
+	PairingTags string         `json:"pairing_tags" gorm:"type:varchar(500)"`
+	BeanID      *uint          `json:"bean_id" gorm:"index"`
+	BrewRatio   string         `json:"brew_ratio" gorm:"size:50"`
+	WaterTemp   string         `json:"water_temp" gorm:"size:50"`
+	GrindSize   string         `json:"grind_size" gorm:"size:50"`
 	FlavorTags  []FlavorTag    `json:"flavor_tags" gorm:"many2many:coffee_log_flavor_tags"`
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
-	DeletedAt   gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
 
-	User User `json:"-" gorm:"foreignKey:UserID"`
+	User User        `json:"-" gorm:"foreignKey:UserID"`
+	Bean *CoffeeBean `json:"bean,omitempty" gorm:"foreignKey:BeanID"`
 }

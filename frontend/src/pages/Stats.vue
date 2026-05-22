@@ -83,6 +83,96 @@
         </div>
       </div>
 
+      <!-- ---- Monthly Review Entry ---- -->
+      <router-link to="/monthly-review" class="block p-5 rounded-sm border border-coffee-latte/40 hover:border-coffee-brown/40 transition-colors select-none" style="background: linear-gradient(135deg, rgba(215,196,168,0.15) 0%, rgba(231,111,81,0.04) 100%);">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="text-2xl leading-none">📅</div>
+            <div>
+              <h4 class="font-serif text-sm font-semibold text-coffee-espresso leading-tight">月度咖啡回顾</h4>
+              <span class="text-[10px] text-coffee-brown font-serif italic">Monthly Review / 回顾你的咖啡月</span>
+            </div>
+          </div>
+          <ChevronRight class="w-4 h-4 text-coffee-softGray" />
+        </div>
+      </router-link>
+
+      <!-- ---- Coffee Personality Module ---- -->
+      <div v-if="store.personalities.length > 0" class="space-y-4">
+        <div class="flex items-center gap-2.5 select-none">
+          <div class="h-px flex-1 max-w-[24px]" style="background: linear-gradient(to right, rgba(92,61,46,0.35), transparent);"></div>
+          <h3 class="text-[10px] uppercase tracking-[0.2em] font-bold text-coffee-espresso">你的咖啡人格 / Coffee Personality</h3>
+          <div class="h-px flex-1" style="background: linear-gradient(to left, rgba(92,61,46,0.35), transparent);"></div>
+        </div>
+
+        <!-- Primary Personality Card -->
+        <div class="p-5 rounded-sm border border-coffee-latte/40" style="background: linear-gradient(135deg, rgba(215,196,168,0.2) 0%, rgba(231,111,81,0.06) 100%);">
+          <div class="flex items-start gap-4">
+            <div class="text-4xl leading-none select-none">{{ store.personalities[0].icon }}</div>
+            <div class="flex-1 space-y-1.5">
+              <div>
+                <h4 class="font-serif text-lg font-semibold text-coffee-espresso leading-tight">{{ store.personalities[0].title }}</h4>
+                <span class="text-[10px] text-coffee-brown font-serif italic">{{ store.personalities[0].subtitle }}</span>
+              </div>
+              <p class="text-xs text-coffee-brown leading-relaxed font-light">{{ store.personalities[0].description }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Secondary Personality Tags -->
+        <div v-if="store.personalities.length > 1" class="flex flex-wrap gap-2">
+          <div v-for="p in store.personalities.slice(1)" :key="p.slug" class="flex items-center gap-2 px-3 py-2 bg-coffee-cream/50 border border-coffee-latte/30 rounded-sm">
+            <span class="text-lg leading-none select-none">{{ p.icon }}</span>
+            <div>
+              <div class="text-[11px] font-semibold text-coffee-espresso leading-none">{{ p.title }}</div>
+              <div class="text-[9px] text-coffee-softGray font-serif italic">{{ p.subtitle }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Share Personality CTA -->
+        <button
+          @click="sharePersonality"
+          class="w-full py-3 text-[10px] uppercase tracking-widest font-semibold bg-coffee-espresso text-coffee-warmWhite hover:bg-coffee-brown transition-all rounded-sm flex items-center justify-center gap-2"
+        >
+          <Share2 class="w-3.5 h-3.5" />
+          <span>分享我的咖啡人格</span>
+        </button>
+      </div>
+
+      <!-- ---- AI Coffee Profile ---- -->
+      <div v-if="store.coffeeProfileAI" class="space-y-3">
+        <div class="flex items-center gap-2.5 select-none">
+          <div class="h-px flex-1 max-w-[24px]" style="background: linear-gradient(to right, rgba(92,61,46,0.35), transparent);"></div>
+          <h3 class="text-[10px] uppercase tracking-[0.2em] font-bold text-coffee-espresso flex items-center gap-1.5"><Sparkles class="w-3 h-3 text-amber-500" />AI 咖啡画像 / Profile</h3>
+          <div class="h-px flex-1" style="background: linear-gradient(to left, rgba(92,61,46,0.35), transparent);"></div>
+        </div>
+        <div class="p-4 bg-coffee-cream/30 border border-coffee-latte/30 rounded-sm">
+          <p class="text-[13px] text-coffee-brown leading-[1.75] font-light font-serif italic pl-2 border-l-2 border-coffee-latte/30">{{ store.coffeeProfileAI }}</p>
+        </div>
+      </div>
+
+      <!-- ---- AI Preference Insight ---- -->
+      <div v-if="store.preferenceInsight" class="space-y-3">
+        <div class="flex items-center gap-2.5 select-none">
+          <div class="h-px flex-1 max-w-[24px]" style="background: linear-gradient(to right, rgba(92,61,46,0.35), transparent);"></div>
+          <h3 class="text-[10px] uppercase tracking-[0.2em] font-bold text-coffee-espresso flex items-center gap-1.5"><Sparkles class="w-3 h-3 text-amber-500" />偏好洞察 / Insight</h3>
+          <div class="h-px flex-1" style="background: linear-gradient(to left, rgba(92,61,46,0.35), transparent);"></div>
+        </div>
+        <div class="p-4 bg-coffee-cream/30 border border-coffee-latte/30 rounded-sm">
+          <p class="text-[13px] text-coffee-brown leading-[1.75] font-light font-serif italic pl-2 border-l-2 border-coffee-latte/30">{{ store.preferenceInsight }}</p>
+        </div>
+      </div>
+
+      <!-- ---- AI Status Indicator ---- -->
+      <div v-if="store.aiStatus" class="flex items-center justify-between px-4 py-3 bg-coffee-cream/20 border border-coffee-cream rounded-sm select-none">
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full" :class="store.aiStatus.enabled ? 'bg-emerald-400' : 'bg-coffee-softGray'"></div>
+          <span class="text-[10px] text-coffee-softGray">AI 引擎</span>
+        </div>
+        <span class="text-[10px] font-mono" :class="store.aiStatus.enabled ? 'text-emerald-600' : 'text-coffee-softGray'">{{ store.aiStatus.enabled ? store.aiStatus.model : 'Mock 模式' }}</span>
+      </div>
+
     </div>
 
     <!-- Sticky Bottom Navigation Bar -->
@@ -122,7 +212,7 @@ import { useCoffeeLogStore } from '@/stores/coffeeLog'
 import { getFlavorTags } from '@/api/flavorTag'
 import FlavorRadarChart from '@/components/charts/FlavorRadarChart.vue'
 import { coffeeTypeLabel } from '@/constants/coffee'
-import { BookOpen, Calendar, BarChart3, Plus, User } from 'lucide-vue-next'
+import { BookOpen, Calendar, BarChart3, Plus, User, Share2, ChevronRight, Sparkles } from 'lucide-vue-next'
 
 const store = useCoffeeLogStore()
 
@@ -160,11 +250,28 @@ const flavorTagStats = computed(() => {
     .map(([name, count]) => ({ name, label: labelMap[name] || name, count }))
 })
 
+const sharePersonality = () => {
+  if (store.personalities.length === 0) return
+  const primary = store.personalities[0]
+  const text = `${primary.icon} ${primary.title} — ${primary.subtitle}\n${primary.description}\n\n— MY COFFEE LOG`
+  if (navigator.share) {
+    navigator.share({ title: 'My Coffee Personality', text }).catch(() => {})
+  } else {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('咖啡人格已复制到剪贴板！')
+    }).catch(() => {})
+  }
+}
+
 onMounted(async () => {
   await store.fetchStats()
   if (store.logs.length === 0) {
     await store.fetchLogs({ page: 1, page_size: 100 })
   }
+  store.fetchPersonality()
+  store.fetchAIStatus()
+  store.fetchCoffeeProfile()
+  store.fetchPreferenceInsight()
 })
 </script>
 

@@ -17,13 +17,13 @@ func NewStatsHandler(statsService *service.StatsService) *StatsHandler {
 }
 
 func (h *StatsHandler) GetOverview(c *gin.Context) {
-	userID, exists := c.Get(middleware.ContextUserID)
-	if !exists {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
 		response.ErrorUnauthorized(c, "user not found in context")
 		return
 	}
 
-	overview, err := h.statsService.GetOverview(userID.(uint))
+	overview, err := h.statsService.GetOverview(userID)
 	if err != nil {
 		response.Error(c, 50000, err.Error())
 		return
@@ -33,13 +33,13 @@ func (h *StatsHandler) GetOverview(c *gin.Context) {
 }
 
 func (h *StatsHandler) GetFlavorProfile(c *gin.Context) {
-	userID, exists := c.Get(middleware.ContextUserID)
-	if !exists {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
 		response.ErrorUnauthorized(c, "user not found in context")
 		return
 	}
 
-	profile, err := h.statsService.GetFlavorProfile(userID.(uint))
+	profile, err := h.statsService.GetFlavorProfile(userID)
 	if err != nil {
 		response.Error(c, 50000, err.Error())
 		return
@@ -49,17 +49,50 @@ func (h *StatsHandler) GetFlavorProfile(c *gin.Context) {
 }
 
 func (h *StatsHandler) GetMonthly(c *gin.Context) {
-	userID, exists := c.Get(middleware.ContextUserID)
-	if !exists {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
 		response.ErrorUnauthorized(c, "user not found in context")
 		return
 	}
 
-	monthly, err := h.statsService.GetMonthly(userID.(uint))
+	monthly, err := h.statsService.GetMonthly(userID)
 	if err != nil {
 		response.Error(c, 50000, err.Error())
 		return
 	}
 
 	response.Success(c, monthly)
+}
+
+func (h *StatsHandler) GetPersonality(c *gin.Context) {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
+		response.ErrorUnauthorized(c, "user not found in context")
+		return
+	}
+
+	personality, err := h.statsService.GetPersonality(userID)
+	if err != nil {
+		response.Error(c, 50000, err.Error())
+		return
+	}
+
+	response.Success(c, personality)
+}
+
+func (h *StatsHandler) GetMonthlyReview(c *gin.Context) {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
+		response.ErrorUnauthorized(c, "user not found in context")
+		return
+	}
+
+	month := c.Query("month")
+	review, err := h.statsService.GetMonthlyReview(userID, month)
+	if err != nil {
+		response.Error(c, 50000, err.Error())
+		return
+	}
+
+	response.Success(c, review)
 }

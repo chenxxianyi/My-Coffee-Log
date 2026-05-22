@@ -87,6 +87,14 @@
             </div>
           </div>
 
+          <router-link to="/coffee-shops" class="p-4 flex justify-between items-center text-xs cursor-pointer hover:bg-coffee-cream/15 transition-colors">
+            <div class="space-y-0.5">
+              <span class="font-medium text-coffee-espresso">咖啡店收藏</span>
+              <p class="text-[10px] text-coffee-softGray">浏览和管理你记录过的咖啡店</p>
+            </div>
+            <ChevronRight class="w-4 h-4 text-coffee-softGray" />
+          </router-link>
+
           <div class="p-4 flex justify-between items-center text-xs cursor-pointer hover:bg-coffee-cream/15 transition-colors" @click="exportBackup">
             <div class="space-y-0.5">
               <span class="font-medium text-coffee-espresso">导出数据备份</span>

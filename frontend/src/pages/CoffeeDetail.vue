@@ -192,6 +192,63 @@
           </div>
         </div>
 
+        <!-- ---- Lifestyle Tags (Mood / Scene / Pairing) ---- -->
+        <div v-if="hasLifestyleTags" class="space-y-3">
+          <div class="flex items-center gap-2.5 select-none">
+            <div class="h-px flex-1 max-w-[24px]" style="background: linear-gradient(to right, rgba(92,61,46,0.35), transparent);"></div>
+            <h3 class="text-[10px] uppercase tracking-[0.2em] font-bold text-coffee-espresso">生活标签 / Lifestyle</h3>
+            <div class="h-px flex-1" style="background: linear-gradient(to left, rgba(92,61,46,0.35), transparent);"></div>
+          </div>
+          <div class="space-y-2.5">
+            <!-- Mood Tags -->
+            <div v-if="log.mood_tags?.length" class="space-y-1.5">
+              <span class="text-[9px] uppercase tracking-wider text-amber-700 font-semibold select-none">心情 Mood</span>
+              <div class="flex flex-wrap gap-1.5">
+                <span v-for="t in log.mood_tags" :key="t" class="px-2.5 py-1 text-[10px] bg-amber-100 text-amber-800 border border-amber-300/60 rounded-full font-medium">{{ lifestyleTagLabel('mood', t) }}</span>
+              </div>
+            </div>
+            <!-- Scene Tags -->
+            <div v-if="log.scene_tags?.length" class="space-y-1.5">
+              <span class="text-[9px] uppercase tracking-wider text-sky-700 font-semibold select-none">场景 Scene</span>
+              <div class="flex flex-wrap gap-1.5">
+                <span v-for="t in log.scene_tags" :key="t" class="px-2.5 py-1 text-[10px] bg-sky-100 text-sky-800 border border-sky-300/60 rounded-full font-medium">{{ lifestyleTagLabel('scene', t) }}</span>
+              </div>
+            </div>
+            <!-- Pairing Tags -->
+            <div v-if="log.pairing_tags?.length" class="space-y-1.5">
+              <span class="text-[9px] uppercase tracking-wider text-rose-700 font-semibold select-none">搭配 Pairing</span>
+              <div class="flex flex-wrap gap-1.5">
+                <span v-for="t in log.pairing_tags" :key="t" class="px-2.5 py-1 text-[10px] bg-rose-100 text-rose-800 border border-rose-300/60 rounded-full font-medium">{{ lifestyleTagLabel('pairing', t) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---- Coffee Bean Archive ---- -->
+        <div v-if="hasBeanInfo" class="space-y-3">
+          <div class="flex items-center gap-2.5 select-none">
+            <div class="h-px flex-1 max-w-[24px]" style="background: linear-gradient(to right, rgba(92,61,46,0.35), transparent);"></div>
+            <h3 class="text-[10px] uppercase tracking-[0.2em] font-bold text-coffee-espresso">咖啡豆档案 / Bean Archive</h3>
+            <div class="h-px flex-1" style="background: linear-gradient(to left, rgba(92,61,46,0.35), transparent);"></div>
+          </div>
+          <div class="p-4 bg-coffee-cream/30 border border-coffee-latte/30 rounded-sm space-y-2">
+            <div v-if="log.bean" class="space-y-1.5">
+              <div class="font-serif text-sm font-semibold text-coffee-espresso">{{ log.bean.name }}</div>
+              <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
+                <div v-if="log.bean.origin" class="flex justify-between"><span class="text-coffee-softGray">产地</span><span class="text-coffee-espresso font-medium">{{ log.bean.origin }}</span></div>
+                <div v-if="log.bean.processing_method" class="flex justify-between"><span class="text-coffee-softGray">处理法</span><span class="text-coffee-espresso font-medium">{{ log.bean.processing_method }}</span></div>
+                <div v-if="log.bean.roast_level" class="flex justify-between"><span class="text-coffee-softGray">烘焙度</span><span class="text-coffee-espresso font-medium">{{ log.bean.roast_level }}</span></div>
+                <div v-if="log.bean.roaster" class="flex justify-between"><span class="text-coffee-softGray">烘焙商</span><span class="text-coffee-espresso font-medium">{{ log.bean.roaster }}</span></div>
+              </div>
+            </div>
+            <div v-if="hasBrewParams" class="pt-2 mt-2 border-t border-coffee-cream grid grid-cols-3 gap-2 text-[10px]">
+              <div v-if="log.brew_ratio" class="text-center"><div class="text-coffee-espresso font-mono font-semibold">{{ log.brew_ratio }}</div><div class="text-coffee-softGray">粉水比</div></div>
+              <div v-if="log.water_temp" class="text-center"><div class="text-coffee-espresso font-mono font-semibold">{{ log.water_temp }}</div><div class="text-coffee-softGray">水温</div></div>
+              <div v-if="log.grind_size" class="text-center"><div class="text-coffee-espresso font-mono font-semibold">{{ log.grind_size }}</div><div class="text-coffee-softGray">研磨度</div></div>
+            </div>
+          </div>
+        </div>
+
         <!-- ---- Taste Notes Diary ---- -->
         <div class="space-y-2.5" :class="justCreated ? 'animate-slide-up-delay-3' : ''">
           <div class="flex items-center gap-2.5 select-none">
@@ -234,11 +291,11 @@
           </router-link>
           <div class="grid grid-cols-2 gap-3">
             <router-link 
-              to="/create" 
+              :to="'/create?from_log_id=' + log.id" 
               class="py-3 text-[10px] uppercase tracking-widest font-semibold bg-coffee-cream text-coffee-espresso hover:bg-coffee-latte transition-all rounded-sm flex items-center justify-center gap-1.5"
             >
               <Plus class="w-3.5 h-3.5" />
-              <span>再记一杯</span>
+              <span>复刻这杯</span>
             </router-link>
             <button 
               @click="handleDelete" 
@@ -267,7 +324,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCoffeeLogStore } from '@/stores/coffeeLog'
-import { coffeeTypeShortLabel, moodLabel } from '@/constants/coffee'
+import { coffeeTypeShortLabel, moodLabel, LIFESTYLE_MOOD_TAGS, LIFESTYLE_SCENE_TAGS, LIFESTYLE_PAIRING_TAGS } from '@/constants/coffee'
 import FlavorRadarChart from '@/components/charts/FlavorRadarChart.vue'
 import { ArrowLeft, Share2, MapPin, Coffee, Check, Plus } from 'lucide-vue-next'
 
@@ -280,6 +337,30 @@ const route = useRoute()
 const store = useCoffeeLogStore()
 
 const log = computed(() => store.getLogById(parseInt(props.id)))
+
+// Lifestyle tags helpers
+const hasLifestyleTags = computed(() => {
+  const l = log.value
+  if (!l) return false
+  return (l.mood_tags?.length ?? 0) > 0 || (l.scene_tags?.length ?? 0) > 0 || (l.pairing_tags?.length ?? 0) > 0
+})
+
+const hasBeanInfo = computed(() => {
+  const l = log.value
+  if (!l) return false
+  return !!l.bean || !!l.bean_id
+})
+
+const hasBrewParams = computed(() => {
+  const l = log.value
+  if (!l) return false
+  return !!l.brew_ratio || !!l.water_temp || !!l.grind_size
+})
+
+const lifestyleTagLabel = (type: 'mood' | 'scene' | 'pairing', val: string) => {
+  const list = type === 'mood' ? LIFESTYLE_MOOD_TAGS : type === 'scene' ? LIFESTYLE_SCENE_TAGS : LIFESTYLE_PAIRING_TAGS
+  return list.find(t => t.val === val)?.label ?? val
+}
 
 // Celebration state
 const justCreated = computed(() => route.query.just_created === 'true')

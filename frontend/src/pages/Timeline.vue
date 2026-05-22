@@ -45,10 +45,10 @@
           <div v-for="(log, idx) in group.items" :key="log.id">
             
             <!-- Type A: Portrait Photo left side (Alternate 1) -->
+            <div v-if="isModZero(idx, 3)" class="group flex gap-5 items-stretch relative">
             <router-link 
-              v-if="isModZero(idx, 3)"
               :to="'/coffee/' + log.id" 
-              class="block group flex gap-5 items-stretch"
+              class="flex gap-5 items-stretch flex-1"
             >
               <div class="w-2/5 aspect-[3/4] overflow-hidden rounded-xl bg-neutral-100 border border-coffee-cream flex-shrink-0 select-none">
                 <img :src="log.image_url" class="w-full h-full object-cover filter saturate-50 group-hover:scale-105 transition-transform duration-700">
@@ -69,13 +69,17 @@
                   <span class="font-mono">{{ moodLabel(log.mood) }}</span>
                 </div>
               </div>
-            </router-link>
+              </router-link>
+              <router-link :to="'/create?from_log_id=' + log.id" class="absolute bottom-1 right-0 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full bg-coffee-cream/80 hover:bg-coffee-latte text-coffee-espresso" title="复刻这杯">
+                <Copy class="w-3 h-3" />
+              </router-link>
+            </div>
 
             <!-- Type B: Text Only Card (Alternate 2) -->
+            <div v-else-if="isModOne(idx, 3)" class="group relative">
             <router-link 
-              v-else-if="isModOne(idx, 3)"
               :to="'/coffee/' + log.id" 
-              class="block group p-5 bg-coffee-cream/30 rounded-2xl border border-coffee-cream/70 hover:bg-coffee-cream/45 transition-colors"
+              class="block p-5 bg-coffee-cream/30 rounded-2xl border border-coffee-cream/70 hover:bg-coffee-cream/45 transition-colors"
             >
               <div class="space-y-2">
                 <div class="flex justify-between items-center text-[8px] font-mono text-coffee-softGray select-none">
@@ -92,12 +96,16 @@
                 </div>
               </div>
             </router-link>
+              <router-link :to="'/create?from_log_id=' + log.id" class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full bg-coffee-cream/80 hover:bg-coffee-latte text-coffee-espresso" title="复刻这杯">
+                <Copy class="w-3 h-3" />
+              </router-link>
+            </div>
 
             <!-- Type C: Wide card with Landscape photo (Alternate 3) -->
+            <div v-else class="group space-y-2 relative">
             <router-link 
-              v-else
               :to="'/coffee/' + log.id" 
-              class="block group space-y-2"
+              class="block space-y-2"
             >
               <div class="w-full h-40 overflow-hidden rounded-xl bg-neutral-100 border border-coffee-cream select-none">
                 <img :src="log.image_url" class="w-full h-full object-cover filter saturate-50 group-hover:scale-[1.02] transition-transform duration-700">
@@ -116,6 +124,10 @@
                 </p>
               </div>
             </router-link>
+              <router-link :to="'/create?from_log_id=' + log.id" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full bg-coffee-cream/80 hover:bg-coffee-latte text-coffee-espresso" title="复刻这杯">
+                <Copy class="w-3 h-3" />
+              </router-link>
+            </div>
 
           </div>
         </div>
@@ -165,7 +177,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useCoffeeLogStore, CoffeeLog } from '@/stores/coffeeLog'
 import { coffeeTypeLabel, moodLabel } from '@/constants/coffee'
-import { BookOpen, Calendar, BarChart3, Plus, User } from 'lucide-vue-next'
+import { BookOpen, Calendar, BarChart3, Plus, User, Copy } from 'lucide-vue-next'
 
 const store = useCoffeeLogStore()
 

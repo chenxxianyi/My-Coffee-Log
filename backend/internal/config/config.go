@@ -58,4 +58,11 @@ func LoadConfig() {
 	if err := viper.Unmarshal(AppConfig); err != nil {
 		log.Fatalf("Failed to unmarshal config: %v", err)
 	}
+
+	if AppConfig.JWTSecret == "" || AppConfig.JWTSecret == "please_change_me" {
+		if AppConfig.AppEnv == "production" {
+			log.Fatalf("JWT_SECRET must be set to a secure value in production")
+		}
+		log.Println("WARNING: using default JWT secret, set JWT_SECRET env var for security")
+	}
 }
