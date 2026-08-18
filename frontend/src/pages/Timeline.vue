@@ -66,7 +66,10 @@
                 </div>
                 <div class="flex justify-between items-center text-[9px] text-coffee-softGray select-none">
                   <span class="truncate max-w-[120px]">在 {{ log.shop_name.split(',')[0] }}</span>
-                  <span class="font-mono">{{ moodLabel(log.mood) }}</span>
+                  <span class="inline-flex items-center gap-1 font-mono">
+                    <AppIcon :name="moodIconName(log.mood)" :size="11" />
+                    {{ moodLabel(log.mood) }}
+                  </span>
                 </div>
               </div>
               </router-link>
@@ -92,7 +95,10 @@
                 </p>
                 <div class="flex justify-between items-center text-[9px] text-coffee-softGray pt-1.5 border-t border-coffee-cream/40 select-none">
                   <span class="truncate max-w-[150px]">在 {{ log.shop_name.split(',')[0] }}</span>
-                  <span class="font-mono uppercase">{{ moodLabel(log.mood) }}</span>
+                  <span class="inline-flex items-center gap-1 font-mono uppercase">
+                    <AppIcon :name="moodIconName(log.mood)" :size="11" />
+                    {{ moodLabel(log.mood) }}
+                  </span>
                 </div>
               </div>
             </router-link>
@@ -136,7 +142,7 @@
 
       <!-- Empty state inside Timeline -->
       <div v-if="groupedLogs.length === 0" class="text-center py-16 text-coffee-softGray space-y-3 select-none">
-        <i data-lucide="coffee" class="w-8 h-8 mx-auto stroke-[1px]"></i>
+        <AppIcon name="coffee" :size="30" :stroke-width="1.35" class="mx-auto" />
         <p class="text-xs uppercase tracking-widest">No matching logs found</p>
       </div>
 
@@ -176,7 +182,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useCoffeeLogStore, CoffeeLog } from '@/stores/coffeeLog'
-import { coffeeTypeLabel, moodLabel } from '@/constants/coffee'
+import { coffeeTypeLabel, moodLabel, moodIconName } from '@/constants/coffee'
+import AppIcon from '@/components/AppIcon.vue'
 import { BookOpen, Calendar, BarChart3, Plus, User, Copy } from 'lucide-vue-next'
 
 const store = useCoffeeLogStore()

@@ -2,27 +2,29 @@
   <div class="flex-1 w-full flex flex-col justify-between bg-coffee-warmWhite text-coffee-charcoal">
     
     <!-- Header -->
-    <div class="px-6 py-4 border-b border-coffee-cream flex justify-between items-center bg-coffee-warmWhite sticky top-0 z-10 select-none">
-      <button @click="router.push('/home')" class="text-coffee-brown hover:text-coffee-espresso">
+    <div class="px-5 py-3.5 border-b border-coffee-cream flex justify-between items-center bg-coffee-warmWhite/95 backdrop-blur-sm sticky top-0 z-10 select-none">
+      <button
+        @click="router.push('/home')"
+        class="grid w-9 h-9 place-items-center -ml-2 rounded-full text-coffee-brown hover:bg-coffee-cream/60 hover:text-coffee-espresso transition-colors"
+        aria-label="关闭并返回首页"
+      >
         <X class="w-5 h-5" />
       </button>
-      <!-- Mode Toggle -->
-      <div class="flex items-center gap-1 bg-coffee-cream/60 rounded-full p-0.5">
-        <button 
-          @click="logMode = 'quick'" 
-          type="button"
-          class="px-3 py-1 rounded-full text-[10px] tracking-wider font-semibold transition-all duration-200"
-          :class="logMode === 'quick' ? 'bg-coffee-espresso text-coffee-warmWhite shadow-sm' : 'text-coffee-softGray hover:text-coffee-espresso'"
-        >快速记录</button>
-        <button 
-          @click="logMode = 'detailed'" 
-          type="button"
-          class="px-3 py-1 rounded-full text-[10px] tracking-wider font-semibold transition-all duration-200"
-          :class="logMode === 'detailed' ? 'bg-coffee-espresso text-coffee-warmWhite shadow-sm' : 'text-coffee-softGray hover:text-coffee-espresso'"
-        >精细记录</button>
+      <div class="text-center leading-none">
+        <h1 class="font-serif text-[17px] font-semibold tracking-wide text-coffee-espresso">
+          {{ logMode === 'quick' ? '记录这一杯' : '精细记录' }}
+        </h1>
+        <p class="mt-1.5 text-[9px] tracking-[0.16em] text-coffee-softGray">
+          {{ logMode === 'quick' ? '选好三项，即可保存' : `步骤 ${step} / 3` }}
+        </p>
       </div>
-      <span v-if="logMode === 'detailed'" class="text-[10px] tracking-wider text-coffee-softGray font-semibold uppercase">步骤 {{ step }}/3</span>
-      <span v-else class="text-[10px] tracking-wider text-coffee-softGray font-semibold uppercase">快速记录</span>
+      <button
+        type="button"
+        class="min-w-[64px] -mr-1 rounded-full border border-coffee-latte/35 bg-coffee-cream/35 px-2.5 py-1.5 text-[9px] font-semibold tracking-wider text-coffee-brown hover:border-coffee-brown/40 hover:bg-coffee-cream/65 transition-colors"
+        @click="logMode = logMode === 'quick' ? 'detailed' : 'quick'"
+      >
+        {{ logMode === 'quick' ? '精细模式' : '快捷模式' }}
+      </button>
     </div>
 
     <!-- Progress Indicator Bar (only in detailed mode) -->
@@ -34,11 +36,23 @@
     <div class="flex-1 overflow-y-auto px-6 py-5">
 
       <!-- ==================== QUICK LOG MODE ==================== -->
-      <div v-if="logMode === 'quick'" class="space-y-6">
+      <div v-if="logMode === 'quick'" class="space-y-5">
+        <div class="flex items-center justify-between rounded-sm border border-coffee-cream bg-coffee-cream/25 px-3.5 py-3 select-none">
+          <div>
+            <p class="font-serif text-sm font-semibold text-coffee-espresso">留下此刻，不必写得很满</p>
+            <p class="mt-1 text-[9px] tracking-wider text-coffee-softGray">封面、类型和心情已预选，可直接保存</p>
+          </div>
+          <AppIcon name="coffee" :size="20" class="text-coffee-brown" />
+        </div>
+
         <!-- Photo Selection -->
         <div class="space-y-2">
-          <label class="text-[10px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso block select-none">封面图</label>
-          <div class="grid grid-cols-4 gap-2">
+          <div class="quick-step-header">
+            <span class="quick-step-number">01</span>
+            <label class="quick-step-title">选择封面</label>
+            <span class="quick-step-note">点选或拍照</span>
+          </div>
+          <div class="grid grid-cols-5 gap-2">
             <div 
               v-for="(imgUrl, idx) in store.DEFAULT_PHOTOS" 
               :key="idx"
@@ -51,28 +65,26 @@
                 <Check class="w-4 h-4" />
               </div>
             </div>
+
+            <button
+              type="button"
+              class="aspect-square relative overflow-hidden rounded-sm border border-dashed border-coffee-latte/60 bg-coffee-cream/20 text-coffee-brown transition-colors hover:border-coffee-brown"
+              :class="quickForm.image_url === uploadedImageUrl && uploadedImageUrl ? 'border-solid border-coffee-brown ring-1 ring-coffee-brown' : ''"
+              aria-label="拍摄或上传封面"
+              @click="triggerFileSelect"
+            >
+              <img v-if="uploadedImageUrl && !isUploading" :src="uploadedImageUrl" class="absolute inset-0 w-full h-full object-cover" alt="已上传封面">
+              <span v-else class="absolute inset-0 flex flex-col items-center justify-center gap-1">
+                <span v-if="isUploading" class="w-4 h-4 border-2 border-coffee-espresso border-t-transparent rounded-full animate-spin"></span>
+                <Camera v-else class="w-4 h-4" />
+                <span class="text-[8px] font-semibold">拍照</span>
+              </span>
+              <span v-if="quickForm.image_url === uploadedImageUrl && uploadedImageUrl && !isUploading" class="absolute inset-0 grid place-items-center bg-coffee-espresso/20 text-white">
+                <Check class="w-4 h-4" />
+              </span>
+            </button>
           </div>
 
-          <!-- Upload Local Photo -->
-          <div 
-            @click="triggerFileSelect"
-            class="mt-3 p-3 border border-dashed border-coffee-latte/60 hover:border-coffee-brown bg-coffee-cream/15 rounded-sm cursor-pointer transition-colors flex items-center justify-center gap-2 select-none"
-          >
-            <template v-if="isUploading">
-              <div class="w-4 h-4 border-2 border-coffee-espresso border-t-transparent rounded-full animate-spin"></div>
-              <span class="text-xs text-coffee-espresso">正在上传相片...</span>
-            </template>
-            <template v-else-if="isLocalUploaded">
-              <div class="w-6 h-6 rounded-full overflow-hidden border border-coffee-espresso">
-                <img :src="quickForm.image_url" class="w-full h-full object-cover">
-              </div>
-              <span class="text-xs text-green-700 font-medium">本地咖啡照片上传并设为封面！</span>
-            </template>
-            <template v-else>
-              <Plus class="w-4 h-4 text-coffee-softGray" />
-              <span class="text-xs text-coffee-espresso font-medium">使用手机拍摄/本地相片作为手账封面</span>
-            </template>
-          </div>
           <input 
             type="file" 
             ref="fileInput" 
@@ -84,43 +96,77 @@
 
         <!-- Coffee Type Selection -->
         <div class="space-y-2">
-          <label class="text-[10px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso block select-none">咖啡类型</label>
+          <div class="quick-step-header">
+            <span class="quick-step-number">02</span>
+            <label class="quick-step-title">咖啡类型</label>
+            <span class="quick-step-note">单选</span>
+          </div>
           <div class="grid grid-cols-3 gap-2">
             <button 
               v-for="t in typePresets" 
               :key="t.val"
               @click="quickForm.coffee_type = t.val"
               type="button"
-              class="p-2.5 border rounded-sm text-center text-xs font-serif font-light transition-all duration-200"
+              class="min-h-10 px-2 py-2 border rounded-sm text-center text-xs font-serif transition-all duration-200"
               :class="quickForm.coffee_type === t.val 
                 ? 'bg-coffee-cream border-coffee-brown ring-1 ring-coffee-brown text-coffee-espresso' 
                 : 'bg-coffee-cream/30 border-coffee-latte/50 hover:border-coffee-brown text-coffee-espresso'"
             >
-              {{ t.label }}
+              {{ t.shortLabel }}
             </button>
           </div>
         </div>
 
         <!-- Mood Selection -->
         <div class="space-y-2">
-          <label class="text-[10px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso block select-none">此时心情</label>
+          <div class="quick-step-header">
+            <span class="quick-step-number">03</span>
+            <label class="quick-step-title">此时心情</label>
+            <span class="quick-step-note">单选</span>
+          </div>
           <div class="grid grid-cols-4 gap-2">
             <button
               v-for="m in moodPresets"
               :key="m.val"
               @click="quickForm.mood = m.val"
               type="button"
-              class="p-2.5 border rounded-sm text-xs font-serif transition-all flex flex-col items-center gap-1"
+              class="min-h-[68px] p-2 border rounded-sm text-xs font-serif transition-all flex flex-col items-center justify-center gap-1"
               :class="quickForm.mood === m.val
                 ? 'border-coffee-brown bg-coffee-cream text-coffee-espresso font-semibold'
                 : 'border-coffee-latte/50 text-coffee-softGray hover:border-coffee-brown'"
             >
-              <component :is="m.icon" class="w-3.5 h-3.5 flex-shrink-0" />
+              <span class="icon-well" :class="quickForm.mood === m.val ? 'icon-well--active' : ''">
+                <AppIcon :name="m.icon" :size="15" />
+              </span>
               <span>{{ m.label }}</span>
             </button>
           </div>
         </div>
 
+        <!-- Progressive disclosure for optional details -->
+        <div class="pt-1 border-t border-coffee-cream/80">
+          <button
+            type="button"
+            class="w-full flex items-center gap-3 rounded-sm px-1 py-3 text-left group"
+            :aria-expanded="showQuickExtras"
+            @click="showQuickExtras = !showQuickExtras"
+          >
+            <span class="grid w-8 h-8 flex-shrink-0 place-items-center rounded-full bg-coffee-cream/60 text-coffee-brown">
+              <Plus v-if="!showQuickExtras" class="w-4 h-4" />
+              <X v-else class="w-3.5 h-3.5" />
+            </span>
+            <span class="flex-1">
+              <span class="block text-[11px] font-semibold tracking-wide text-coffee-espresso">添加更多细节</span>
+              <span class="mt-1 block text-[9px] text-coffee-softGray">风味、生活标签、名称与 AI 文案</span>
+            </span>
+            <span v-if="quickExtrasCount" class="rounded-full bg-coffee-cream px-2 py-1 text-[8px] font-semibold text-coffee-brown">
+              已添加 {{ quickExtrasCount }} 项
+            </span>
+            <ChevronDown class="w-4 h-4 text-coffee-softGray transition-transform duration-200" :class="showQuickExtras ? 'rotate-180' : ''" />
+          </button>
+
+          <Transition name="fade">
+            <div v-if="showQuickExtras" class="mt-2 space-y-6 rounded-sm border border-coffee-cream/80 bg-white/20 p-4">
         <!-- Lifestyle Tags: Mood / Scene / Pairing -->
         <div class="space-y-3">
           <label class="text-[10px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso block select-none">生活标签 <span class="text-coffee-softGray font-normal normal-case">(选填)</span></label>
@@ -133,11 +179,14 @@
                 :key="t.val"
                 @click="toggleLifestyleTag(quickForm.mood_tags, t.val)"
                 type="button"
-                class="px-2.5 py-1 text-[10px] border rounded-full transition-all duration-150"
+                class="lifestyle-chip"
                 :class="quickForm.mood_tags.includes(t.val)
                   ? 'bg-amber-100 text-amber-800 border-amber-400'
                   : 'bg-coffee-cream/30 text-coffee-espresso border-coffee-latte/50 hover:border-coffee-brown'"
-              >{{ t.label }}</button>
+              >
+                <AppIcon :name="t.icon" :size="12" />
+                <span>{{ t.label }}</span>
+              </button>
             </div>
           </div>
           <!-- Scene Tags -->
@@ -149,11 +198,14 @@
                 :key="t.val"
                 @click="toggleLifestyleTag(quickForm.scene_tags, t.val)"
                 type="button"
-                class="px-2.5 py-1 text-[10px] border rounded-full transition-all duration-150"
+                class="lifestyle-chip"
                 :class="quickForm.scene_tags.includes(t.val)
                   ? 'bg-sky-100 text-sky-800 border-sky-400'
                   : 'bg-coffee-cream/30 text-coffee-espresso border-coffee-latte/50 hover:border-coffee-brown'"
-              >{{ t.label }}</button>
+              >
+                <AppIcon :name="t.icon" :size="12" />
+                <span>{{ t.label }}</span>
+              </button>
             </div>
           </div>
           <!-- Pairing Tags -->
@@ -165,11 +217,14 @@
                 :key="t.val"
                 @click="toggleLifestyleTag(quickForm.pairing_tags, t.val)"
                 type="button"
-                class="px-2.5 py-1 text-[10px] border rounded-full transition-all duration-150"
+                class="lifestyle-chip"
                 :class="quickForm.pairing_tags.includes(t.val)
                   ? 'bg-rose-100 text-rose-800 border-rose-400'
                   : 'bg-coffee-cream/30 text-coffee-espresso border-coffee-latte/50 hover:border-coffee-brown'"
-              >{{ t.label }}</button>
+              >
+                <AppIcon :name="t.icon" :size="12" />
+                <span>{{ t.label }}</span>
+              </button>
             </div>
           </div>
         </div>
@@ -197,7 +252,9 @@
                 ? 'border-coffee-brown bg-coffee-cream text-coffee-espresso'
                 : 'border-coffee-latte/50 text-coffee-softGray hover:border-coffee-brown'"
             >
-              <component :is="f.icon" class="w-4 h-4 flex-shrink-0" />
+              <span class="icon-well" :class="quickForm.flavor_preset === f.val ? 'icon-well--active' : ''">
+                <AppIcon :name="f.icon" :size="17" />
+              </span>
               <div>
                 <div class="text-xs font-semibold font-serif leading-none">{{ f.label }}</div>
                 <div class="text-[10px] mt-1 opacity-70">{{ f.desc }}</div>
@@ -205,32 +262,6 @@
             </button>
           </div>
 
-          <!-- Live Radar Preview -->
-          <Transition name="fade">
-            <div v-if="quickForm.flavor_preset" class="flex items-center gap-4 p-3 bg-coffee-cream/30 border border-coffee-latte/40 rounded-sm">
-              <div class="w-[72px] h-[72px] flex-shrink-0">
-                <FlavorRadarChart
-                  :values="quickRadarValues"
-                  :size="72"
-                  :show-labels="false"
-                  :dot-radius="1.5"
-                />
-              </div>
-              <div class="flex-1 space-y-1">
-                <div class="text-[9px] uppercase tracking-[0.2em] font-semibold text-coffee-espresso">
-                  {{ flavorPresets.find(f => f.val === quickForm.flavor_preset)?.label }} 风味图谱
-                </div>
-                <div class="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[9px] text-coffee-softGray">
-                  <span>酸度 <span class="font-mono text-coffee-espresso">{{ quickRadarValues[0] }}</span></span>
-                  <span>苦感 <span class="font-mono text-coffee-espresso">{{ quickRadarValues[1] }}</span></span>
-                  <span>甜感 <span class="font-mono text-coffee-espresso">{{ quickRadarValues[2] }}</span></span>
-                  <span>醇厚 <span class="font-mono text-coffee-espresso">{{ quickRadarValues[3] }}</span></span>
-                  <span>香气 <span class="font-mono text-coffee-espresso">{{ quickRadarValues[4] }}</span></span>
-                  <span>余韵 <span class="font-mono text-coffee-espresso">{{ quickRadarValues[5] }}</span></span>
-                </div>
-              </div>
-            </div>
-          </Transition>
         </div>
 
         <!-- Optional: Coffee Name (quick fill) -->
@@ -242,6 +273,21 @@
             placeholder="不填则自动生成" 
             class="w-full p-3 bg-coffee-cream/40 border border-coffee-latte/60 focus:border-coffee-brown focus:outline-none rounded-sm font-serif text-sm transition-colors"
           >
+        </div>
+
+        <label class="flex items-center gap-3 rounded-sm border border-coffee-cream bg-coffee-cream/25 p-3 cursor-pointer">
+          <input
+            v-model="generateAI"
+            type="checkbox"
+            class="h-4 w-4 flex-shrink-0 accent-coffee-espresso"
+          >
+          <span class="flex-1">
+            <span class="block text-[10px] font-semibold tracking-wide text-coffee-espresso">生成 AI 感官文案</span>
+            <span class="mt-1 block text-[9px] leading-relaxed text-coffee-softGray">关闭时仍会保存本地摘要</span>
+          </span>
+        </label>
+            </div>
+          </Transition>
         </div>
       </div>
 
@@ -436,7 +482,9 @@
                 ? 'border-coffee-brown bg-coffee-cream text-coffee-espresso font-semibold'
                 : 'border-coffee-latte/50 text-coffee-softGray hover:border-coffee-brown'"
             >
-              <component :is="m.icon" class="w-3.5 h-3.5 flex-shrink-0" />
+              <span class="icon-well" :class="form.mood === m.val ? 'icon-well--active' : ''">
+                <AppIcon :name="m.icon" :size="15" />
+              </span>
               <span>{{ m.label }}</span>
             </button>
           </div>
@@ -524,11 +572,14 @@
                 :key="t.val"
                 @click="toggleLifestyleTag(form.mood_tags!, t.val)"
                 type="button"
-                class="px-2.5 py-1 text-[10px] border rounded-full transition-all duration-150"
+                class="lifestyle-chip"
                 :class="form.mood_tags?.includes(t.val)
                   ? 'bg-amber-100 text-amber-800 border-amber-400'
                   : 'bg-coffee-cream/30 text-coffee-espresso border-coffee-latte/50 hover:border-coffee-brown'"
-              >{{ t.label }}</button>
+              >
+                <AppIcon :name="t.icon" :size="12" />
+                <span>{{ t.label }}</span>
+              </button>
             </div>
           </div>
           <!-- Scene Tags -->
@@ -540,11 +591,14 @@
                 :key="t.val"
                 @click="toggleLifestyleTag(form.scene_tags!, t.val)"
                 type="button"
-                class="px-2.5 py-1 text-[10px] border rounded-full transition-all duration-150"
+                class="lifestyle-chip"
                 :class="form.scene_tags?.includes(t.val)
                   ? 'bg-sky-100 text-sky-800 border-sky-400'
                   : 'bg-coffee-cream/30 text-coffee-espresso border-coffee-latte/50 hover:border-coffee-brown'"
-              >{{ t.label }}</button>
+              >
+                <AppIcon :name="t.icon" :size="12" />
+                <span>{{ t.label }}</span>
+              </button>
             </div>
           </div>
           <!-- Pairing Tags -->
@@ -556,11 +610,14 @@
                 :key="t.val"
                 @click="toggleLifestyleTag(form.pairing_tags!, t.val)"
                 type="button"
-                class="px-2.5 py-1 text-[10px] border rounded-full transition-all duration-150"
+                class="lifestyle-chip"
                 :class="form.pairing_tags?.includes(t.val)
                   ? 'bg-rose-100 text-rose-800 border-rose-400'
                   : 'bg-coffee-cream/30 text-coffee-espresso border-coffee-latte/50 hover:border-coffee-brown'"
-              >{{ t.label }}</button>
+              >
+                <AppIcon :name="t.icon" :size="12" />
+                <span>{{ t.label }}</span>
+              </button>
             </div>
           </div>
         </div>
@@ -570,8 +627,11 @@
     </div>
 
     <!-- Bottom Controls -->
-    <div class="p-6 border-t border-coffee-cream bg-coffee-warmWhite sticky bottom-0 z-10 select-none space-y-3">
-      <label class="flex items-start gap-3 p-3 rounded-sm border border-coffee-cream bg-coffee-cream/25 cursor-pointer">
+    <div
+      class="border-t border-coffee-cream bg-coffee-warmWhite/95 backdrop-blur-sm sticky bottom-0 z-10 select-none space-y-3"
+      :class="logMode === 'quick' ? 'px-5 py-4' : 'p-6'"
+    >
+      <label v-if="logMode === 'detailed'" class="flex items-start gap-3 p-3 rounded-sm border border-coffee-cream bg-coffee-cream/25 cursor-pointer">
         <input
           v-model="generateAI"
           type="checkbox"
@@ -582,6 +642,13 @@
           <span class="block text-[10px] leading-relaxed text-coffee-softGray">开启后会将咖啡名称、风味分数与笔记发送至已配置的 AI 服务；关闭时仅使用本地摘要。</span>
         </span>
       </label>
+      <div v-if="logMode === 'quick'" class="flex items-center justify-between text-[9px] tracking-wide">
+        <span class="inline-flex items-center gap-1.5 font-semibold text-coffee-brown">
+          <Check class="w-3 h-3" />
+          {{ typePresets.find(t => t.val === quickForm.coffee_type)?.shortLabel }} · {{ moodPresets.find(m => m.val === quickForm.mood)?.label }}
+        </span>
+        <span class="text-coffee-softGray">信息已齐，可以直接保存</span>
+      </div>
       <div class="flex gap-3">
         <!-- Detailed mode: show back button -->
         <button 
@@ -601,7 +668,7 @@
             <span>{{ generateAI ? '正在保存并准备云端文案...' : '正在保存本地摘要...' }}</span>
           </template>
           <template v-else>
-            <span v-if="logMode === 'quick'">{{ generateAI ? '保存并启用 AI' : '一键保存' }}</span>
+            <span v-if="logMode === 'quick'">保存这杯咖啡</span>
             <span v-else>{{ step === 3 ? (generateAI ? '保存并启用 AI 文案' : '保存手账') : '下一步' }}</span>
           </template>
         </button>
@@ -616,8 +683,9 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCoffeeLogStore, NewCoffeeLog } from '@/stores/coffeeLog'
 import FlavorRadarChart from '@/components/charts/FlavorRadarChart.vue'
+import AppIcon from '@/components/AppIcon.vue'
 import request from '@/api/request'
-import { X, Check, Plus, Smile, Zap, Moon, CloudRain, Sun, Leaf, Heart, Flame, MapPin, ChevronDown } from 'lucide-vue-next'
+import { X, Check, Plus, Camera, MapPin, ChevronDown } from 'lucide-vue-next'
 import { LIFESTYLE_MOOD_TAGS, LIFESTYLE_SCENE_TAGS, LIFESTYLE_PAIRING_TAGS } from '@/constants/coffee'
 import * as shopApi from '@/api/coffeeShop'
 import * as beanApi from '@/api/coffeeBean'
@@ -631,11 +699,13 @@ const logMode = ref<'quick' | 'detailed'>('quick')
 const step = ref(1)
 const isSubmitting = ref(false)
 const generateAI = ref(false)
+const showQuickExtras = ref(false)
 
 // File upload states
 const fileInput = ref<HTMLInputElement | null>(null)
 const isUploading = ref(false)
 const isLocalUploaded = ref(false)
+const uploadedImageUrl = ref('')
 
 // Shop autocomplete
 const shopNames = ref<string[]>([])
@@ -708,6 +778,15 @@ const quickForm = reactive({
   pairing_tags: [] as string[]
 })
 
+const quickExtrasCount = computed(() => {
+  return quickForm.mood_tags.length +
+    quickForm.scene_tags.length +
+    quickForm.pairing_tags.length +
+    (quickForm.flavor_preset ? 1 : 0) +
+    (quickForm.coffee_name.trim() ? 1 : 0) +
+    (generateAI.value ? 1 : 0)
+})
+
 // Prefill from existing log (Brew Again)
 onMounted(async () => {
   const fromLogId = route.query.from_log_id
@@ -726,6 +805,10 @@ onMounted(async () => {
         quickForm.mood_tags = [...(sourceLog.mood_tags || [])]
         quickForm.scene_tags = [...(sourceLog.scene_tags || [])]
         quickForm.pairing_tags = [...(sourceLog.pairing_tags || [])]
+        showQuickExtras.value = quickForm.mood_tags.length > 0 || quickForm.scene_tags.length > 0 || quickForm.pairing_tags.length > 0
+        if (sourceLog.image_url && !store.DEFAULT_PHOTOS.includes(sourceLog.image_url)) {
+          uploadedImageUrl.value = sourceLog.image_url
+        }
         // Prefill detailed form
         form.coffee_type = sourceLog.coffee_type
         form.image_url = sourceLog.image_url || store.DEFAULT_PHOTOS[1]
@@ -787,12 +870,12 @@ const generateQuickName = (type: string) => {
 
 // Presets Specs
 const typePresets = [
-  { val: 'Pour Over', label: 'Pour Over / 手冲' },
-  { val: 'Latte', label: 'Latte / 拿铁' },
-  { val: 'Americano', label: 'Americano / 美式' },
-  { val: 'Cold Brew', label: 'Cold Brew / 冷萃' },
-  { val: 'Espresso', label: 'Espresso / 浓缩' },
-  { val: 'Dirty', label: 'Dirty / 脏咖啡' }
+  { val: 'Pour Over', label: 'Pour Over / 手冲', shortLabel: '手冲' },
+  { val: 'Latte', label: 'Latte / 拿铁', shortLabel: '拿铁' },
+  { val: 'Americano', label: 'Americano / 美式', shortLabel: '美式' },
+  { val: 'Cold Brew', label: 'Cold Brew / 冷萃', shortLabel: '冷萃' },
+  { val: 'Espresso', label: 'Espresso / 浓缩', shortLabel: '浓缩' },
+  { val: 'Dirty', label: 'Dirty / 脏咖啡', shortLabel: '脏咖啡' }
 ]
 
 const sliderSpecs = [
@@ -819,46 +902,37 @@ const flavorPresets = [
     val: 'bright',
     label: '清新明亮',
     desc: '高酸 · 轻盈',
-    icon: Sun,
+    icon: 'bright',
     values: { acidity: 5, bitterness: 1, sweetness: 3, body: 2, aroma: 4, aftertaste: 3 }
   },
   {
     val: 'floral',
     label: '花果芬芳',
     desc: '果香 · 花香',
-    icon: Leaf,
+    icon: 'floral',
     values: { acidity: 4, bitterness: 1, sweetness: 4, body: 2, aroma: 5, aftertaste: 3 }
   },
   {
     val: 'smooth',
     label: '甜美柔滑',
     desc: '低酸 · 甜润',
-    icon: Heart,
+    icon: 'smooth',
     values: { acidity: 2, bitterness: 1, sweetness: 5, body: 3, aroma: 3, aftertaste: 4 }
   },
   {
     val: 'bold',
     label: '浓郁醇厚',
     desc: '厚重 · 回甘',
-    icon: Flame,
+    icon: 'bold',
     values: { acidity: 1, bitterness: 4, sweetness: 2, body: 5, aroma: 4, aftertaste: 5 }
   }
 ]
 
-const quickRadarValues = computed(() => {
-  const preset = flavorPresets.find(f => f.val === quickForm.flavor_preset)
-  if (preset) {
-    const v = preset.values
-    return [v.acidity, v.bitterness, v.sweetness, v.body, v.aroma, v.aftertaste]
-  }
-  return [3, 2, 3, 3, 3, 3]
-})
-
 const moodPresets = [
-  { val: 'Calm', label: '平静', icon: Smile },
-  { val: 'Energetic', label: '愉悦', icon: Zap },
-  { val: 'Reflective', label: '沉浸', icon: Moon },
-  { val: 'Tired', label: '疲惫', icon: CloudRain }
+  { val: 'Calm', label: '平静', icon: 'calm' },
+  { val: 'Energetic', label: '愉悦', icon: 'energetic' },
+  { val: 'Reflective', label: '沉浸', icon: 'reflective' },
+  { val: 'Tired', label: '疲惫', icon: 'tired' }
 ]
 
 const toggleTag = (tag: string) => {
@@ -991,6 +1065,7 @@ const handleFileChange = async (event: Event) => {
     }) as any
 
     if (res && res.url) {
+      uploadedImageUrl.value = res.url
       // Set image on the active form based on current mode
       if (logMode.value === 'quick') {
         quickForm.image_url = res.url
@@ -1014,11 +1089,82 @@ const handleFileChange = async (event: Event) => {
 .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(-4px); }
 
+.quick-step-header {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 1.5rem;
+  user-select: none;
+}
+
+.quick-step-number {
+  display: grid;
+  width: 1.4rem;
+  height: 1.4rem;
+  place-items: center;
+  border: 1px solid rgba(192, 160, 124, 0.45);
+  border-radius: 9999px;
+  color: #9c7b59;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.quick-step-title {
+  color: #5c3d2e;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.quick-step-note {
+  margin-left: auto;
+  color: #c0a07c;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+}
+
 /* Range slider styling */
 input[type="range"]::-webkit-slider-thumb {
   border-radius: 50%;
   width: 12px;
   height: 12px;
   background: #7A5638;
+}
+
+.lifestyle-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 1.75rem;
+  padding: 0.25rem 0.65rem;
+  border-width: 1px;
+  border-radius: 9999px;
+  font-size: 10px;
+  line-height: 1;
+  transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease, transform 150ms ease;
+}
+
+.lifestyle-chip:active {
+  transform: scale(0.97);
+}
+
+.icon-well {
+  display: inline-grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex-shrink: 0;
+  place-items: center;
+  border: 1px solid rgba(192, 160, 124, 0.35);
+  border-radius: 9999px;
+  background: rgba(253, 232, 194, 0.35);
+  color: #9c7b59;
+  transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.icon-well--active {
+  border-color: rgba(92, 61, 46, 0.32);
+  background: rgba(92, 61, 46, 0.09);
+  color: #5c3d2e;
 }
 </style>

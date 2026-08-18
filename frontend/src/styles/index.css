@@ -10,6 +10,12 @@
   }
 }
 
+/* One quiet line weight across the product icon family. */
+.lucide:not([class*="stroke-"]) {
+  stroke-width: 1.7;
+  vector-effect: non-scaling-stroke;
+}
+
 /* tactile paper grain texture overlay */
 .paper-grain {
   background-color: #FFF2DB;

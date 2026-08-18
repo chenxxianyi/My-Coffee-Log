@@ -20,7 +20,9 @@
         <!-- Cover Image -->
         <div class="h-40 bg-coffee-cream/40 overflow-hidden">
           <img v-if="shop.image_url" :src="shop.image_url" class="w-full h-full object-cover">
-          <div v-else class="w-full h-full flex items-center justify-center text-6xl opacity-20">🏪</div>
+          <div v-else class="w-full h-full flex items-center justify-center text-coffee-softGray/50">
+            <AppIcon name="cafe" :size="46" :stroke-width="1.35" />
+          </div>
         </div>
         <!-- Shop Info Overlay -->
         <div class="px-6 -mt-8 relative z-10">
@@ -81,7 +83,9 @@
         >
           <div class="w-10 h-10 rounded-sm overflow-hidden flex-shrink-0 bg-coffee-cream/40">
             <img v-if="log.image_url" :src="log.image_url" class="w-full h-full object-cover">
-            <div v-else class="w-full h-full flex items-center justify-center text-sm">☕</div>
+            <div v-else class="w-full h-full flex items-center justify-center text-coffee-softGray">
+              <AppIcon name="coffee" :size="16" />
+            </div>
           </div>
           <div class="flex-1 min-w-0">
             <div class="text-xs font-serif font-medium text-coffee-espresso truncate">{{ log.coffee_name }}</div>
@@ -158,6 +162,7 @@ import { useRouter, useRoute } from 'vue-router'
 import * as shopApi from '@/api/coffeeShop'
 import type { CoffeeShop } from '@/api/coffeeShop'
 import type { CoffeeLog } from '@/stores/coffeeLog'
+import AppIcon from '@/components/AppIcon.vue'
 import { BookOpen, Calendar, BarChart3, Plus, User, ChevronLeft, ChevronRight, X, Pencil, MapPin, Star } from 'lucide-vue-next'
 
 const router = useRouter()

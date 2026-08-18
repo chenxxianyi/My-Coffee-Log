@@ -89,7 +89,10 @@
               <span>{{ log.shop_name }}</span>
             </div>
             <div class="w-px h-3 bg-coffee-cream"></div>
-            <span class="text-coffee-espresso italic font-semibold">{{ moodLabel(log.mood) }}</span>
+            <span class="inline-flex items-center gap-1.5 text-coffee-espresso italic font-semibold">
+              <AppIcon :name="moodIconName(log.mood)" :size="13" />
+              {{ moodLabel(log.mood) }}
+            </span>
           </div>
         </div>
 
@@ -129,7 +132,10 @@
           <!-- Section header -->
           <div class="flex justify-between items-center select-none relative z-10">
             <span class="text-[9px] uppercase tracking-[0.25em] font-bold text-coffee-brown">AI 感官评语 / Editorial</span>
-            <span class="text-[10px] text-coffee-espresso italic font-semibold">{{ moodLabel(log.mood) }}</span>
+            <span class="inline-flex items-center gap-1 text-[10px] text-coffee-espresso italic font-semibold">
+              <AppIcon :name="moodIconName(log.mood)" :size="12" />
+              {{ moodLabel(log.mood) }}
+            </span>
           </div>
           <!-- AI prose text -->
           <p class="font-serif italic text-[15px] text-coffee-espresso leading-[1.8] relative z-10">
@@ -204,21 +210,30 @@
             <div v-if="log.mood_tags?.length" class="space-y-1.5">
               <span class="text-[9px] uppercase tracking-wider text-amber-700 font-semibold select-none">心情 Mood</span>
               <div class="flex flex-wrap gap-1.5">
-                <span v-for="t in log.mood_tags" :key="t" class="px-2.5 py-1 text-[10px] bg-amber-100 text-amber-800 border border-amber-300/60 rounded-full font-medium">{{ lifestyleTagLabel('mood', t) }}</span>
+                <span v-for="t in log.mood_tags" :key="t" class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] bg-amber-100 text-amber-800 border border-amber-300/60 rounded-full font-medium">
+                  <AppIcon :name="lifestyleTagIcon('mood', t)" :size="12" />
+                  {{ lifestyleTagLabel('mood', t) }}
+                </span>
               </div>
             </div>
             <!-- Scene Tags -->
             <div v-if="log.scene_tags?.length" class="space-y-1.5">
               <span class="text-[9px] uppercase tracking-wider text-sky-700 font-semibold select-none">场景 Scene</span>
               <div class="flex flex-wrap gap-1.5">
-                <span v-for="t in log.scene_tags" :key="t" class="px-2.5 py-1 text-[10px] bg-sky-100 text-sky-800 border border-sky-300/60 rounded-full font-medium">{{ lifestyleTagLabel('scene', t) }}</span>
+                <span v-for="t in log.scene_tags" :key="t" class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] bg-sky-100 text-sky-800 border border-sky-300/60 rounded-full font-medium">
+                  <AppIcon :name="lifestyleTagIcon('scene', t)" :size="12" />
+                  {{ lifestyleTagLabel('scene', t) }}
+                </span>
               </div>
             </div>
             <!-- Pairing Tags -->
             <div v-if="log.pairing_tags?.length" class="space-y-1.5">
               <span class="text-[9px] uppercase tracking-wider text-rose-700 font-semibold select-none">搭配 Pairing</span>
               <div class="flex flex-wrap gap-1.5">
-                <span v-for="t in log.pairing_tags" :key="t" class="px-2.5 py-1 text-[10px] bg-rose-100 text-rose-800 border border-rose-300/60 rounded-full font-medium">{{ lifestyleTagLabel('pairing', t) }}</span>
+                <span v-for="t in log.pairing_tags" :key="t" class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] bg-rose-100 text-rose-800 border border-rose-300/60 rounded-full font-medium">
+                  <AppIcon :name="lifestyleTagIcon('pairing', t)" :size="12" />
+                  {{ lifestyleTagLabel('pairing', t) }}
+                </span>
               </div>
             </div>
           </div>
@@ -324,8 +339,9 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCoffeeLogStore } from '@/stores/coffeeLog'
-import { coffeeTypeShortLabel, moodLabel, LIFESTYLE_MOOD_TAGS, LIFESTYLE_SCENE_TAGS, LIFESTYLE_PAIRING_TAGS } from '@/constants/coffee'
+import { coffeeTypeShortLabel, moodLabel, moodIconName, LIFESTYLE_MOOD_TAGS, LIFESTYLE_SCENE_TAGS, LIFESTYLE_PAIRING_TAGS } from '@/constants/coffee'
 import FlavorRadarChart from '@/components/charts/FlavorRadarChart.vue'
+import AppIcon from '@/components/AppIcon.vue'
 import { ArrowLeft, Share2, MapPin, Coffee, Check, Plus } from 'lucide-vue-next'
 
 const props = defineProps<{
@@ -360,6 +376,11 @@ const hasBrewParams = computed(() => {
 const lifestyleTagLabel = (type: 'mood' | 'scene' | 'pairing', val: string) => {
   const list = type === 'mood' ? LIFESTYLE_MOOD_TAGS : type === 'scene' ? LIFESTYLE_SCENE_TAGS : LIFESTYLE_PAIRING_TAGS
   return list.find(t => t.val === val)?.label ?? val
+}
+
+const lifestyleTagIcon = (type: 'mood' | 'scene' | 'pairing', val: string) => {
+  const list = type === 'mood' ? LIFESTYLE_MOOD_TAGS : type === 'scene' ? LIFESTYLE_SCENE_TAGS : LIFESTYLE_PAIRING_TAGS
+  return list.find(t => t.val === val)?.icon ?? 'coffee'
 }
 
 // Celebration state

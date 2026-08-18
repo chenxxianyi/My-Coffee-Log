@@ -59,7 +59,10 @@
 
     <!-- Quick Seed accounts prompt -->
     <div class="mt-8 p-4 bg-coffee-cream/20 rounded-2xl border border-dashed border-coffee-latte/50 text-[10px] text-coffee-brown space-y-1 text-center select-none">
-      <p class="font-bold">✨ 便捷测试通道提示</p>
+      <p class="inline-flex items-center justify-center gap-1.5 font-bold">
+        <AppIcon name="sparkles" :size="12" />
+        便捷测试通道提示
+      </p>
       <p class="font-light leading-relaxed">
         前端路由中已注入守卫，在测试阶段如果你直接访问需鉴权的页面，系统将自动注入 Mock 登录态，完全不阻碍你的评审与流畅体验！
       </p>
@@ -72,6 +75,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import AppIcon from '@/components/AppIcon.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()

@@ -47,7 +47,10 @@
               <span>·</span>
               <span class="truncate max-w-[180px]">{{ store.todayLog.shop_name.split(',')[0] }}</span>
               <span>·</span>
-              <span>{{ moodLabel(store.todayLog.mood) }}</span>
+              <span class="inline-flex items-center gap-1">
+                <AppIcon :name="moodIconName(store.todayLog.mood)" :size="11" />
+                {{ moodLabel(store.todayLog.mood) }}
+              </span>
             </div>
           </div>
         </router-link>
@@ -232,7 +235,10 @@
               <h4 class="font-serif text-base font-light text-coffee-espresso truncate italic leading-tight">{{ log.coffee_name }}</h4>
               <p class="text-[10px] text-coffee-brown font-light truncate leading-relaxed">{{ log.notes }}</p>
               <div class="flex gap-2 items-center text-[9px] text-coffee-softGray pt-0.5">
-                <span class="px-1.5 py-0.5 bg-coffee-cream rounded-sm text-coffee-espresso">{{ moodLabel(log.mood) }}</span>
+                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-coffee-cream rounded-sm text-coffee-espresso">
+                  <AppIcon :name="moodIconName(log.mood)" :size="11" />
+                  {{ moodLabel(log.mood) }}
+                </span>
                 <span class="truncate max-w-[120px]">在 {{ log.shop_name.split(',')[0] }}</span>
               </div>
             </div>
@@ -291,7 +297,8 @@
 import { computed, onMounted } from 'vue'
 import { useCoffeeLogStore } from '@/stores/coffeeLog'
 import { useAuthStore } from '@/stores/auth'
-import { coffeeTypeShortLabel, coffeeTypeLabel, moodLabel } from '@/constants/coffee'
+import { coffeeTypeShortLabel, coffeeTypeLabel, moodLabel, moodIconName } from '@/constants/coffee'
+import AppIcon from '@/components/AppIcon.vue'
 import { BookOpen, Calendar, BarChart3, Plus, Search, User } from 'lucide-vue-next'
 
 const store = useCoffeeLogStore()

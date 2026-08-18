@@ -23,7 +23,9 @@
 
       <!-- Empty State -->
       <div v-if="!review || review.count === 0" class="flex flex-col items-center justify-center py-16 space-y-4 select-none">
-        <div class="text-5xl opacity-30">☕</div>
+        <div class="grid w-16 h-16 place-items-center rounded-full border border-coffee-latte/25 bg-coffee-cream/35 text-coffee-softGray">
+          <AppIcon name="coffee" :size="28" />
+        </div>
         <p class="text-sm text-coffee-softGray font-light italic text-center leading-relaxed">
           这个月的咖啡手账还是空白的。<br>新的月份，新的开始。
         </p>
@@ -215,6 +217,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useCoffeeLogStore } from '@/stores/coffeeLog'
+import AppIcon from '@/components/AppIcon.vue'
 import FlavorRadarChart from '@/components/charts/FlavorRadarChart.vue'
 import { coffeeTypeLabel } from '@/constants/coffee'
 import { BookOpen, Calendar, BarChart3, Plus, User, Share2, ChevronLeft, ChevronRight } from 'lucide-vue-next'
@@ -295,7 +298,7 @@ function weekdayLabel(weekday: number) {
 function shareReview() {
   if (!review.value) return
   const lines: string[] = []
-  lines.push(`☕ ${displayMonth.value} 月度咖啡回顾`)
+  lines.push(`MY COFFEE LOG · ${displayMonth.value} 月度咖啡回顾`)
   lines.push(`本月 ${review.value.count} 杯`)
   if (review.value.favorite_coffee_type) {
     lines.push(`最常喝：${coffeeTypeLabel(review.value.favorite_coffee_type)}`)

@@ -144,7 +144,7 @@
         <!-- Footer -->
         <div class="flex justify-between items-center pt-1.5 border-t border-coffee-cream text-[7px] text-coffee-softGray font-bold tracking-widest uppercase select-none">
           <span>{{ formatFullDate(log.drink_date) }}</span>
-          <span>MOOD: {{ moodEmoji(log.mood) }} {{ log.mood }}</span>
+          <span class="inline-flex items-center gap-1">MOOD: <AppIcon :name="moodIconName(log.mood)" :size="8" /> {{ moodLabel(log.mood) }}</span>
         </div>
       </div>
 
@@ -185,7 +185,7 @@
             </div>
             <div class="flex justify-between border-b border-dotted border-coffee-cream/60 pb-0.5">
               <span>MOOD</span>
-              <span>{{ moodEmoji(log.mood) }} {{ log.mood }}</span>
+              <span class="inline-flex items-center gap-1"><AppIcon :name="moodIconName(log.mood)" :size="8" /> {{ moodLabel(log.mood) }}</span>
             </div>
           </div>
           <!-- Flavor scores as receipt items -->
@@ -266,6 +266,8 @@
 import { ref, computed } from 'vue'
 import { useCoffeeLogStore } from '@/stores/coffeeLog'
 import FlavorRadarChart from '@/components/charts/FlavorRadarChart.vue'
+import AppIcon from '@/components/AppIcon.vue'
+import { moodIconName, moodLabel } from '@/constants/coffee'
 import { X, Download, Coffee, Sparkles } from 'lucide-vue-next'
 import html2canvas from 'html2canvas'
 import * as statsApi from '@/api/stats'
@@ -298,11 +300,6 @@ const cardDimensions = computed(() => {
     return { width: '260px', height: '462px' }
   }
 })
-
-const moodEmoji = (mood: string) => {
-  const map: Record<string, string> = { Calm: '😌', Energetic: '⚡', Reflective: '💭', Tired: '🥱' }
-  return map[mood] ?? '😌'
-}
 
 const exportCardImage = async () => {
   const cardElement = document.getElementById('card-element')

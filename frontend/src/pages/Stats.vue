@@ -2,10 +2,19 @@
   <div class="flex-1 w-full flex flex-col justify-between bg-coffee-warmWhite text-coffee-charcoal">
     
     <!-- Header -->
-    <div class="px-6 py-5 flex justify-between items-end border-b border-coffee-cream bg-coffee-warmWhite sticky top-0 z-10 select-none">
-      <div>
+    <div class="px-4 py-4 flex items-center gap-3 border-b border-coffee-cream bg-coffee-warmWhite/95 backdrop-blur-sm sticky top-0 z-10 select-none">
+      <button
+        type="button"
+        class="grid w-9 h-9 flex-shrink-0 place-items-center rounded-full border border-coffee-latte/35 bg-coffee-cream/30 text-coffee-brown hover:border-coffee-brown/35 hover:bg-coffee-cream/70 hover:text-coffee-espresso focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coffee-latte transition-colors"
+        aria-label="返回上一页"
+        title="返回上一页"
+        @click="handleBack"
+      >
+        <ArrowLeft class="w-[18px] h-[18px]" />
+      </button>
+      <div class="flex-1 min-w-0">
         <span class="text-[9px] uppercase tracking-[0.25em] font-semibold text-coffee-softGray">Sensory Metrics</span>
-        <h2 class="font-serif text-2xl font-light text-coffee-espresso leading-none mt-1">我的风味足迹</h2>
+        <h2 class="font-serif text-2xl font-light text-coffee-espresso leading-none mt-1 truncate">我的风味足迹</h2>
       </div>
       <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" alt="Avatar" class="w-8 h-8 rounded-full object-cover border border-coffee-latte select-none">
     </div>
@@ -84,16 +93,20 @@
       </div>
 
       <!-- ---- Monthly Review Entry ---- -->
-      <router-link to="/monthly-review" class="block p-5 rounded-sm border border-coffee-latte/40 hover:border-coffee-brown/40 transition-colors select-none" style="background: linear-gradient(135deg, rgba(215,196,168,0.15) 0%, rgba(231,111,81,0.04) 100%);">
+      <router-link to="/monthly-review" class="group block p-4 rounded-sm border border-coffee-latte/40 hover:border-coffee-brown/50 hover:-translate-y-0.5 transition-all duration-200 select-none" style="background: linear-gradient(135deg, rgba(215,196,168,0.16) 0%, rgba(231,111,81,0.05) 100%);">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="text-2xl leading-none">📅</div>
+            <div class="grid w-11 h-11 flex-shrink-0 place-items-center rounded-full border border-coffee-latte/35 bg-coffee-cream/60 text-coffee-brown ring-1 ring-coffee-latte/10">
+              <AppIcon name="monthly-review" :size="20" />
+            </div>
             <div>
               <h4 class="font-serif text-sm font-semibold text-coffee-espresso leading-tight">月度咖啡回顾</h4>
-              <span class="text-[10px] text-coffee-brown font-serif italic">Monthly Review / 回顾你的咖啡月</span>
+              <span class="mt-1 block text-[10px] text-coffee-softGray font-serif italic">回顾本月的风味与咖啡时光</span>
             </div>
           </div>
-          <ChevronRight class="w-4 h-4 text-coffee-softGray" />
+          <span class="grid w-7 h-7 flex-shrink-0 place-items-center rounded-full text-coffee-softGray group-hover:bg-coffee-cream/70 group-hover:text-coffee-brown transition-colors">
+            <ChevronRight class="w-4 h-4" />
+          </span>
         </div>
       </router-link>
 
@@ -108,7 +121,9 @@
         <!-- Primary Personality Card -->
         <div class="p-5 rounded-sm border border-coffee-latte/40" style="background: linear-gradient(135deg, rgba(215,196,168,0.2) 0%, rgba(231,111,81,0.06) 100%);">
           <div class="flex items-start gap-4">
-            <div class="text-4xl leading-none select-none">{{ store.personalities[0].icon }}</div>
+            <div class="grid w-12 h-12 flex-shrink-0 place-items-center rounded-full border border-coffee-latte/35 bg-coffee-cream/55 text-coffee-brown select-none">
+              <AppIcon :name="personalityIconName(store.personalities[0].slug)" :size="23" />
+            </div>
             <div class="flex-1 space-y-1.5">
               <div>
                 <h4 class="font-serif text-lg font-semibold text-coffee-espresso leading-tight">{{ store.personalities[0].title }}</h4>
@@ -122,7 +137,9 @@
         <!-- Secondary Personality Tags -->
         <div v-if="store.personalities.length > 1" class="flex flex-wrap gap-2">
           <div v-for="p in store.personalities.slice(1)" :key="p.slug" class="flex items-center gap-2 px-3 py-2 bg-coffee-cream/50 border border-coffee-latte/30 rounded-sm">
-            <span class="text-lg leading-none select-none">{{ p.icon }}</span>
+            <span class="grid w-7 h-7 flex-shrink-0 place-items-center rounded-full bg-coffee-cream text-coffee-brown select-none">
+              <AppIcon :name="personalityIconName(p.slug)" :size="14" />
+            </span>
             <div>
               <div class="text-[11px] font-semibold text-coffee-espresso leading-none">{{ p.title }}</div>
               <div class="text-[9px] text-coffee-softGray font-serif italic">{{ p.subtitle }}</div>
@@ -208,13 +225,37 @@
 
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useCoffeeLogStore } from '@/stores/coffeeLog'
 import { getFlavorTags } from '@/api/flavorTag'
 import FlavorRadarChart from '@/components/charts/FlavorRadarChart.vue'
+import AppIcon from '@/components/AppIcon.vue'
 import { coffeeTypeLabel } from '@/constants/coffee'
-import { BookOpen, Calendar, BarChart3, Plus, User, Share2, ChevronRight, Sparkles } from 'lucide-vue-next'
+import { ArrowLeft, BookOpen, Calendar, BarChart3, Plus, User, Share2, ChevronRight, Sparkles } from 'lucide-vue-next'
 
 const store = useCoffeeLogStore()
+const router = useRouter()
+
+const handleBack = () => {
+  if (window.history.state?.back) {
+    router.back()
+    return
+  }
+  router.push('/home')
+}
+
+const personalityIcons: Record<string, string> = {
+  'citrus-minimalist': 'citrus',
+  'creamy-comfort-seeker': 'creamy',
+  'slow-morning-brewer': 'morning',
+  'urban-latte-lover': 'office',
+  'bold-espresso-purist': 'coffee',
+  'rainy-day-reader': 'book',
+  'social-weekend-explorer': 'social',
+  'productive-hustler': 'productive'
+}
+
+const personalityIconName = (slug: string) => personalityIcons[slug] ?? 'coffee'
 
 const barColors = ['bg-coffee-brown', 'bg-coffee-brown/60', 'bg-coffee-brown/35', 'bg-coffee-brown/20']
 

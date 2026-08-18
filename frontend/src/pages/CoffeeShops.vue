@@ -30,7 +30,9 @@
 
       <!-- Empty State -->
       <div v-if="shops.length === 0 && !isLoading" class="flex flex-col items-center justify-center py-16 space-y-4 select-none">
-        <div class="text-5xl opacity-30">🏪</div>
+        <div class="grid w-16 h-16 place-items-center rounded-full border border-coffee-latte/25 bg-coffee-cream/35 text-coffee-softGray">
+          <AppIcon name="cafe" :size="28" />
+        </div>
         <p class="text-sm text-coffee-softGray font-light italic text-center leading-relaxed">
           还没有收藏的咖啡店。<br>记录咖啡时填写店铺名称，会自动收藏。
         </p>
@@ -51,7 +53,9 @@
           <!-- Shop Image or Placeholder -->
           <div class="w-12 h-12 rounded-sm overflow-hidden flex-shrink-0 bg-coffee-cream/50 border border-coffee-latte/30">
             <img v-if="shop.image_url" :src="shop.image_url" class="w-full h-full object-cover">
-            <div v-else class="w-full h-full flex items-center justify-center text-lg">☕</div>
+            <div v-else class="w-full h-full flex items-center justify-center text-coffee-softGray">
+              <AppIcon name="coffee" :size="19" />
+            </div>
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2">
@@ -139,6 +143,7 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import * as shopApi from '@/api/coffeeShop'
 import type { CoffeeShop } from '@/api/coffeeShop'
+import AppIcon from '@/components/AppIcon.vue'
 import { BookOpen, Calendar, BarChart3, Plus, User, ChevronRight, X, Search, Star } from 'lucide-vue-next'
 
 const shops = ref<CoffeeShop[]>([])
