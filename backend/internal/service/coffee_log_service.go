@@ -17,69 +17,97 @@ type CoffeeLogService struct {
 	aiService     *AIService
 	shopService   *CoffeeShopService
 	beanService   *CoffeeBeanService
+	userService   *UserService
 }
 
-func NewCoffeeLogService(coffeeLogRepo *repository.CoffeeLogRepository, flavorTagRepo *repository.FlavorTagRepository, aiService *AIService, shopService *CoffeeShopService, beanService *CoffeeBeanService) *CoffeeLogService {
+func NewCoffeeLogService(coffeeLogRepo *repository.CoffeeLogRepository, flavorTagRepo *repository.FlavorTagRepository, aiService *AIService, shopService *CoffeeShopService, beanService *CoffeeBeanService, userService *UserService) *CoffeeLogService {
 	return &CoffeeLogService{
 		coffeeLogRepo: coffeeLogRepo,
 		flavorTagRepo: flavorTagRepo,
 		aiService:     aiService,
 		shopService:   shopService,
 		beanService:   beanService,
+		userService:   userService,
 	}
 }
 
 type CreateCoffeeLogRequest struct {
-	CoffeeName   string   `json:"coffee_name" binding:"required,max=120"`
-	CoffeeType   string   `json:"coffee_type" binding:"required,max=50"`
-	ShopName     string   `json:"shop_name" binding:"max=255"`
-	Location     string   `json:"location" binding:"max=255"`
-	ImageURL     string   `json:"image_url" binding:"max=500"`
-	DrinkDate    string   `json:"drink_date" binding:"max=20"`
-	Mood         string   `json:"mood" binding:"max=50"`
-	Notes        string   `json:"notes" binding:"max=2000"`
-	GenerateAI   bool     `json:"generate_ai"`
-	Acidity      int      `json:"acidity"`
-	Bitterness   int      `json:"bitterness"`
-	Sweetness    int      `json:"sweetness"`
-	Body         int      `json:"body"`
-	Aroma        int      `json:"aroma"`
-	Aftertaste   int      `json:"aftertaste"`
-	FlavorTagIDs []uint   `json:"flavor_tag_ids"`
-	MoodTags     []string `json:"mood_tags"`
-	SceneTags    []string `json:"scene_tags"`
-	PairingTags  []string `json:"pairing_tags"`
-	BeanID       *uint    `json:"bean_id"`
-	BeanName     string   `json:"bean_name" binding:"max=120"`
-	BrewRatio    string   `json:"brew_ratio" binding:"max=50"`
-	WaterTemp    string   `json:"water_temp" binding:"max=50"`
-	GrindSize    string   `json:"grind_size" binding:"max=50"`
+	CoffeeName      string   `json:"coffee_name" binding:"max=120"`
+	CoffeeType      string   `json:"coffee_type" binding:"required,max=50"`
+	ShopName        string   `json:"shop_name" binding:"max=255"`
+	Location        string   `json:"location" binding:"max=255"`
+	ImageURL        string   `json:"image_url" binding:"max=500"`
+	DrinkDate       string   `json:"drink_date" binding:"max=20"`
+	Mood            string   `json:"mood" binding:"max=50"`
+	Notes           string   `json:"notes" binding:"max=2000"`
+	GenerateAI      bool     `json:"generate_ai"`
+	Acidity         int      `json:"acidity"`
+	Bitterness      int      `json:"bitterness"`
+	Sweetness       int      `json:"sweetness"`
+	Body            int      `json:"body"`
+	Aroma           int      `json:"aroma"`
+	Aftertaste      int      `json:"aftertaste"`
+	FlavorTagIDs    []uint   `json:"flavor_tag_ids"`
+	MoodTags        []string `json:"mood_tags"`
+	SceneTags       []string `json:"scene_tags"`
+	PairingTags     []string `json:"pairing_tags"`
+	BeanID          *uint    `json:"bean_id"`
+	BeanName        string   `json:"bean_name" binding:"max=120"`
+	BrewRatio       string   `json:"brew_ratio" binding:"max=50"`
+	WaterTemp       string   `json:"water_temp" binding:"max=50"`
+	GrindSize       string   `json:"grind_size" binding:"max=50"`
+
+	// Data quality fields (v2)
+	RecordMode       string `json:"record_mode" binding:"omitempty,oneof=quick detailed"`     // quick | detailed
+	CoffeeNameSource string `json:"coffee_name_source" binding:"omitempty,max=30"`              // user_input | system_suggested | empty
+	NotesSource      string `json:"notes_source" binding:"omitempty,max=30"`                   // user_input | ai_generated | empty
+	ShopSource       string `json:"shop_source" binding:"omitempty,max=30"`                    // user_input | recent_reuse | empty
+	SensoryRecorded  bool   `json:"sensory_recorded"`
+	SourceLogID      *uint  `json:"source_log_id"`
+	IsTestData       bool   `json:"is_test_data"`
 }
 
 type UpdateCoffeeLogRequest struct {
-	CoffeeName   string    `json:"coffee_name"`
-	CoffeeType   string    `json:"coffee_type"`
-	ShopName     string    `json:"shop_name"`
-	Location     string    `json:"location"`
-	ImageURL     string    `json:"image_url"`
-	DrinkDate    string    `json:"drink_date"`
-	Mood         string    `json:"mood"`
-	Notes        string    `json:"notes"`
-	GenerateAI   *bool     `json:"generate_ai"`
-	Acidity      *int      `json:"acidity"`
-	Bitterness   *int      `json:"bitterness"`
-	Sweetness    *int      `json:"sweetness"`
-	Body         *int      `json:"body"`
-	Aroma        *int      `json:"aroma"`
-	Aftertaste   *int      `json:"aftertaste"`
-	FlavorTagIDs *[]uint   `json:"flavor_tag_ids"`
-	MoodTags     *[]string `json:"mood_tags"`
-	SceneTags    *[]string `json:"scene_tags"`
-	PairingTags  *[]string `json:"pairing_tags"`
-	BeanID       *uint     `json:"bean_id"`
-	BrewRatio    *string   `json:"brew_ratio"`
-	WaterTemp    *string   `json:"water_temp"`
-	GrindSize    *string   `json:"grind_size"`
+	CoffeeName      string    `json:"coffee_name"`
+	CoffeeType      string    `json:"coffee_type"`
+	ShopName        string    `json:"shop_name"`
+	Location        string    `json:"location"`
+	ImageURL        string    `json:"image_url"`
+	DrinkDate       string    `json:"drink_date"`
+	Mood            string    `json:"mood"`
+	Notes           string    `json:"notes"`
+	GenerateAI      *bool     `json:"generate_ai"`
+	Acidity         *int      `json:"acidity"`
+	Bitterness      *int      `json:"bitterness"`
+	Sweetness       *int      `json:"sweetness"`
+	Body            *int      `json:"body"`
+	Aroma           *int      `json:"aroma"`
+	Aftertaste      *int      `json:"aftertaste"`
+	FlavorTagIDs    *[]uint   `json:"flavor_tag_ids"`
+	MoodTags        *[]string `json:"mood_tags"`
+	SceneTags       *[]string `json:"scene_tags"`
+	PairingTags     *[]string `json:"pairing_tags"`
+	BeanID          *uint     `json:"bean_id"`
+	BrewRatio       *string   `json:"brew_ratio"`
+	WaterTemp       *string   `json:"water_temp"`
+	GrindSize       *string   `json:"grind_size"`
+
+	// Allow clearing optional fields using a presence flag
+	ClearShopName        bool `json:"clear_shop_name"`
+	ClearNotes           bool `json:"clear_notes"`
+	ClearMoodTags        bool `json:"clear_mood_tags"`
+	ClearSceneTags       bool `json:"clear_scene_tags"`
+	ClearPairingTags     bool `json:"clear_pairing_tags"`
+	ClearFlavorTags      bool `json:"clear_flavor_tags"`
+	ClearLocation        bool `json:"clear_location"`
+	ClearBrewRatio       bool `json:"clear_brew_ratio"`
+	ClearWaterTemp       bool `json:"clear_water_temp"`
+	ClearGrindSize       bool `json:"clear_grind_size"`
+	ClearBeanID          bool `json:"clear_bean_id"`
+	ClearSensoryRecorded bool `json:"clear_sensory_recorded"`
+
+	// Data quality updates
+	SensoryRecorded *bool `json:"sensory_recorded_update"`
 }
 
 const maxLifestyleTags = 5
@@ -172,8 +200,11 @@ func (s *CoffeeLogService) generateAndStoreAISummary(logID uint, userID uint, re
 }
 
 func (s *CoffeeLogService) Create(userID uint, req CreateCoffeeLogRequest) (*model.CoffeeLog, error) {
-	if err := s.validateFlavorScores(req.Acidity, req.Bitterness, req.Sweetness, req.Body, req.Aroma, req.Aftertaste); err != nil {
-		return nil, err
+	// Validate sensory scores only when sensory_recorded is true
+	if req.SensoryRecorded {
+		if err := s.validateFlavorScores(req.Acidity, req.Bitterness, req.Sweetness, req.Body, req.Aroma, req.Aftertaste); err != nil {
+			return nil, err
+		}
 	}
 
 	if err := validateLifestyleTags(req.MoodTags, validMoodTags, maxLifestyleTags, "mood"); err != nil {
@@ -201,8 +232,47 @@ func (s *CoffeeLogService) Create(userID uint, req CreateCoffeeLogRequest) (*mod
 		drinkDate = &parsed
 	}
 
+	// Determine record mode
+	recordMode := req.RecordMode
+	if recordMode == "" {
+		recordMode = "quick"
+	}
+
+	// Auto-generate coffee name if empty (system_suggested)
+	coffeeName := req.CoffeeName
+	coffeeNameSource := req.CoffeeNameSource
+	if coffeeName == "" {
+		coffeeName = generateAutoCoffeeName(req.CoffeeType)
+		if coffeeNameSource == "" {
+			coffeeNameSource = "system_suggested"
+		}
+	}
+	if coffeeNameSource == "" {
+		coffeeNameSource = "user_input"
+	}
+
+	// Determine shop source
+	shopSource := req.ShopSource
+	if shopSource == "" {
+		if req.ShopName == "" {
+			shopSource = "empty"
+		} else {
+			shopSource = "user_input"
+		}
+	}
+
+	// Determine notes source
+	notesSource := req.NotesSource
+	if notesSource == "" {
+		if req.Notes == "" {
+			notesSource = "empty"
+		} else {
+			notesSource = "user_input"
+		}
+	}
+
 	aiReq := FlavorSummaryRequest{
-		CoffeeName: req.CoffeeName,
+		CoffeeName: coffeeName,
 		CoffeeType: req.CoffeeType,
 		Tags:       tagNames,
 		Acidity:    req.Acidity,
@@ -214,7 +284,12 @@ func (s *CoffeeLogService) Create(userID uint, req CreateCoffeeLogRequest) (*mod
 		Mood:       req.Mood,
 		Notes:      req.Notes,
 	}
-	aiSummary := s.aiService.generateMockSummary(req.CoffeeType, tagNames, req.Acidity, req.Bitterness, req.Sweetness, req.Body, req.Aroma, req.Aftertaste)
+
+	// Only generate mock AI summary if user explicitly asked for it
+	var aiSummary string
+	if req.GenerateAI {
+		aiSummary = s.aiService.generateMockSummary(req.CoffeeType, tagNames, req.Acidity, req.Bitterness, req.Sweetness, req.Body, req.Aroma, req.Aftertaste)
+	}
 
 	// Resolve bean_id: either from direct reference or inline bean_name
 	var beanID *uint
@@ -226,29 +301,36 @@ func (s *CoffeeLogService) Create(userID uint, req CreateCoffeeLogRequest) (*mod
 	}
 
 	log := &model.CoffeeLog{
-		UserID:      userID,
-		CoffeeName:  req.CoffeeName,
-		CoffeeType:  req.CoffeeType,
-		ShopName:    req.ShopName,
-		Location:    req.Location,
-		ImageURL:    req.ImageURL,
-		DrinkDate:   drinkDate,
-		Mood:        req.Mood,
-		Notes:       req.Notes,
-		Acidity:     req.Acidity,
-		Bitterness:  req.Bitterness,
-		Sweetness:   req.Sweetness,
-		Body:        req.Body,
-		Aroma:       req.Aroma,
-		Aftertaste:  req.Aftertaste,
-		AISummary:   aiSummary,
-		MoodTags:    tagsToJSON(req.MoodTags),
-		SceneTags:   tagsToJSON(req.SceneTags),
-		PairingTags: tagsToJSON(req.PairingTags),
-		BeanID:      beanID,
-		BrewRatio:   req.BrewRatio,
-		WaterTemp:   req.WaterTemp,
-		GrindSize:   req.GrindSize,
+		UserID:          userID,
+		CoffeeName:      coffeeName,
+		CoffeeType:      req.CoffeeType,
+		ShopName:        req.ShopName,
+		Location:        req.Location,
+		ImageURL:        req.ImageURL,
+		DrinkDate:       drinkDate,
+		Mood:            req.Mood,
+		Notes:           req.Notes,
+		Acidity:         req.Acidity,
+		Bitterness:      req.Bitterness,
+		Sweetness:       req.Sweetness,
+		Body:            req.Body,
+		Aroma:           req.Aroma,
+		Aftertaste:      req.Aftertaste,
+		AISummary:       aiSummary,
+		MoodTags:        tagsToJSON(req.MoodTags),
+		SceneTags:       tagsToJSON(req.SceneTags),
+		PairingTags:     tagsToJSON(req.PairingTags),
+		BeanID:          beanID,
+		BrewRatio:       req.BrewRatio,
+		WaterTemp:       req.WaterTemp,
+		GrindSize:       req.GrindSize,
+		RecordMode:      recordMode,
+		CoffeeNameSource: coffeeNameSource,
+		NotesSource:      notesSource,
+		ShopSource:       shopSource,
+		SensoryRecorded:  req.SensoryRecorded,
+		SourceLogID:      req.SourceLogID,
+		IsTestData:       req.IsTestData,
 	}
 
 	if err := s.coffeeLogRepo.Create(log, req.FlavorTagIDs); err != nil {
@@ -259,9 +341,14 @@ func (s *CoffeeLogService) Create(userID uint, req CreateCoffeeLogRequest) (*mod
 		go s.generateAndStoreAISummary(log.ID, userID, aiReq)
 	}
 
-	// Auto-create or update coffee shop record
-	if s.shopService != nil {
+	// Auto-create or update coffee shop record only when user provided a shop name
+	if s.shopService != nil && req.ShopName != "" {
 		_ = s.shopService.EnsureShopForLog(userID, req.ShopName)
+	}
+
+	// Mark first record time for onboarding
+	if s.userService != nil {
+		_ = s.userService.MarkFirstRecord(userID)
 	}
 
 	created, err := s.coffeeLogRepo.FindByID(log.ID, userID)
@@ -269,6 +356,24 @@ func (s *CoffeeLogService) Create(userID uint, req CreateCoffeeLogRequest) (*mod
 		return log, nil
 	}
 	return created, nil
+}
+
+// generateAutoCoffeeName generates a coffee name from type when user doesn't provide one
+func generateAutoCoffeeName(coffeeType string) string {
+	typeMap := map[string]string{
+		"Pour Over":  "手冲咖啡",
+		"Latte":      "拿铁",
+		"Americano":  "美式咖啡",
+		"Cold Brew":  "冷萃咖啡",
+		"Espresso":   "浓缩咖啡",
+		"Dirty":      "Dirty 咖啡",
+		"Cappuccino": "卡布奇诺",
+		"Flat White": "馥芮白",
+	}
+	if name, ok := typeMap[coffeeType]; ok {
+		return name
+	}
+	return "咖啡"
 }
 
 func (s *CoffeeLogService) GetByID(id, userID uint) (*model.CoffeeLog, error) {
@@ -299,18 +404,29 @@ func (s *CoffeeLogService) Update(id, userID uint, req UpdateCoffeeLogRequest) (
 
 	if req.CoffeeName != "" {
 		existing.CoffeeName = req.CoffeeName
+		existing.CoffeeNameSource = "user_input"
 		aiInputChanged = true
 	}
 	if req.CoffeeType != "" {
 		existing.CoffeeType = req.CoffeeType
 		aiInputChanged = true
 	}
-	if req.ShopName != "" {
+
+	// Handle shop_name: update or clear
+	if req.ClearShopName {
+		existing.ShopName = ""
+		existing.ShopSource = "empty"
+	} else if req.ShopName != "" {
 		existing.ShopName = req.ShopName
+		existing.ShopSource = "user_input"
 	}
-	if req.Location != "" {
+
+	if req.ClearLocation {
+		existing.Location = ""
+	} else if req.Location != "" {
 		existing.Location = req.Location
 	}
+
 	if req.ImageURL != "" {
 		existing.ImageURL = req.ImageURL
 	}
@@ -325,10 +441,17 @@ func (s *CoffeeLogService) Update(id, userID uint, req UpdateCoffeeLogRequest) (
 		existing.Mood = req.Mood
 		aiInputChanged = true
 	}
-	if req.Notes != "" {
+
+	// Handle notes: update or clear
+	if req.ClearNotes {
+		existing.Notes = ""
+		existing.NotesSource = "empty"
+	} else if req.Notes != "" {
 		existing.Notes = req.Notes
+		existing.NotesSource = "user_input"
 		aiInputChanged = true
 	}
+
 	if req.Acidity != nil {
 		acidity = *req.Acidity
 		existing.Acidity = *req.Acidity
@@ -366,11 +489,19 @@ func (s *CoffeeLogService) Update(id, userID uint, req UpdateCoffeeLogRequest) (
 		existing.MoodTags = tagsToJSON(*req.MoodTags)
 		aiInputChanged = true
 	}
+	if req.ClearMoodTags {
+		existing.MoodTags = ""
+		aiInputChanged = true
+	}
 	if req.SceneTags != nil {
 		if err := validateLifestyleTags(*req.SceneTags, validSceneTags, maxLifestyleTags, "scene"); err != nil {
 			return nil, err
 		}
 		existing.SceneTags = tagsToJSON(*req.SceneTags)
+		aiInputChanged = true
+	}
+	if req.ClearSceneTags {
+		existing.SceneTags = ""
 		aiInputChanged = true
 	}
 	if req.PairingTags != nil {
@@ -380,9 +511,22 @@ func (s *CoffeeLogService) Update(id, userID uint, req UpdateCoffeeLogRequest) (
 		existing.PairingTags = tagsToJSON(*req.PairingTags)
 		aiInputChanged = true
 	}
+	if req.ClearPairingTags {
+		existing.PairingTags = ""
+		aiInputChanged = true
+	}
 
-	if err := s.validateFlavorScores(acidity, bitterness, sweetness, body, aroma, aftertaste); err != nil {
-		return nil, err
+	// Handle sensory_recorded updates
+	if req.SensoryRecorded != nil {
+		existing.SensoryRecorded = *req.SensoryRecorded
+	} else if req.ClearSensoryRecorded {
+		existing.SensoryRecorded = false
+	}
+
+	if existing.SensoryRecorded {
+		if err := s.validateFlavorScores(acidity, bitterness, sweetness, body, aroma, aftertaste); err != nil {
+			return nil, err
+		}
 	}
 
 	var flavorTagIDs []uint
@@ -395,6 +539,11 @@ func (s *CoffeeLogService) Update(id, userID uint, req UpdateCoffeeLogRequest) (
 			return nil, err
 		}
 		tagNames = flavorTagNames(tags)
+	}
+	if req.ClearFlavorTags {
+		flavorTagIDs = []uint{}
+		tagNames = []string{}
+		aiInputChanged = true
 	}
 
 	needRegenAI := aiInputChanged || tagIDsProvided
@@ -414,8 +563,11 @@ func (s *CoffeeLogService) Update(id, userID uint, req UpdateCoffeeLogRequest) (
 			Mood:       existing.Mood,
 			Notes:      existing.Notes,
 		}
-		existing.AISummary = s.aiService.generateMockSummary(existing.CoffeeType, tagNames, acidity, bitterness, sweetness, body, aroma, aftertaste)
-		generateExternalAI = req.GenerateAI != nil && *req.GenerateAI && externalAIEnabled()
+		// Only regenerate mock AI if user explicitly requested
+		if req.GenerateAI != nil && *req.GenerateAI {
+			existing.AISummary = s.aiService.generateMockSummary(existing.CoffeeType, tagNames, acidity, bitterness, sweetness, body, aroma, aftertaste)
+			generateExternalAI = externalAIEnabled()
+		}
 	}
 
 	if err := s.coffeeLogRepo.Update(existing, flavorTagIDs); err != nil {

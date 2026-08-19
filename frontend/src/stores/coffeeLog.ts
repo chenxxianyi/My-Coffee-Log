@@ -30,6 +30,14 @@ export interface CoffeeLog {
   brew_ratio: string
   water_temp: string
   grind_size: string
+  // Data quality fields (v2)
+  record_mode: string
+  coffee_name_source: string
+  notes_source: string
+  shop_source: string
+  sensory_recorded: boolean
+  source_log_id: number | null
+  is_test_data: boolean
 }
 
 export interface CoffeeBeanInfo {
@@ -66,6 +74,10 @@ export interface NewCoffeeLog {
   brew_ratio?: string
   water_temp?: string
   grind_size?: string
+  // Data quality fields (v2)
+  record_mode?: string
+  sensory_recorded?: boolean
+  source_log_id?: number | null
 }
 
 export const useCoffeeLogStore = defineStore('coffeeLog', () => {
@@ -82,6 +94,7 @@ export const useCoffeeLogStore = defineStore('coffeeLog', () => {
 
   // Stats from API
   const statsOverview = ref<statsApi.StatsOverview | null>(null)
+  const statsMeta = ref<statsApi.StatsMeta | null>(null)
   const flavorProfile = ref<statsApi.FlavorProfile | null>(null)
 
   // Getters
@@ -181,11 +194,18 @@ export const useCoffeeLogStore = defineStore('coffeeLog', () => {
 
   async function fetchStats() {
     try {
-      const [overview, profile] = await Promise.all([
+      const [overviewResp, profile] = await Promise.all([
         statsApi.getStatsOverview(),
         statsApi.getFlavorProfile()
       ])
-      statsOverview.value = overview
+      // Handle meta-wrapped response
+      if (overviewResp && typeof overviewResp === 'object' && 'data' in overviewResp && 'meta' in overviewResp) {
+        statsOverview.value = (overviewResp as statsApi.StatsResponseWrapper<statsApi.StatsOverview>).data
+        statsMeta.value = (overviewResp as statsApi.StatsResponseWrapper<statsApi.StatsOverview>).meta
+      } else {
+        statsOverview.value = overviewResp as unknown as statsApi.StatsOverview
+        statsMeta.value = null
+      }
       flavorProfile.value = profile
     } catch (e) {
       console.error('Failed to fetch stats:', e)
@@ -272,6 +292,7 @@ export const useCoffeeLogStore = defineStore('coffeeLog', () => {
     aiStatus,
     coffeeProfileAI,
     preferenceInsight,
+    statsMeta,
     fetchLogs,
     fetchLogById,
     addLog,

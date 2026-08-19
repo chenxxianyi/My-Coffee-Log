@@ -53,3 +53,25 @@ func (h *UserHandler) UpdateCurrentUser(c *gin.Context) {
 
 	response.Success(c, user)
 }
+
+func (h *UserHandler) CompleteOnboarding(c *gin.Context) {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
+		response.ErrorUnauthorized(c, "user not found in context")
+		return
+	}
+
+	var req service.OnboardingRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.ErrorBadRequest(c, err.Error())
+		return
+	}
+
+	user, err := h.userService.CompleteOnboarding(userID, req)
+	if err != nil {
+		response.Error(c, 50000, err.Error())
+		return
+	}
+
+	response.Success(c, user)
+}

@@ -1,17 +1,22 @@
 import { createRouter, createWebHistory, RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
 import Splash from '@/pages/Splash.vue'
 import Home from '@/pages/Home.vue'
-import CoffeeDetail from '@/pages/CoffeeDetail.vue'
-import Timeline from '@/pages/Timeline.vue'
-import ShareCard from '@/pages/ShareCard.vue'
-import CreateCoffeeLog from '@/pages/CreateCoffeeLog.vue'
-import Stats from '@/pages/Stats.vue'
-import MonthlyReview from '@/pages/MonthlyReview.vue'
-import CoffeeShops from '@/pages/CoffeeShops.vue'
-import CoffeeShopDetail from '@/pages/CoffeeShopDetail.vue'
-import Login from '@/pages/Login.vue'
-import Register from '@/pages/Register.vue'
-import Profile from '@/pages/Profile.vue'
+
+// Lazy-loaded pages for better bundle splitting
+const CoffeeDetail = () => import('@/pages/CoffeeDetail.vue')
+const Timeline = () => import('@/pages/Timeline.vue')
+const ShareCard = () => import('@/pages/ShareCard.vue')
+const CreateCoffeeLog = () => import('@/pages/CreateCoffeeLog.vue')
+const Stats = () => import('@/pages/Stats.vue')
+const MonthlyReview = () => import('@/pages/MonthlyReview.vue')
+const CoffeeShops = () => import('@/pages/CoffeeShops.vue')
+const CoffeeShopDetail = () => import('@/pages/CoffeeShopDetail.vue')
+const Login = () => import('@/pages/Login.vue')
+const Register = () => import('@/pages/Register.vue')
+const Profile = () => import('@/pages/Profile.vue')
+const RecordSuccess = () => import('@/pages/RecordSuccess.vue')
+const Onboarding = () => import('@/pages/Onboarding.vue')
+const WeeklyReview = () => import('@/pages/WeeklyReview.vue')
 
 const routes = [
   {
@@ -35,6 +40,16 @@ const routes = [
     component: Register
   },
   {
+    path: '/onboarding',
+    name: 'onboarding',
+    component: Onboarding
+  },
+  {
+    path: '/weekly-review',
+    name: 'weekly-review',
+    component: WeeklyReview
+  },
+  {
     path: '/create',
     name: 'create',
     component: CreateCoffeeLog
@@ -43,6 +58,12 @@ const routes = [
     path: '/coffee/:id',
     name: 'detail',
     component: CoffeeDetail,
+    props: true
+  },
+  {
+    path: '/coffee/:id/success',
+    name: 'record-success',
+    component: RecordSuccess,
     props: true
   },
   {
@@ -93,13 +114,33 @@ const router = createRouter({
 })
 
 // Navigation guard for auth
-router.beforeEach((to: RouteLocationNormalized, _from: RouteLocationNormalized, next: NavigationGuardNext) => {
+router.beforeEach(async (to: RouteLocationNormalized, _from: RouteLocationNormalized, next: NavigationGuardNext) => {
   const token = localStorage.getItem('token')
   const publicPages = ['splash', 'login', 'register']
   const authRequired = !publicPages.includes(to.name as string)
 
   if (authRequired && !token) {
     next({ name: 'login' })
+  } else if (to.name === 'onboarding' && !token) {
+    next({ name: 'login' })
+  } else if (to.name === 'home' && token) {
+    // Check onboarding status for new users
+    try {
+      const response = await fetch('/api/v1/users/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      if (response.ok) {
+        const result = await response.json()
+        const user = result.data
+        if (!user.onboarding_completed && !user.first_record_at) {
+          next({ name: 'onboarding' })
+          return
+        }
+      }
+    } catch {
+      // Continue to home if check fails
+    }
+    next()
   } else {
     next()
   }

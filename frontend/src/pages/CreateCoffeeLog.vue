@@ -787,6 +787,18 @@ const quickExtrasCount = computed(() => {
     (generateAI.value ? 1 : 0)
 })
 
+// Rebrew source tracking
+const sourceLogId = ref<number | null>(null)
+const sourceSensoryRef = ref<{
+  acidity: number
+  bitterness: number
+  sweetness: number
+  body: number
+  aroma: number
+  aftertaste: number
+  flavor_tags: string[]
+} | null>(null)
+
 // Prefill from existing log (Brew Again)
 onMounted(async () => {
   const fromLogId = route.query.from_log_id
@@ -798,33 +810,36 @@ onMounted(async () => {
         try { sourceLog = await store.fetchLogById(id) } catch { /* ignore */ }
       }
       if (sourceLog) {
-        // Prefill quick form
+        // Store source_log_id for submission
+        sourceLogId.value = id
+
+        // Prefill quick form - only auto-bring allowed fields
         quickForm.coffee_type = sourceLog.coffee_type
-        quickForm.mood = sourceLog.mood || 'Calm'
         quickForm.image_url = sourceLog.image_url || store.DEFAULT_PHOTOS[1]
-        quickForm.mood_tags = [...(sourceLog.mood_tags || [])]
-        quickForm.scene_tags = [...(sourceLog.scene_tags || [])]
-        quickForm.pairing_tags = [...(sourceLog.pairing_tags || [])]
-        showQuickExtras.value = quickForm.mood_tags.length > 0 || quickForm.scene_tags.length > 0 || quickForm.pairing_tags.length > 0
         if (sourceLog.image_url && !store.DEFAULT_PHOTOS.includes(sourceLog.image_url)) {
           uploadedImageUrl.value = sourceLog.image_url
         }
-        // Prefill detailed form
+
+        // Prefill detailed form - only auto-bring allowed fields
         form.coffee_type = sourceLog.coffee_type
         form.image_url = sourceLog.image_url || store.DEFAULT_PHOTOS[1]
-        form.acidity = sourceLog.acidity
-        form.bitterness = sourceLog.bitterness
-        form.sweetness = sourceLog.sweetness
-        form.body = sourceLog.body
-        form.aroma = sourceLog.aroma
-        form.aftertaste = sourceLog.aftertaste
-        form.flavor_tags = [...(sourceLog.flavor_tags || [])]
-        form.mood = sourceLog.mood || 'Calm'
+        form.bean_id = sourceLog.bean_id
+        form.bean_name = sourceLog.bean?.name || ''
         form.shop_name = sourceLog.shop_name || ''
-        form.notes = sourceLog.notes || ''
-        form.mood_tags = [...(sourceLog.mood_tags || [])]
-        form.scene_tags = [...(sourceLog.scene_tags || [])]
-        form.pairing_tags = [...(sourceLog.pairing_tags || [])]
+        form.brew_ratio = sourceLog.brew_ratio || ''
+        form.water_temp = sourceLog.water_temp || ''
+        form.grind_size = sourceLog.grind_size || ''
+
+        // Store source sensory scores as reference (not auto-filled)
+        sourceSensoryRef.value = {
+          acidity: sourceLog.acidity,
+          bitterness: sourceLog.bitterness,
+          sweetness: sourceLog.sweetness,
+          body: sourceLog.body,
+          aroma: sourceLog.aroma,
+          aftertaste: sourceLog.aftertaste,
+          flavor_tags: sourceLog.flavor_tags || []
+        }
       }
     }
   }
@@ -854,19 +869,6 @@ const form = reactive<NewCoffeeLog>({
   water_temp: '',
   grind_size: ''
 })
-
-// Auto-generate coffee name for quick log
-const generateQuickName = (type: string) => {
-  const typeMap: Record<string, string> = {
-    'Pour Over': '手冲咖啡',
-    'Latte': '拿铁',
-    'Americano': '美式咖啡',
-    'Cold Brew': '冷萃咖啡',
-    'Espresso': '浓缩咖啡',
-    'Dirty': 'Dirty 咖啡'
-  }
-  return typeMap[type] || '咖啡'
-}
 
 // Presets Specs
 const typePresets = [
@@ -956,25 +958,30 @@ const handleNext = async () => {
   // Quick Log: save immediately
   if (logMode.value === 'quick') {
     isSubmitting.value = true
+    const flavorPreset = flavorPresets.find(f => f.val === quickForm.flavor_preset)
+    const hasSensory = !!flavorPreset
     const quickLog: NewCoffeeLog = {
-      coffee_name: quickForm.coffee_name.trim() || generateQuickName(quickForm.coffee_type),
+      coffee_name: quickForm.coffee_name.trim() || '',
       coffee_type: quickForm.coffee_type,
       image_url: quickForm.image_url,
       mood: quickForm.mood,
-      shop_name: 'Local Coffee Spot',
-      notes: '一杯温润安静的手账记录。',
+      shop_name: '',
+      notes: '',
       generate_ai: generateAI.value,
-      ...(flavorPresets.find(f => f.val === quickForm.flavor_preset)?.values ?? { acidity: 3, bitterness: 2, sweetness: 3, body: 3, aroma: 3, aftertaste: 3 }),
+      ...(flavorPreset?.values ?? { acidity: 0, bitterness: 0, sweetness: 0, body: 0, aroma: 0, aftertaste: 0 }),
+      sensory_recorded: hasSensory,
+      record_mode: 'quick',
       flavor_tags: [],
       mood_tags: quickForm.mood_tags,
       scene_tags: quickForm.scene_tags,
-      pairing_tags: quickForm.pairing_tags
+      pairing_tags: quickForm.pairing_tags,
+      source_log_id: sourceLogId.value || undefined
     }
     try {
       const created = await store.addLog(quickLog)
       isSubmitting.value = false
       store.fetchStats()
-      router.push(`/coffee/${created.id}?just_created=true`)
+      router.push(`/coffee/${created.id}/success`)
     } catch (e: any) {
       isSubmitting.value = false
       alert(e.message || '保存失败，请稍后重试')
@@ -1019,15 +1026,19 @@ const handleNext = async () => {
 
     const savedLog = {
       ...form,
-      shop_name: form.shop_name.trim() || 'Local Coffee Spot',
-      notes: form.notes.trim() || '一杯温润安静的手账记录。',
-      generate_ai: generateAI.value
+      coffee_name: form.coffee_name.trim() || '',
+      shop_name: form.shop_name.trim() || '',
+      notes: form.notes.trim() || '',
+      generate_ai: generateAI.value,
+      sensory_recorded: true, // detailed mode always includes sensory
+      record_mode: 'detailed',
+      source_log_id: sourceLogId.value || undefined
     }
     try {
       const created = await store.addLog(savedLog)
       isSubmitting.value = false
       store.fetchStats()
-      router.push(`/coffee/${created.id}?just_created=true`)
+      router.push(`/coffee/${created.id}/success`)
     } catch (e: any) {
       isSubmitting.value = false
       alert(e.message || '保存失败，请稍后重试')

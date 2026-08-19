@@ -64,6 +64,7 @@ func (r *Router) Setup(engine *gin.Engine) {
 		{
 			users.GET("/me", r.userHandler.GetCurrentUser)
 			users.PUT("/me", r.userHandler.UpdateCurrentUser)
+			users.PUT("/me/onboarding", r.userHandler.CompleteOnboarding)
 		}
 
 		// Coffee Logs
@@ -84,6 +85,8 @@ func (r *Router) Setup(engine *gin.Engine) {
 			stats.GET("/monthly", r.statsHandler.GetMonthly)
 			stats.GET("/personality", r.statsHandler.GetPersonality)
 			stats.GET("/monthly-review", r.statsHandler.GetMonthlyReview)
+			stats.GET("/weekly-review", r.statsHandler.GetWeeklyReview)
+			stats.GET("/record-progress", r.statsHandler.GetRecordProgress)
 		}
 
 		// AI

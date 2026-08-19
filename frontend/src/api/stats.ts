@@ -14,6 +14,22 @@ export interface StatsOverview {
   recent_flavor_tags: FlavorTagItem[]
 }
 
+// Meta info for stats responses
+export interface StatsMeta {
+  sample_count: number
+  valid_sensory_count: number
+  date_from?: string
+  date_to?: string
+  threshold: number
+  is_ready: boolean
+}
+
+// Wrapped response with data + meta
+export interface StatsResponseWrapper<T> {
+  data: T
+  meta: StatsMeta
+}
+
 export interface FlavorProfile {
   acidity: number
   bitterness: number
@@ -173,4 +189,19 @@ export interface PreferenceInsightResponse {
 
 export async function generatePreferenceInsight(): Promise<PreferenceInsightResponse> {
   return request.post('/ai/preference-insight') as unknown as Promise<PreferenceInsightResponse>
+}
+
+// ---- Record Progress ----
+
+export interface RecordProgressResponse {
+  record_id: number
+  month_cup_count: number
+  total_count: number
+  is_first_record: boolean
+  next_insight_name: string
+  next_insight_delta: number
+}
+
+export async function getRecordProgress(recordId: number): Promise<RecordProgressResponse> {
+  return request.get('/stats/record-progress', { params: { record_id: recordId } }) as unknown as Promise<RecordProgressResponse>
 }

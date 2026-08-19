@@ -63,7 +63,7 @@ func main() {
 	aiService := service.NewAIService(statsService)
 	shopService := service.NewCoffeeShopService(shopRepo, coffeeLogRepo)
 	beanService := service.NewCoffeeBeanService(beanRepo)
-	coffeeLogService := service.NewCoffeeLogService(coffeeLogRepo, flavorTagRepo, aiService, shopService, beanService)
+	coffeeLogService := service.NewCoffeeLogService(coffeeLogRepo, flavorTagRepo, aiService, shopService, beanService, userService)
 
 	// Init handlers
 	authHandler := handler.NewAuthHandler(authService)

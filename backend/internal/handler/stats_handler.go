@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"strconv"
+
 	"my-coffee-log/internal/middleware"
 	"my-coffee-log/internal/response"
 	"my-coffee-log/internal/service"
@@ -23,13 +25,13 @@ func (h *StatsHandler) GetOverview(c *gin.Context) {
 		return
 	}
 
-	overview, err := h.statsService.GetOverview(userID)
+	statsResp, err := h.statsService.GetOverviewWithMeta(userID)
 	if err != nil {
 		response.Error(c, 50000, err.Error())
 		return
 	}
 
-	response.Success(c, overview)
+	response.Success(c, statsResp)
 }
 
 func (h *StatsHandler) GetFlavorProfile(c *gin.Context) {
@@ -89,6 +91,46 @@ func (h *StatsHandler) GetMonthlyReview(c *gin.Context) {
 
 	month := c.Query("month")
 	review, err := h.statsService.GetMonthlyReview(userID, month)
+	if err != nil {
+		response.Error(c, 50000, err.Error())
+		return
+	}
+
+	response.Success(c, review)
+}
+
+func (h *StatsHandler) GetRecordProgress(c *gin.Context) {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
+		response.ErrorUnauthorized(c, "user not found in context")
+		return
+	}
+
+	recordIDStr := c.Query("record_id")
+	recordID, err := strconv.ParseUint(recordIDStr, 10, 32)
+	if err != nil {
+		response.Error(c, 40000, "invalid record_id")
+		return
+	}
+
+	progress, err := h.statsService.GetRecordProgress(userID, uint(recordID))
+	if err != nil {
+		response.Error(c, 50000, err.Error())
+		return
+	}
+
+	response.Success(c, progress)
+}
+
+func (h *StatsHandler) GetWeeklyReview(c *gin.Context) {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
+		response.ErrorUnauthorized(c, "user not found in context")
+		return
+	}
+
+	week := c.Query("week")
+	review, err := h.statsService.GetWeeklyReview(userID, week)
 	if err != nil {
 		response.Error(c, 50000, err.Error())
 		return

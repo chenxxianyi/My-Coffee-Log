@@ -31,6 +31,14 @@ export interface CoffeeLogDTO {
   grind_size: string
   created_at: string
   updated_at: string
+  // Data quality fields (v2)
+  record_mode: string
+  coffee_name_source: string
+  notes_source: string
+  shop_source: string
+  sensory_recorded: boolean
+  source_log_id: number | null
+  is_test_data: boolean
 }
 
 export interface PaginatedResponse<T> {
@@ -69,7 +77,15 @@ export function toCoffeeLog(dto: CoffeeLogDTO) {
     bean: dto.bean || null,
     brew_ratio: dto.brew_ratio || '',
     water_temp: dto.water_temp || '',
-    grind_size: dto.grind_size || ''
+    grind_size: dto.grind_size || '',
+    // Data quality fields
+    record_mode: dto.record_mode || 'quick',
+    coffee_name_source: dto.coffee_name_source || 'empty',
+    notes_source: dto.notes_source || 'empty',
+    shop_source: dto.shop_source || 'empty',
+    sensory_recorded: dto.sensory_recorded || false,
+    source_log_id: dto.source_log_id || null,
+    is_test_data: dto.is_test_data || false
   }
 }
 
@@ -98,6 +114,10 @@ export interface CreateCoffeeLogParams {
   brew_ratio?: string
   water_temp?: string
   grind_size?: string
+  // Data quality fields
+  record_mode?: string
+  sensory_recorded?: boolean
+  source_log_id?: number | null
 }
 
 function toCreatePayload(params: CreateCoffeeLogParams) {
@@ -129,7 +149,11 @@ function toCreatePayload(params: CreateCoffeeLogParams) {
     bean_name: params.bean_name || '',
     brew_ratio: params.brew_ratio || '',
     water_temp: params.water_temp || '',
-    grind_size: params.grind_size || ''
+    grind_size: params.grind_size || '',
+    // Data quality fields
+    record_mode: params.record_mode || 'quick',
+    sensory_recorded: params.sensory_recorded ?? false,
+    source_log_id: params.source_log_id || null
   }
 }
 
